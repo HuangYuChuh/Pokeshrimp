@@ -1,6 +1,13 @@
 "use client";
 
-export function Sidebar() {
+import { MODEL_OPTIONS } from "./model-options";
+
+interface SidebarProps {
+  modelId: string;
+  onModelChange: (id: string) => void;
+}
+
+export function Sidebar({ modelId, onModelChange }: SidebarProps) {
   return (
     <aside className="flex h-full w-[var(--sidebar-width)] shrink-0 flex-col border-r border-[var(--border-color)] bg-[var(--bg-secondary)]">
       {/* Header */}
@@ -15,11 +22,22 @@ export function Sidebar() {
         </button>
       </div>
 
-      {/* Footer */}
+      {/* Model selector */}
       <div className="border-t border-[var(--border-color)] p-3">
-        <div className="text-xs text-[var(--text-secondary)]">
-          Pokeshrimp v0.1.0
-        </div>
+        <label className="mb-1.5 block text-xs text-[var(--text-secondary)]">
+          Model
+        </label>
+        <select
+          value={modelId}
+          onChange={(e) => onModelChange(e.target.value)}
+          className="w-full rounded-md border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+        >
+          {MODEL_OPTIONS.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.label}
+            </option>
+          ))}
+        </select>
       </div>
     </aside>
   );
