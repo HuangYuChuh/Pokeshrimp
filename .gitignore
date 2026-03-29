@@ -1,2 +1,36 @@
 # 内部文档
 VisAgent-产品定义与技术架构方案.md
+
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Electron build output
+dist-electron/
+dist/
+release/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# System
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Debug
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts

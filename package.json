@@ -1,0 +1,40 @@
+{
+  "name": "pokeshrimp",
+  "version": "0.1.0",
+  "description": "Pokeshrimp — AI-powered image & video creative workstation",
+  "private": true,
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "next dev",
+    "dev:electron": "npm run build:electron && electron .",
+    "build": "next build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "start": "next start",
+    "lint": "next lint",
+    "package": "npm run build && npm run build:electron && electron-builder"
+  },
+  "dependencies": {
+    "ai": "^4.3.0",
+    "@ai-sdk/anthropic": "^1.2.0",
+    "@ai-sdk/openai": "^1.2.0",
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "sql.js": "^1.12.0",
+    "next": "^15.3.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "electron": "^35.1.0",
+    "electron-builder": "^25.1.0",
+    "typescript": "^5.8.0",
+    "tailwindcss": "^4.1.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "postcss": "^8.5.0"
+  },
+  "author": "科林 KELIN <onepigge1999@gmail.com>",
+  "license": "Apache-2.0"
+}
