@@ -27,6 +27,9 @@ Thumbs.db
 # Claude Code
 .claude/
 
+# VisAgent asset history (content-addressable, not tracked by git)
+.visagent/.history/
+
 # IDE
 .vscode/
 .idea/

@@ -1,0 +1,15 @@
+# Designfile — 资产依赖图
+# 声明品牌资产之间的依赖关系，修改上游资产时自动重新生成下游。
+# 参考：Unix Makefile 的声明式构建思想。
+
+brand: 示例品牌
+assets:
+  logo:
+    skill: /logo-design
+    params: { style: "现代简约", color: "蓝白" }
+  business-card:
+    skill: /card-design
+    depends_on: [logo]
+  packaging:
+    skill: /packaging-design
+    depends_on: [logo]
