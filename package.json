@@ -5,35 +5,63 @@
   "private": true,
   "main": "dist-electron/main.js",
   "scripts": {
-    "dev": "next dev",
-    "dev:electron": "npm run build:electron && electron .",
+    "dev": "npm run build:electron && electron .",
+    "dev:web": "next dev --port 3099",
     "build": "next build",
     "build:electron": "tsc -p tsconfig.electron.json",
     "start": "next start",
     "lint": "next lint",
-    "package": "npm run build && npm run build:electron && electron-builder"
+    "package": "npm run build && npm run build:electron && electron-builder --mac"
   },
   "dependencies": {
-    "ai": "^4.3.0",
     "@ai-sdk/anthropic": "^1.2.0",
     "@ai-sdk/openai": "^1.2.0",
+    "@ai-sdk/react": "^1.2.0",
     "@modelcontextprotocol/sdk": "^1.12.0",
-    "sql.js": "^1.12.0",
+    "ai": "^4.3.0",
+    "better-sqlite3": "^12.8.0",
     "next": "^15.3.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "sql.js": "^1.12.0"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "electron": "^35.1.0",
     "electron-builder": "^25.1.0",
-    "typescript": "^5.8.0",
+    "postcss": "^8.5.0",
     "tailwindcss": "^4.1.0",
-    "@tailwindcss/postcss": "^4.1.0",
-    "postcss": "^8.5.0"
+    "typescript": "^5.8.0"
+  },
+  "build": {
+    "appId": "com.pokeshrimp.app",
+    "productName": "Pokeshrimp",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist-electron/**/*",
+      ".next/standalone/**/*",
+      ".next/static/**/*",
+      "public/**/*"
+    ],
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.graphics-design"
+    },
+    "extraResources": [
+      {
+        "from": ".next/static",
+        "to": ".next/static"
+      }
+    ]
   },
   "author": "科林 KELIN <onepigge1999@gmail.com>",
   "license": "Apache-2.0"

@@ -18,7 +18,6 @@ export function ChatPanel({ modelId }: ChatPanelProps) {
       api: "/api/chat",
       body: { modelId },
       onFinish(message) {
-        // Check if any tool invocations produced image results
         if (message.parts) {
           for (const part of message.parts) {
             if (
@@ -43,12 +42,11 @@ export function ChatPanel({ modelId }: ChatPanelProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Auto-resize textarea
   const adjustTextareaHeight = useCallback(() => {
     const el = textareaRef.current;
     if (el) {
       el.style.height = "auto";
-      el.style.height = Math.min(el.scrollHeight, 160) + "px";
+      el.style.height = Math.min(el.scrollHeight, 120) + "px";
     }
   }, []);
 
@@ -69,74 +67,100 @@ export function ChatPanel({ modelId }: ChatPanelProps) {
   );
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col bg-[var(--bg-primary)]">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        minWidth: 0,
+        height: "100vh",
+        background: "var(--bg-base)",
+      }}
+    >
+      {/* Navbar spacer */}
+      <div className="drag" style={{ height: "var(--navbar-height)", flexShrink: 0 }} />
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div
+        className="selectable"
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "0 24px",
+        }}
+      >
         {messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center">
-              <h2 className="mb-2 text-2xl font-semibold">Pokeshrimp</h2>
-              <p className="text-sm text-[var(--text-secondary)]">
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+          }}>
+            <div style={{ textAlign: "center" }}>
+              <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.01em", color: "var(--text-primary)" }}>
+                Pokeshrimp
+              </h2>
+              <p style={{ marginTop: 6, fontSize: 13, color: "var(--text-tertiary)" }}>
                 Describe what you want to create
               </p>
             </div>
           </div>
         ) : (
-          <div className="mx-auto max-w-3xl space-y-6">
+          <div style={{ maxWidth: 640, margin: "0 auto", paddingBottom: 16 }}>
             {messages.map((message) => (
-              <div key={message.id}>
-                {/* Text content */}
+              <div key={message.id} style={{ marginBottom: 20 }}>
                 {message.content && (
-                  <div
-                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
+                  <div style={{
+                    display: "flex",
+                    justifyContent: message.role === "user" ? "flex-end" : "flex-start",
+                  }}>
                     <div
-                      className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
-                        message.role === "user"
-                          ? "bg-[var(--accent)] text-white"
-                          : "bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
-                      }`}
+                      style={{
+                        maxWidth: "85%",
+                        padding: "10px 16px",
+                        borderRadius: 16,
+                        fontSize: 14,
+                        lineHeight: 1.6,
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                        ...(message.role === "user"
+                          ? { background: "var(--accent)", color: "#fff" }
+                          : { background: "var(--bg-elevated)", color: "var(--text-primary)" }),
+                      }}
                     >
-                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      {message.content}
                     </div>
                   </div>
                 )}
 
-                {/* Tool invocations */}
                 {message.parts
                   ?.filter((p) => p.type === "tool-invocation")
                   .map((part) => {
                     if (part.type !== "tool-invocation") return null;
                     const { toolInvocation } = part;
                     return (
-                      <div
-                        key={toolInvocation.toolCallId}
-                        className="mt-2 flex justify-start"
-                      >
-                        <div className="max-w-[80%] rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] px-3 py-2 text-xs">
-                          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-                            <span className="font-mono">
-                              {toolInvocation.toolName}
-                            </span>
-                            {toolInvocation.state === "result" ? (
-                              <span className="rounded bg-green-500/20 px-1.5 py-0.5 text-green-400">
-                                done
-                              </span>
-                            ) : (
-                              <span className="rounded bg-yellow-500/20 px-1.5 py-0.5 text-yellow-400">
-                                running...
-                              </span>
-                            )}
-                          </div>
-                          {toolInvocation.state === "result" &&
-                            toolInvocation.result &&
-                            typeof toolInvocation.result === "string" && (
-                              <div className="mt-1.5 whitespace-pre-wrap text-[var(--text-secondary)]">
-                                {toolInvocation.result.length > 200
-                                  ? toolInvocation.result.slice(0, 200) + "..."
-                                  : toolInvocation.result}
-                              </div>
-                            )}
+                      <div key={toolInvocation.toolCallId} style={{
+                        marginTop: 8,
+                        display: "flex",
+                        justifyContent: "flex-start",
+                      }}>
+                        <div style={{
+                          padding: "6px 12px",
+                          borderRadius: 8,
+                          border: "0.5px solid var(--border-subtle)",
+                          background: "var(--bg-sidebar)",
+                          fontSize: 12,
+                          color: "var(--text-secondary)",
+                        }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 11 }}>
+                            {toolInvocation.toolName}
+                          </span>
+                          {" "}
+                          {toolInvocation.state === "result" ? (
+                            <span style={{ color: "#4ade80", fontSize: 11 }}>done</span>
+                          ) : (
+                            <span style={{ color: "#fbbf24", fontSize: 11 }}>running</span>
+                          )}
                         </div>
                       </div>
                     );
@@ -144,17 +168,27 @@ export function ChatPanel({ modelId }: ChatPanelProps) {
               </div>
             ))}
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-              <div className="flex justify-start">
-                <div className="rounded-xl bg-[var(--bg-tertiary)] px-4 py-3 text-sm text-[var(--text-secondary)]">
-                  <span className="inline-block animate-pulse">Thinking...</span>
-                </div>
+              <div style={{
+                padding: "10px 16px",
+                borderRadius: 16,
+                background: "var(--bg-elevated)",
+                display: "inline-block",
+                fontSize: 13,
+                color: "var(--text-tertiary)",
+              }}>
+                Thinking...
               </div>
             )}
             {error && (
-              <div className="flex justify-start">
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                  {error.message || "Something went wrong. Check your API key configuration."}
-                </div>
+              <div style={{
+                padding: "10px 16px",
+                borderRadius: 12,
+                border: "0.5px solid rgba(239,68,68,0.2)",
+                background: "rgba(239,68,68,0.06)",
+                fontSize: 13,
+                color: "#f87171",
+              }}>
+                {error.message || "Something went wrong"}
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -162,23 +196,64 @@ export function ChatPanel({ modelId }: ChatPanelProps) {
         )}
       </div>
 
-      {/* Input */}
-      <div className="border-t border-[var(--border-color)] p-4">
-        <form onSubmit={handleSubmit} className="mx-auto flex max-w-3xl gap-2">
+      {/* Input area */}
+      <div style={{ flexShrink: 0, padding: "8px 24px 20px" }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            maxWidth: 640,
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "flex-end",
+            gap: 8,
+          }}
+        >
           <textarea
             ref={textareaRef}
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message or use /skill..."
+            placeholder="Type a message..."
             rows={1}
-            className="flex-1 resize-none rounded-lg border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-secondary)] focus:border-[var(--accent)]"
+            className="selectable"
+            style={{
+              flex: 1,
+              resize: "none",
+              padding: "10px 14px",
+              border: "0.5px solid var(--border-default)",
+              borderRadius: 12,
+              background: "var(--bg-input)",
+              color: "var(--text-primary)",
+              fontSize: 14,
+              lineHeight: 1.5,
+              outline: "none",
+              transition: "border-color 150ms",
+              fontFamily: "inherit",
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = "var(--border-focus)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = "var(--border-default)";
+            }}
             disabled={isLoading}
           />
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="self-end rounded-lg bg-[var(--accent)] px-5 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            style={{
+              flexShrink: 0,
+              padding: "10px 16px",
+              border: "none",
+              borderRadius: 12,
+              background: "var(--accent)",
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: "pointer",
+              transition: "opacity 150ms",
+              opacity: isLoading || !input.trim() ? 0.3 : 1,
+            }}
           >
             Send
           </button>

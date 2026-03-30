@@ -13,21 +13,15 @@ export function Sidebar({ modelId, onModelChange }: SidebarProps) {
   const { sessions, currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
-  // Fetch sessions on mount
   useEffect(() => {
     fetch("/api/sessions")
-      .then((res) => {
-        if (res.ok) return res.json();
-        return { sessions: [] };
-      })
+      .then((res) => (res.ok ? res.json() : { sessions: [] }))
       .then((data) => {
         if (data.sessions) {
           dispatch({ type: "SET_SESSIONS", sessions: data.sessions });
         }
       })
-      .catch(() => {
-        // API not available yet — ignore
-      });
+      .catch(() => {});
   }, [dispatch]);
 
   const handleNewTask = useCallback(() => {
@@ -37,18 +31,12 @@ export function Sidebar({ modelId, onModelChange }: SidebarProps) {
       title: "New Task",
       createdAt: new Date().toISOString(),
     };
-
-    // Optimistic add
     dispatch({ type: "ADD_SESSION", session });
-
-    // Try to persist via API
     fetch("/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(session),
-    }).catch(() => {
-      // API not available yet — session stays local
-    });
+    }).catch(() => {});
   }, [dispatch]);
 
   const handleSelectSession = useCallback(
@@ -59,50 +47,134 @@ export function Sidebar({ modelId, onModelChange }: SidebarProps) {
   );
 
   return (
-    <aside className="flex h-full w-[var(--sidebar-width)] shrink-0 flex-col border-r border-[var(--border-color)] bg-[var(--bg-secondary)]">
-      {/* Header */}
-      <div className="flex h-14 items-center border-b border-[var(--border-color)] px-4">
-        <h1 className="text-base font-semibold tracking-tight">Pokeshrimp</h1>
-      </div>
-
-      {/* Task list */}
-      <div className="flex-1 overflow-y-auto p-3">
+    <div
+      className="drag"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "var(--sidebar-width)",
+        minWidth: "var(--sidebar-width)",
+        height: "100vh",
+        background: "var(--bg-sidebar)",
+        paddingTop: "var(--navbar-height)",
+      }}
+    >
+      {/* New task button */}
+      <div style={{ padding: "8px 12px" }}>
         <button
           onClick={handleNewTask}
-          className="mb-3 flex w-full items-center gap-2 rounded-lg border border-dashed border-[var(--border-color)] px-3 py-2 text-sm text-[var(--text-secondary)] transition-colors hover:border-[var(--accent)] hover:text-[var(--text-primary)]"
+          className="nodrag"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            width: "100%",
+            padding: "7px 12px",
+            border: "none",
+            borderRadius: 8,
+            background: "transparent",
+            color: "var(--text-secondary)",
+            fontSize: 13,
+            cursor: "pointer",
+            transition: "background 150ms, color 150ms",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "var(--bg-hover)";
+            e.currentTarget.style.color = "var(--text-primary)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "var(--text-secondary)";
+          }}
         >
-          + New Task
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <line x1="8" y1="3" x2="8" y2="13" />
+            <line x1="3" y1="8" x2="13" y2="8" />
+          </svg>
+          New Task
         </button>
-
-        <div className="space-y-1">
-          {sessions.map((session) => (
-            <button
-              key={session.id}
-              onClick={() => handleSelectSession(session.id)}
-              className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                session.id === currentSessionId
-                  ? "bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
-                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              <div className="truncate">{session.title}</div>
-              <div className="mt-0.5 text-xs text-[var(--text-secondary)] opacity-60">
-                {new Date(session.createdAt).toLocaleDateString()}
-              </div>
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* Model selector */}
-      <div className="border-t border-[var(--border-color)] p-3">
-        <label className="mb-1.5 block text-xs text-[var(--text-secondary)]">
-          Model
-        </label>
+      {/* Session list */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "4px 12px",
+        }}
+      >
+        {sessions.length === 0 ? (
+          <div style={{ padding: "16px 12px", fontSize: 12, color: "var(--text-tertiary)" }}>
+            No sessions yet
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {sessions.map((session) => (
+              <button
+                key={session.id}
+                onClick={() => handleSelectSession(session.id)}
+                className="nodrag"
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "7px 12px",
+                  border: "none",
+                  borderRadius: 6,
+                  background: session.id === currentSessionId ? "var(--bg-active)" : "transparent",
+                  color: session.id === currentSessionId ? "var(--text-primary)" : "var(--text-secondary)",
+                  fontSize: 13,
+                  textAlign: "left",
+                  cursor: "pointer",
+                  transition: "background 150ms, color 150ms",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={(e) => {
+                  if (session.id !== currentSessionId) {
+                    e.currentTarget.style.background = "var(--bg-hover)";
+                    e.currentTarget.style.color = "var(--text-primary)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (session.id !== currentSessionId) {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "var(--text-secondary)";
+                  }
+                }}
+              >
+                {session.title}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div
+        style={{
+          flexShrink: 0,
+          padding: "12px 16px",
+          borderTop: "0.5px solid var(--border-subtle)",
+        }}
+      >
         <select
           value={modelId}
           onChange={(e) => onModelChange(e.target.value)}
-          className="w-full rounded-md border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+          className="nodrag"
+          style={{
+            width: "100%",
+            padding: "5px 8px",
+            border: "0.5px solid var(--border-subtle)",
+            borderRadius: 6,
+            background: "var(--bg-input)",
+            color: "var(--text-secondary)",
+            fontSize: 12,
+            outline: "none",
+            cursor: "pointer",
+            appearance: "none",
+            WebkitAppearance: "none",
+          }}
         >
           {MODEL_OPTIONS.map((m) => (
             <option key={m.id} value={m.id}>
@@ -110,12 +182,7 @@ export function Sidebar({ modelId, onModelChange }: SidebarProps) {
             </option>
           ))}
         </select>
-
-        {/* Version */}
-        <div className="mt-2 text-center text-xs text-[var(--text-secondary)] opacity-50">
-          v0.1.0
-        </div>
       </div>
-    </aside>
+    </div>
   );
 }
