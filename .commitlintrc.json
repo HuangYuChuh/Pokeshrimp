@@ -1,0 +1,22 @@
+{
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "type-enum": [
+      2,
+      "always",
+      ["feat", "fix", "refactor", "chore", "docs", "test", "style", "perf", "ci", "revert"]
+    ],
+    "scope-enum": [
+      1,
+      "always",
+      [
+        "core/tool", "core/permission", "core/hooks", "core/config",
+        "core/mcp", "core/skill", "core/session", "core/ai", "core",
+        "electron", "ui", "api",
+        "architecture", "conventions", "ci"
+      ]
+    ],
+    "subject-max-length": [2, "always", 70],
+    "body-max-line-length": [1, "always", 120]
+  }
+}

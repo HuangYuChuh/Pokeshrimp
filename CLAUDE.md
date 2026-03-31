@@ -50,6 +50,24 @@ npm run package      # Package as macOS desktop app
 - New tools must implement the `Tool` interface from `src/core/tool/types.ts`
 - New skills are `.skill.md` files in `.visagent/skills/` or `~/.visagent/skills/`
 
+## Workflow
+
+**Never push directly to `main`.** All changes go through Pull Requests:
+
+1. Create a feature branch: `git checkout -b feat/description`
+2. Develop and commit (following commit convention below)
+3. Push branch and open PR via `gh pr create`
+4. CI runs automatically (TypeScript check + Next.js build + Electron build + commit lint)
+5. Review and merge
+
+**Branch naming**: `<type>/<short-description>` (e.g. `feat/tool-use-loop`, `fix/sidebar-overflow`, `refactor/core-config`)
+
+**CI checks** (must all pass before merge):
+- `npx tsc --noEmit` — TypeScript type check
+- `npm run build` — Next.js production build
+- `npm run build:electron` — Electron compilation
+- Commit message lint (Conventional Commits)
+
 ## Git Commit Convention
 
 Use **Conventional Commits** with scope:
