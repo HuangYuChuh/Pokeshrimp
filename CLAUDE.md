@@ -49,3 +49,33 @@ npm run package      # Package as macOS desktop app
 - Config format defined in `src/core/config/schema.ts` (single source of truth)
 - New tools must implement the `Tool` interface from `src/core/tool/types.ts`
 - New skills are `.skill.md` files in `.visagent/skills/` or `~/.visagent/skills/`
+
+## Git Commit Convention
+
+Use **Conventional Commits** with scope:
+
+```
+<type>(<scope>): <description>
+```
+
+**Types**: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`
+
+**Scopes** (match project modules):
+- `core/tool`, `core/permission`, `core/hooks`, `core/config`, `core/mcp`, `core/skill`, `core/session`, `core/ai`
+- `electron`, `ui`, `api`
+- Omit scope for cross-cutting changes
+
+**Examples**:
+```
+feat(core/tool): add unified Tool interface and registry
+fix(electron): auto-start Next.js dev server
+refactor(core): extract framework-agnostic core layer
+docs(architecture): add technical architecture document
+chore: update dependencies
+```
+
+**Rules**:
+- Subject line < 70 characters, imperative mood, no period
+- Body (optional): blank line after subject, explain "why" not "what"
+- Footer: `Co-Authored-By: ...` when applicable
+- One logical change per commit — don't mix features with refactors
