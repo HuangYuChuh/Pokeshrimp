@@ -7,9 +7,10 @@ import { useAppState, useAppDispatch } from "@/lib/store";
 interface SidebarProps {
   modelId: string;
   onModelChange: (id: string) => void;
+  onOpenSettings?: () => void;
 }
 
-export function Sidebar({ modelId, onModelChange }: SidebarProps) {
+export function Sidebar({ modelId, onModelChange, onOpenSettings }: SidebarProps) {
   const { sessions, currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
@@ -156,6 +157,9 @@ export function Sidebar({ modelId, onModelChange }: SidebarProps) {
           flexShrink: 0,
           padding: "12px 16px",
           borderTop: "0.5px solid var(--border-subtle)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
         <select
@@ -163,7 +167,7 @@ export function Sidebar({ modelId, onModelChange }: SidebarProps) {
           onChange={(e) => onModelChange(e.target.value)}
           className="nodrag"
           style={{
-            width: "100%",
+            flex: 1,
             padding: "5px 8px",
             border: "0.5px solid var(--border-subtle)",
             borderRadius: 6,
@@ -182,6 +186,27 @@ export function Sidebar({ modelId, onModelChange }: SidebarProps) {
             </option>
           ))}
         </select>
+        <button
+          onClick={onOpenSettings}
+          className="nodrag"
+          title="Settings"
+          style={{
+            marginLeft: 8,
+            padding: 6,
+            border: "none",
+            borderRadius: 6,
+            background: "transparent",
+            color: "var(--text-secondary)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
       </div>
     </div>
   );
