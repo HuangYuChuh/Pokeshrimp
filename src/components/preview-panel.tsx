@@ -2,12 +2,9 @@
 
 import { useCallback } from "react";
 import { useAppState, useAppDispatch, type PreviewTab } from "@/lib/store";
-
-const TABS: { id: PreviewTab; label: string }[] = [
-  { id: "preview", label: "Preview" },
-  { id: "editor", label: "Editor" },
-  { id: "output", label: "Output" },
-];
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function PreviewPanel() {
   const { previewTab, previewContent, editorParams, outputFiles } =
@@ -15,8 +12,8 @@ export function PreviewPanel() {
   const dispatch = useAppDispatch();
 
   const handleTabChange = useCallback(
-    (tab: PreviewTab) => {
-      dispatch({ type: "SET_PREVIEW_TAB", tab });
+    (value: unknown) => {
+      dispatch({ type: "SET_PREVIEW_TAB", tab: value as PreviewTab });
     },
     [dispatch],
   );
@@ -29,145 +26,121 @@ export function PreviewPanel() {
   );
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "var(--preview-width)",
-        minWidth: "var(--preview-width)",
-        height: "100vh",
-        borderLeft: "0.5px solid var(--border-subtle)",
-        background: "var(--bg-sidebar)",
-      }}
-    >
+    <aside className="flex h-screen w-[380px] min-w-[380px] flex-col border-l border-border bg-sidebar">
       {/* Navbar spacer */}
-      <div className="drag" style={{ height: "var(--navbar-height)", flexShrink: 0 }} />
+      <div className="drag h-12 shrink-0" />
 
-      {/* Tab bar */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 2,
-        padding: "0 16px",
-        height: 36,
-        flexShrink: 0,
-      }}>
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => handleTabChange(tab.id)}
-            className="nodrag"
-            style={{
-              padding: "4px 10px",
-              border: "none",
-              borderRadius: 6,
-              background: previewTab === tab.id ? "var(--bg-active)" : "transparent",
-              color: previewTab === tab.id ? "var(--text-primary)" : "var(--text-tertiary)",
-              fontSize: 12,
-              fontWeight: 500,
-              cursor: "pointer",
-              transition: "background 150ms, color 150ms",
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={previewTab}
+        onValueChange={handleTabChange}
+        className="flex flex-1 flex-col overflow-hidden"
+      >
+        <TabsList className="mx-4 shrink-0">
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="editor">Editor</TabsTrigger>
+          <TabsTrigger value="output">Output</TabsTrigger>
+        </TabsList>
 
-      {/* Divider */}
-      <div style={{ margin: "0 16px", borderBottom: "0.5px solid var(--border-subtle)" }} />
+        <TabsContent value="preview" className="flex-1 overflow-auto">
+          <PreviewContent content={previewContent} />
+        </TabsContent>
 
-      {/* Content */}
-      <div style={{ flex: 1, overflow: "auto" }}>
-        {previewTab === "preview" && <PreviewContent content={previewContent} />}
-        {previewTab === "editor" && <EditorContent value={editorParams} onChange={handleEditorChange} />}
-        {previewTab === "output" && <OutputContent files={outputFiles} />}
-      </div>
-    </div>
+        <TabsContent value="editor" className="flex-1 overflow-auto">
+          <EditorContent value={editorParams} onChange={handleEditorChange} />
+        </TabsContent>
+
+        <TabsContent value="output" className="flex-1 overflow-auto">
+          <OutputContent files={outputFiles} />
+        </TabsContent>
+      </Tabs>
+    </aside>
   );
 }
 
-function PreviewContent({ content }: { content: { type: string; url?: string; text?: string } }) {
+function PreviewContent({
+  content,
+}: {
+  content: { type: string; url?: string; text?: string };
+}) {
   if (content.type === "image" && content.url) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", padding: 24 }}>
-        <img src={content.url} alt="Preview" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 8, objectFit: "contain" }} />
+      <div className="flex h-full items-center justify-center p-6">
+        <img
+          src={content.url}
+          alt="Preview"
+          className="max-h-full max-w-full rounded-lg object-contain"
+        />
       </div>
     );
   }
   if (content.type === "text" && content.text) {
     return (
-      <div className="selectable" style={{ padding: 20, fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-wrap", color: "var(--text-primary)" }}>
-        {content.text}
-      </div>
+      <ScrollArea className="h-full">
+        <div className="selectable whitespace-pre-wrap p-5 text-sm leading-relaxed text-foreground">
+          {content.text}
+        </div>
+      </ScrollArea>
     );
   }
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 13, color: "var(--text-tertiary)" }}>
+    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
       Generated content will appear here
     </div>
   );
 }
 
-function EditorContent({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function EditorContent({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: 16 }}>
-      <label style={{ marginBottom: 8, fontSize: 11, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-tertiary)" }}>
+    <div className="flex h-full flex-col p-4">
+      <label className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
         Parameters
       </label>
-      <textarea
+      <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         spellCheck={false}
-        className="selectable"
-        style={{
-          flex: 1,
-          resize: "none",
-          padding: 12,
-          border: "0.5px solid var(--border-subtle)",
-          borderRadius: 8,
-          background: "var(--bg-base)",
-          color: "var(--text-primary)",
-          fontFamily: "monospace",
-          fontSize: 12,
-          lineHeight: 1.5,
-          outline: "none",
-        }}
+        className="selectable flex-1 resize-none font-mono text-xs"
         placeholder='{ "prompt": "..." }'
       />
     </div>
   );
 }
 
-function OutputContent({ files }: { files: { name: string; path: string; type: string }[] }) {
+function OutputContent({
+  files,
+}: {
+  files: { name: string; path: string; type: string }[];
+}) {
   if (files.length === 0) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 13, color: "var(--text-tertiary)" }}>
+      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
         Output files will appear here
       </div>
     );
   }
   return (
-    <div style={{ padding: 16 }}>
-      {files.map((file, i) => (
-        <div key={i} style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "8px 12px",
-          borderRadius: 6,
-          cursor: "pointer",
-          transition: "background 150ms",
-          marginBottom: 2,
-        }}>
-          <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 6px", borderRadius: 4, background: "var(--bg-elevated)", color: "var(--text-tertiary)" }}>
-            {file.type}
-          </span>
-          <span style={{ flex: 1, fontSize: 13, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {file.name}
-          </span>
-        </div>
-      ))}
-    </div>
+    <ScrollArea className="h-full">
+      <div className="p-4">
+        {files.map((file, i) => (
+          <div
+            key={i}
+            className="mb-0.5 flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 transition-colors hover:bg-muted"
+          >
+            <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+              {file.type}
+            </span>
+            <span className="flex-1 truncate text-sm text-foreground">
+              {file.name}
+            </span>
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
   );
 }

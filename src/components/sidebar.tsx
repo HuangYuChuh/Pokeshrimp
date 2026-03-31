@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { MODEL_OPTIONS } from "./model-options";
+import { Plus } from "lucide-react";
 import { useAppState, useAppDispatch } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface SidebarProps {
-  modelId: string;
-  onModelChange: (id: string) => void;
-}
-
-export function Sidebar({ modelId, onModelChange }: SidebarProps) {
+export function Sidebar() {
   const { sessions, currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
@@ -47,142 +45,49 @@ export function Sidebar({ modelId, onModelChange }: SidebarProps) {
   );
 
   return (
-    <div
-      className="drag"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: "var(--sidebar-width)",
-        minWidth: "var(--sidebar-width)",
-        height: "100vh",
-        background: "var(--bg-sidebar)",
-        paddingTop: "var(--navbar-height)",
-      }}
-    >
-      {/* New task button */}
-      <div style={{ padding: "8px 12px" }}>
-        <button
+    <aside className="drag flex h-full w-[260px] shrink-0 flex-col bg-sidebar">
+      {/* macOS traffic light space */}
+      <div className="h-13 shrink-0" />
+
+      {/* New task */}
+      <div className="px-3 pb-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
           onClick={handleNewTask}
-          className="nodrag"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            width: "100%",
-            padding: "7px 12px",
-            border: "none",
-            borderRadius: 8,
-            background: "transparent",
-            color: "var(--text-secondary)",
-            fontSize: 13,
-            cursor: "pointer",
-            transition: "background 150ms, color 150ms",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--bg-hover)";
-            e.currentTarget.style.color = "var(--text-primary)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "var(--text-secondary)";
-          }}
         >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <line x1="8" y1="3" x2="8" y2="13" />
-            <line x1="3" y1="8" x2="13" y2="8" />
-          </svg>
-          New Task
-        </button>
+          <Plus size={15} strokeWidth={1.5} />
+          New task
+        </Button>
+      </div>
+
+      {/* Recents label */}
+      <div className="px-5 pb-2">
+        <span className="text-[11px] font-medium tracking-wide text-muted-foreground/60">
+          Recents
+        </span>
       </div>
 
       {/* Session list */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "4px 12px",
-        }}
-      >
-        {sessions.length === 0 ? (
-          <div style={{ padding: "16px 12px", fontSize: 12, color: "var(--text-tertiary)" }}>
-            No sessions yet
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {sessions.map((session) => (
-              <button
-                key={session.id}
-                onClick={() => handleSelectSession(session.id)}
-                className="nodrag"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  padding: "7px 12px",
-                  border: "none",
-                  borderRadius: 6,
-                  background: session.id === currentSessionId ? "var(--bg-active)" : "transparent",
-                  color: session.id === currentSessionId ? "var(--text-primary)" : "var(--text-secondary)",
-                  fontSize: 13,
-                  textAlign: "left",
-                  cursor: "pointer",
-                  transition: "background 150ms, color 150ms",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-                onMouseEnter={(e) => {
-                  if (session.id !== currentSessionId) {
-                    e.currentTarget.style.background = "var(--bg-hover)";
-                    e.currentTarget.style.color = "var(--text-primary)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (session.id !== currentSessionId) {
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.color = "var(--text-secondary)";
-                  }
-                }}
-              >
-                {session.title}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div
-        style={{
-          flexShrink: 0,
-          padding: "12px 16px",
-          borderTop: "0.5px solid var(--border-subtle)",
-        }}
-      >
-        <select
-          value={modelId}
-          onChange={(e) => onModelChange(e.target.value)}
-          className="nodrag"
-          style={{
-            width: "100%",
-            padding: "5px 8px",
-            border: "0.5px solid var(--border-subtle)",
-            borderRadius: 6,
-            background: "var(--bg-input)",
-            color: "var(--text-secondary)",
-            fontSize: 12,
-            outline: "none",
-            cursor: "pointer",
-            appearance: "none",
-            WebkitAppearance: "none",
-          }}
-        >
-          {MODEL_OPTIONS.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.label}
-            </option>
+      <ScrollArea className="flex-1">
+        <div className="flex flex-col gap-px px-3">
+          {sessions.map((session) => (
+            <button
+              key={session.id}
+              onClick={() => handleSelectSession(session.id)}
+              className={cn(
+                "nodrag w-full truncate rounded-lg px-3 py-1.5 text-left text-[13px] transition-colors",
+                session.id === currentSessionId
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+              )}
+            >
+              {session.title}
+            </button>
           ))}
-        </select>
-      </div>
-    </div>
+        </div>
+      </ScrollArea>
+    </aside>
   );
 }
