@@ -6,6 +6,9 @@ import {
   addMessage,
   touchSession,
 } from "@/lib/db";
+import { getToolRegistry } from "@/core/init";
+import { bridgeToolsForAI } from "@/core/ai/tool-bridge";
+import type { ToolContext } from "@/core/tool/types";
 
 export async function POST(req: Request) {
   const { messages, modelId, sessionId } = await req.json();
@@ -29,13 +32,25 @@ export async function POST(req: Request) {
     await addMessage(sid, lastMsg.role, lastMsg.content);
   }
 
+  // Setup tool context
+  const registry = getToolRegistry();
+  const context: ToolContext = {
+    sessionId: sid,
+    cwd: process.cwd(),
+  };
+
+  // Bridge tools for AI SDK
+  const tools = bridgeToolsForAI(registry, context);
+
   const result = streamText({
     model: getModel(modelId),
     system: SYSTEM_PROMPT,
     messages,
+    tools,
+    maxSteps: 10,
     onFinish: async ({ text }) => {
       // Persist assistant reply
-      if (sid) {
+      if (sid && text) {
         await addMessage(sid, "assistant", text);
         await touchSession(sid);
       }
