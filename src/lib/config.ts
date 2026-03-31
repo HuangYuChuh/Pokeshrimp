@@ -1,31 +1,19 @@
+// Re-export from core — keeps existing imports working
+export { getConfig, reloadConfig, loadConfig, loadConfigFile } from "@/core/config/loader";
+export type { AppConfig } from "@/core/config/schema";
+
+// Legacy type alias for backward compatibility
+export type PokeshrimpConfig = import("@/core/config/schema").AppConfig;
+
+// Legacy saveConfig — writes to global config file
 import fs from "fs";
 import path from "path";
 import os from "os";
 
-export interface PokeshrimpConfig {
-  defaultModel?: string;
-  apiKeys?: {
-    anthropic?: string;
-    openai?: string;
-  };
-}
-
 const CONFIG_DIR = path.join(os.homedir(), ".pokeshrimp");
 const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 
-export function getConfig(): PokeshrimpConfig {
-  try {
-    if (fs.existsSync(CONFIG_FILE)) {
-      const raw = fs.readFileSync(CONFIG_FILE, "utf-8");
-      return JSON.parse(raw);
-    }
-  } catch {
-    // Fall back to empty config
-  }
-  return {};
-}
-
-export function saveConfig(config: PokeshrimpConfig): void {
+export function saveConfig(config: Record<string, unknown>): void {
   if (!fs.existsSync(CONFIG_DIR)) {
     fs.mkdirSync(CONFIG_DIR, { recursive: true });
   }

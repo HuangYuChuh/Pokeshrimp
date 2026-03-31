@@ -1,108 +1,49 @@
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import fs from "fs";
-import path from "path";
-import os from "os";
+// Re-export from core — keeps existing imports working
+import { MCPClientManager } from "@/core/mcp/client";
+import type { MCPServerConnectConfig } from "@/core/mcp/client";
+import { getConfig } from "@/core/config/loader";
+import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
 
-export interface MCPServerConfig {
-  command: string;
-  args?: string[];
-  env?: Record<string, string>;
-}
+export type { MCPServerConnectConfig as MCPServerConfig } from "@/core/mcp/client";
 
-interface MCPServersConfig {
-  mcpServers: Record<string, MCPServerConfig>;
-}
-
-const GLOBAL_MCP_CONFIG = path.join(
-  os.homedir(),
-  ".pokeshrimp",
-  "mcp-servers.json"
-);
-
-// Active MCP clients keyed by server name
-const clients = new Map<string, Client>();
-
-function loadMCPConfig(): MCPServersConfig {
-  try {
-    if (fs.existsSync(GLOBAL_MCP_CONFIG)) {
-      const raw = fs.readFileSync(GLOBAL_MCP_CONFIG, "utf-8");
-      return JSON.parse(raw);
-    }
-  } catch {
-    // Fall back to empty
-  }
-  return { mcpServers: {} };
-}
+const manager = new MCPClientManager();
 
 export async function connectMCPServer(
   name: string,
-  config: MCPServerConfig
+  config: MCPServerConnectConfig,
 ): Promise<Client> {
-  // Return existing client if already connected
-  if (clients.has(name)) {
-    return clients.get(name)!;
-  }
-
-  const transport = new StdioClientTransport({
-    command: config.command,
-    args: config.args,
-    env: { ...process.env, ...config.env } as Record<string, string>,
-  });
-
-  const client = new Client({
-    name: `pokeshrimp-${name}`,
-    version: "0.1.0",
-  });
-
-  await client.connect(transport);
-  clients.set(name, client);
-  return client;
+  return manager.connectServer(name, config);
 }
 
 export async function getAllMCPTools(): Promise<
   Array<{ serverName: string; tools: Awaited<ReturnType<Client["listTools"]>>["tools"] }>
 > {
-  const config = loadMCPConfig();
-  const results: Array<{
-    serverName: string;
-    tools: Awaited<ReturnType<Client["listTools"]>>["tools"];
-  }> = [];
-
+  // Auto-connect from config before listing
+  const config = getConfig();
   for (const [name, serverConfig] of Object.entries(config.mcpServers)) {
-    try {
-      const client = await connectMCPServer(name, serverConfig);
-      const { tools } = await client.listTools();
-      results.push({ serverName: name, tools });
-    } catch (err) {
-      console.error(`[MCP] Failed to connect to ${name}:`, err);
+    if (serverConfig.enabled !== false) {
+      try {
+        await manager.connectServer(name, {
+          command: serverConfig.command,
+          args: serverConfig.args,
+          env: serverConfig.env,
+        });
+      } catch (err) {
+        console.error(`[MCP] Failed to connect to ${name}:`, err);
+      }
     }
   }
-
-  return results;
+  return manager.listAllTools();
 }
 
 export async function callMCPTool(
   serverName: string,
   toolName: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
 ): Promise<unknown> {
-  const client = clients.get(serverName);
-  if (!client) {
-    throw new Error(`MCP server "${serverName}" is not connected`);
-  }
-
-  const result = await client.callTool({ name: toolName, arguments: args });
-  return result;
+  return manager.callTool(serverName, toolName, args);
 }
 
 export async function disconnectAll(): Promise<void> {
-  for (const [name, client] of clients) {
-    try {
-      await client.close();
-    } catch (err) {
-      console.error(`[MCP] Failed to disconnect ${name}:`, err);
-    }
-  }
-  clients.clear();
+  return manager.disconnectAll();
 }
