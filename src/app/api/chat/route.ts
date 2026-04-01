@@ -42,8 +42,19 @@ export async function POST(req: Request) {
   // Bridge tools for AI SDK
   const tools = bridgeToolsForAI(registry, context);
 
+  let model;
+  try {
+    model = getModel(modelId);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to load model";
+    return new Response(
+      JSON.stringify({ error: "API key not configured. Open Settings to add your API key." }),
+      { status: 401, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   const result = streamText({
-    model: getModel(modelId),
+    model,
     system: SYSTEM_PROMPT,
     messages,
     tools,

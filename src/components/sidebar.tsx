@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import { useAppState, useAppDispatch } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export function Sidebar() {
+interface SidebarProps {
+  onOpenSettings?: () => void;
+}
+
+export function Sidebar({ onOpenSettings }: SidebarProps) {
   const { sessions, currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
@@ -88,6 +92,21 @@ export function Sidebar() {
           ))}
         </div>
       </ScrollArea>
+
+      {/* Settings */}
+      {onOpenSettings && (
+        <div className="shrink-0 border-t border-sidebar-border px-3 py-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
+            onClick={onOpenSettings}
+          >
+            <Settings size={15} strokeWidth={1.5} />
+            Settings
+          </Button>
+        </div>
+      )}
     </aside>
   );
 }
