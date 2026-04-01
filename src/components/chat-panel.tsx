@@ -3,15 +3,31 @@
 import { useChat } from "@ai-sdk/react";
 import { useRef, useEffect, useCallback, type KeyboardEvent } from "react";
 import { useAppDispatch } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ArrowUp, ChevronDown } from "lucide-react";
+import { MODEL_OPTIONS } from "./model-options";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
 
 interface ChatPanelProps {
   modelId: string;
+  onModelChange: (id: string) => void;
 }
 
-export function ChatPanel({ modelId }: ChatPanelProps) {
+export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dispatch = useAppDispatch();
+
+  const currentModel = MODEL_OPTIONS.find((m) => m.id === modelId);
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
     useChat({
@@ -42,17 +58,15 @@ export function ChatPanel({ modelId }: ChatPanelProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const adjustTextareaHeight = useCallback(() => {
+  const adjustHeight = useCallback(() => {
     const el = textareaRef.current;
     if (el) {
       el.style.height = "auto";
-      el.style.height = Math.min(el.scrollHeight, 120) + "px";
+      el.style.height = Math.min(el.scrollHeight, 200) + "px";
     }
   }, []);
 
-  useEffect(() => {
-    adjustTextareaHeight();
-  }, [input, adjustTextareaHeight]);
+  useEffect(adjustHeight, [input, adjustHeight]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -66,199 +80,182 @@ export function ChatPanel({ modelId }: ChatPanelProps) {
     [input, isLoading, handleSubmit],
   );
 
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-        minWidth: 0,
-        height: "100vh",
-        background: "var(--bg-base)",
-      }}
-    >
-      {/* Navbar spacer */}
-      <div className="drag" style={{ height: "var(--navbar-height)", flexShrink: 0 }} />
+  const isEmpty = messages.length === 0;
 
-      {/* Messages */}
-      <div
-        className="selectable"
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "0 24px",
-        }}
-      >
-        {messages.length === 0 ? (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100%",
-          }}>
-            <div style={{ textAlign: "center" }}>
-              <h2 style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.01em", color: "var(--text-primary)" }}>
-                Pokeshrimp
-              </h2>
-              <p style={{ marginTop: 6, fontSize: 13, color: "var(--text-tertiary)" }}>
-                Describe what you want to create
+  return (
+    <div className="flex min-w-0 flex-1 flex-col bg-background">
+      {/* Drag region */}
+      <div className="drag h-13 shrink-0" />
+
+      {/* Content area */}
+      {isEmpty ? (
+        /* Empty state: centered greeting + bottom input */
+        <div className="flex flex-1 flex-col">
+          <div className="flex flex-1 items-center justify-center pb-32">
+            <div className="text-center">
+              <h1 className="text-[28px] font-semibold tracking-tight text-foreground">
+                What would you like to create?
+              </h1>
+              <p className="mt-3 text-[15px] text-muted-foreground">
+                描述你想创作的内容，剩下的交给我
               </p>
             </div>
           </div>
-        ) : (
-          <div style={{ maxWidth: 640, margin: "0 auto", paddingBottom: 16 }}>
-            {messages.map((message) => (
-              <div key={message.id} style={{ marginBottom: 20 }}>
-                {message.content && (
-                  <div style={{
-                    display: "flex",
-                    justifyContent: message.role === "user" ? "flex-end" : "flex-start",
-                  }}>
-                    <div
-                      style={{
-                        maxWidth: "85%",
-                        padding: "10px 16px",
-                        borderRadius: 16,
-                        fontSize: 14,
-                        lineHeight: 1.6,
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-word",
-                        ...(message.role === "user"
-                          ? { background: "var(--accent)", color: "#fff" }
-                          : { background: "var(--bg-elevated)", color: "var(--text-primary)" }),
-                      }}
-                    >
-                      {message.content}
-                    </div>
-                  </div>
-                )}
-
-                {message.parts
-                  ?.filter((p) => p.type === "tool-invocation")
-                  .map((part) => {
-                    if (part.type !== "tool-invocation") return null;
-                    const { toolInvocation } = part;
-                    return (
-                      <div key={toolInvocation.toolCallId} style={{
-                        marginTop: 8,
-                        display: "flex",
-                        justifyContent: "flex-start",
-                      }}>
-                        <div style={{
-                          padding: "6px 12px",
-                          borderRadius: 8,
-                          border: "0.5px solid var(--border-subtle)",
-                          background: "var(--bg-sidebar)",
-                          fontSize: 12,
-                          color: "var(--text-secondary)",
-                        }}>
-                          <span style={{ fontFamily: "monospace", fontSize: 11 }}>
-                            {toolInvocation.toolName}
-                          </span>
-                          {" "}
-                          {toolInvocation.state === "result" ? (
-                            <span style={{ color: "#4ade80", fontSize: 11 }}>done</span>
-                          ) : (
-                            <span style={{ color: "#fbbf24", fontSize: 11 }}>running</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            ))}
-            {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-              <div style={{
-                padding: "10px 16px",
-                borderRadius: 16,
-                background: "var(--bg-elevated)",
-                display: "inline-block",
-                fontSize: 13,
-                color: "var(--text-tertiary)",
-              }}>
-                Thinking...
-              </div>
-            )}
-            {error && (
-              <div style={{
-                padding: "10px 16px",
-                borderRadius: 12,
-                border: "0.5px solid rgba(239,68,68,0.2)",
-                background: "rgba(239,68,68,0.06)",
-                fontSize: 13,
-                color: "#f87171",
-              }}>
-                {error.message || "Something went wrong"}
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-      </div>
-
-      {/* Input area */}
-      <div style={{ flexShrink: 0, padding: "8px 24px 20px" }}>
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            maxWidth: 640,
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "flex-end",
-            gap: 8,
-          }}
-        >
-          <textarea
+          <InputArea
             ref={textareaRef}
-            value={input}
+            input={input}
+            isLoading={isLoading}
+            modelLabel={currentModel?.label ?? "Model"}
+            modelId={modelId}
+            onModelChange={onModelChange}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
-            rows={1}
-            className="selectable"
-            style={{
-              flex: 1,
-              resize: "none",
-              padding: "10px 14px",
-              border: "0.5px solid var(--border-default)",
-              borderRadius: 12,
-              background: "var(--bg-input)",
-              color: "var(--text-primary)",
-              fontSize: 14,
-              lineHeight: 1.5,
-              outline: "none",
-              transition: "border-color 150ms",
-              fontFamily: "inherit",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-focus)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-default)";
-            }}
-            disabled={isLoading}
+            onSubmit={handleSubmit}
           />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            style={{
-              flexShrink: 0,
-              padding: "10px 16px",
-              border: "none",
-              borderRadius: 12,
-              background: "var(--accent)",
-              color: "#fff",
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: "pointer",
-              transition: "opacity 150ms",
-              opacity: isLoading || !input.trim() ? 0.3 : 1,
-            }}
-          >
-            Send
-          </button>
-        </form>
-      </div>
+        </div>
+      ) : (
+        /* Conversation state: messages + bottom input */
+        <>
+          <ScrollArea className="flex-1">
+            <div className="selectable mx-auto max-w-[680px] px-6 pt-4 pb-6">
+              {messages.map((message) => (
+                <div key={message.id} className="mb-6">
+                  {message.content && (
+                    <div
+                      className={cn(
+                        "flex",
+                        message.role === "user" ? "justify-end" : "justify-start"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "max-w-[85%] whitespace-pre-wrap break-words text-[14px] leading-7",
+                          message.role === "user"
+                            ? "rounded-2xl bg-primary px-4 py-2.5 text-primary-foreground"
+                            : "text-foreground"
+                        )}
+                      >
+                        {message.content}
+                      </div>
+                    </div>
+                  )}
+
+                  {message.parts
+                    ?.filter((p) => p.type === "tool-invocation")
+                    .map((part) => {
+                      if (part.type !== "tool-invocation") return null;
+                      const { toolInvocation } = part;
+                      return (
+                        <div key={toolInvocation.toolCallId} className="mt-2">
+                          <Badge variant="outline" className="gap-1.5 text-[11px] font-normal">
+                            <span className="font-mono">{toolInvocation.toolName}</span>
+                            <span className={toolInvocation.state === "result" ? "text-green-400" : "text-yellow-400"}>
+                              {toolInvocation.state === "result" ? "done" : "running"}
+                            </span>
+                          </Badge>
+                        </div>
+                      );
+                    })}
+                </div>
+              ))}
+
+              {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+                <div className="flex flex-col gap-2.5 py-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              )}
+
+              {error && (
+                <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-[13px] text-destructive">
+                  {error.message || "Something went wrong"}
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+          <InputArea
+            ref={textareaRef}
+            input={input}
+            isLoading={isLoading}
+            modelLabel={currentModel?.label ?? "Model"}
+            modelId={modelId}
+            onModelChange={onModelChange}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onSubmit={handleSubmit}
+          />
+        </>
+      )}
     </div>
   );
 }
+
+/* ─── Input Area ─── */
+
+import { forwardRef } from "react";
+
+interface InputAreaProps {
+  input: string;
+  isLoading: boolean;
+  modelLabel: string;
+  modelId: string;
+  onModelChange: (id: string) => void;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+}
+
+const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
+  function InputArea(
+    { input, isLoading, modelLabel, modelId, onModelChange, onChange, onKeyDown, onSubmit },
+    ref
+  ) {
+    return (
+      <div className="shrink-0 px-6 pb-6">
+        <form onSubmit={onSubmit} className="mx-auto max-w-[680px]">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <textarea
+              ref={ref}
+              value={input}
+              onChange={onChange}
+              onKeyDown={onKeyDown}
+              placeholder="描述你的需求..."
+              rows={1}
+              disabled={isLoading}
+              className="selectable nodrag block w-full resize-none bg-transparent px-4 pt-4 pb-2 text-[14px] leading-6 text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:opacity-50"
+            />
+            <div className="flex items-center justify-between px-3 pb-2.5">
+              <div />
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="nodrag flex h-7 items-center gap-1 rounded-lg px-2 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none">
+                    {modelLabel}
+                    <ChevronDown size={12} />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={8}>
+                    <DropdownMenuRadioGroup value={modelId} onValueChange={onModelChange}>
+                      {MODEL_OPTIONS.map((m) => (
+                        <DropdownMenuRadioItem key={m.id} value={m.id} className="text-[13px]">
+                          {m.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <button
+                  type="submit"
+                  disabled={!input.trim() || isLoading}
+                  className="nodrag flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity disabled:opacity-20"
+                >
+                  <ArrowUp size={15} strokeWidth={2} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    );
+  }
+);
