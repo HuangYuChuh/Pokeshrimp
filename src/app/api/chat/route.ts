@@ -42,14 +42,31 @@ export async function POST(req: Request) {
   // Bridge tools for AI SDK
   const tools = bridgeToolsForAI(registry, context);
 
+  let model;
+  try {
+    model = getModel(modelId);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to load model";
+    // Check if it's an API key issue
+    if (msg.includes("API key") || msg.includes("apiKey") || msg.includes("authentication")) {
+      return new Response(
+        JSON.stringify({ error: "API key not configured. Open Settings (⚙) to add your API key." }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    return new Response(
+      JSON.stringify({ error: msg }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   const result = streamText({
-    model: getModel(modelId),
+    model,
     system: SYSTEM_PROMPT,
     messages,
     tools,
     maxSteps: 10,
     onFinish: async ({ text }) => {
-      // Persist assistant reply
       if (sid && text) {
         await addMessage(sid, "assistant", text);
         await touchSession(sid);

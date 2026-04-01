@@ -8,11 +8,16 @@ export { MODEL_OPTIONS } from "@/core/ai/provider";
 
 /**
  * Backward-compatible getModel that reads API keys from config automatically.
+ * Always reloads config to pick up changes from settings page.
  */
 export function getModel(modelId?: string): LanguageModel {
-  const config = getConfig();
+  const { reloadConfig } = require("@/core/config/loader");
+  const config = reloadConfig();
   return coreGetModel(
     modelId || config.defaultModel,
-    config.apiKeys,
+    {
+      anthropic: config.apiKeys?.anthropic || process.env.ANTHROPIC_API_KEY,
+      openai: config.apiKeys?.openai || process.env.OPENAI_API_KEY,
+    },
   );
 }

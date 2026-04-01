@@ -5,9 +5,11 @@ import { AppProvider } from "@/lib/store";
 import { Sidebar } from "@/components/sidebar";
 import { ChatPanel } from "@/components/chat-panel";
 import { PreviewPanel } from "@/components/preview-panel";
+import { SettingsDialog } from "@/components/settings-dialog";
 
 export default function Home() {
   const [modelId, setModelId] = useState("claude-sonnet");
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <AppProvider>
@@ -21,7 +23,7 @@ export default function Home() {
           background: "var(--bg-base)",
         }}
       >
-        <Sidebar modelId={modelId} onModelChange={setModelId} />
+        <Sidebar modelId={modelId} onModelChange={setModelId} onOpenSettings={() => setSettingsOpen(true)} />
         <div
           style={{
             display: "flex",
@@ -37,6 +39,7 @@ export default function Home() {
           <PreviewPanel />
         </div>
       </div>
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </AppProvider>
   );
 }
