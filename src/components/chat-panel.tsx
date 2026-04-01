@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { useRef, useEffect, useCallback, type KeyboardEvent } from "react";
+import { useRef, useEffect, useCallback, useState, type KeyboardEvent } from "react";
 import { useAppDispatch } from "@/lib/store";
 
 interface ChatPanelProps {
@@ -137,32 +137,11 @@ export function ChatPanel({ modelId }: ChatPanelProps) {
                   ?.filter((p) => p.type === "tool-invocation")
                   .map((part) => {
                     if (part.type !== "tool-invocation") return null;
-                    const { toolInvocation } = part;
                     return (
-                      <div key={toolInvocation.toolCallId} style={{
-                        marginTop: 8,
-                        display: "flex",
-                        justifyContent: "flex-start",
-                      }}>
-                        <div style={{
-                          padding: "6px 12px",
-                          borderRadius: 8,
-                          border: "0.5px solid var(--border-subtle)",
-                          background: "var(--bg-sidebar)",
-                          fontSize: 12,
-                          color: "var(--text-secondary)",
-                        }}>
-                          <span style={{ fontFamily: "monospace", fontSize: 11 }}>
-                            {toolInvocation.toolName}
-                          </span>
-                          {" "}
-                          {toolInvocation.state === "result" ? (
-                            <span style={{ color: "#4ade80", fontSize: 11 }}>done</span>
-                          ) : (
-                            <span style={{ color: "#fbbf24", fontSize: 11 }}>running</span>
-                          )}
-                        </div>
-                      </div>
+                      <ToolInvocationCard
+                        key={part.toolInvocation.toolCallId}
+                        toolInvocation={part.toolInvocation}
+                      />
                     );
                   })}
               </div>
@@ -261,4 +240,151 @@ export function ChatPanel({ modelId }: ChatPanelProps) {
       </div>
     </div>
   );
+}
+
+/* ─── Tool Invocation Card ─── */
+
+interface ToolInvocationProps {
+  toolInvocation: {
+    toolCallId: string;
+    toolName: string;
+    state: string;
+    args?: unknown;
+    result?: unknown;
+  };
+}
+
+function ToolInvocationCard({ toolInvocation }: ToolInvocationProps) {
+  const [expanded, setExpanded] = useState(false);
+  const isDone = toolInvocation.state === "result";
+  const hasArgs = !!(toolInvocation.args && Object.keys(toolInvocation.args as Record<string, unknown>).length > 0);
+  const hasResult = !!(isDone && toolInvocation.result != null);
+
+  const toolLabel = formatToolName(toolInvocation.toolName);
+  const argsPreview = hasArgs ? formatArgsPreview(toolInvocation.args) : "";
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "8px 12px",
+          borderRadius: 10,
+          border: "0.5px solid var(--border-subtle, rgba(255,255,255,0.07))",
+          background: "var(--bg-sidebar, #111)",
+          color: "var(--text-secondary, #a1a1aa)",
+          fontSize: 12,
+          cursor: "pointer",
+          width: "auto",
+          maxWidth: "85%",
+          textAlign: "left",
+          transition: "background 150ms",
+        }}
+      >
+        {/* Status indicator */}
+        <span
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: isDone ? "#4ade80" : "#fbbf24",
+            flexShrink: 0,
+            animation: isDone ? "none" : "pulse 1.5s infinite",
+          }}
+        />
+
+        {/* Tool name + preview */}
+        <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span style={{ fontWeight: 500, color: "var(--text-primary, #e4e4e7)" }}>{toolLabel}</span>
+          {argsPreview && (
+            <span style={{ marginLeft: 6, opacity: 0.6 }}>{argsPreview}</span>
+          )}
+        </span>
+
+        {/* Expand chevron */}
+        {(hasArgs || hasResult) && (
+          <svg
+            width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2" strokeLinecap="round"
+            style={{
+              flexShrink: 0,
+              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 150ms",
+            }}
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        )}
+      </button>
+
+      {/* Expanded detail */}
+      {expanded && (hasArgs || hasResult) && (
+        <div
+          style={{
+            marginTop: 4,
+            marginLeft: 12,
+            padding: "10px 14px",
+            borderRadius: 8,
+            border: "0.5px solid var(--border-subtle, rgba(255,255,255,0.07))",
+            background: "var(--bg-base, #09090b)",
+            fontSize: 11,
+            fontFamily: "monospace",
+            lineHeight: 1.6,
+            maxHeight: 300,
+            overflowY: "auto",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-all",
+            color: "var(--text-secondary, #a1a1aa)",
+          }}
+          className="selectable"
+        >
+          {hasArgs && (
+            <>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-tertiary, #52525b)", marginBottom: 4, fontFamily: "inherit", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                Input
+              </div>
+              <div style={{ marginBottom: hasResult ? 12 : 0 }}>
+                {formatValue(toolInvocation.args)}
+              </div>
+            </>
+          )}
+          {hasResult && (
+            <>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-tertiary, #52525b)", marginBottom: 4, fontFamily: "inherit", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                Result
+              </div>
+              <div>{formatValue(toolInvocation.result)}</div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatToolName(name: string): string {
+  return name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatArgsPreview(args: unknown): string {
+  if (!args || typeof args !== "object") return "";
+  const entries = Object.entries(args as Record<string, unknown>);
+  if (entries.length === 0) return "";
+  const [key, val] = entries[0];
+  const valStr = typeof val === "string" ? val : JSON.stringify(val);
+  const truncated = valStr.length > 40 ? valStr.slice(0, 40) + "..." : valStr;
+  return `${key}: ${truncated}`;
+}
+
+function formatValue(val: unknown): string {
+  if (typeof val === "string") return val.length > 2000 ? val.slice(0, 2000) + "\n...(truncated)" : val;
+  try {
+    const str = JSON.stringify(val, null, 2);
+    return str.length > 2000 ? str.slice(0, 2000) + "\n...(truncated)" : str;
+  } catch {
+    return String(val);
+  }
 }
