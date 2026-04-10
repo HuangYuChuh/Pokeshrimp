@@ -12,6 +12,7 @@
     "start": "next start",
     "lint": "next lint",
     "package": "npm run build && npm run build:electron && electron-builder --mac",
+    "cli": "npx tsx src/cli/index.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -47,6 +48,7 @@
     "husky": "^9.1.7",
     "postcss": "^8.5.0",
     "tailwindcss": "^4.1.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.0"
   },
   "build": {
