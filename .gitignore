@@ -9,8 +9,9 @@ node_modules/
 .next/
 out/
 
-# Electron build output
+# Build output
 dist-electron/
+dist-cli/
 dist/
 release/
 
