@@ -1,40 +1,98 @@
-<p align="center">
-  <h1 align="center">Pokeshrimp</h1>
-  <p align="center">The Super Router for AI-Powered Image & Video Creation</p>
+<div align="center">
+
+<!-- TODO: add banner image -->
+
+<h1>Pokeshrimp</h1>
+
+<p><strong>Humans use GUI, Agents use CLI, Creators use Pokeshrimp.</strong></p>
+
+<p>An AI-powered desktop workstation for image and video creation workflows. It combines a desktop chat UI, a local agent runtime, and skill-based CLI orchestration into one editable workspace.</p>
+
+<p>
+  <a href="https://github.com/HuangYuChuh/Pokeshrimp/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-10B981?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTMgNmwzIDEuNSAzLTEuNSAzIDEuNSAzLTEuNSAzIDEuNVY0LjVMMyA0LjVWNnoiLz48L3N2Zz4=" alt="License" /></a>
+  <a href="https://github.com/HuangYuChuh/Pokeshrimp/stargazers"><img src="https://img.shields.io/github/stars/HuangYuChuh/Pokeshrimp?style=flat&color=EAB308&logo=github" alt="Stars" /></a>
+  <a href="https://github.com/HuangYuChuh/Pokeshrimp/network/members"><img src="https://img.shields.io/github/forks/HuangYuChuh/Pokeshrimp?style=flat&color=F97316&logo=github" alt="Forks" /></a>
+  <a href="https://github.com/HuangYuChuh/Pokeshrimp/issues"><img src="https://img.shields.io/github/issues/HuangYuChuh/Pokeshrimp?style=flat&color=3B82F6" alt="Issues" /></a>
 </p>
 
-<p align="center">
-  <a href="https://github.com/HuangYuChuh/Pokeshrimp/releases"><img src="https://img.shields.io/github/v/release/HuangYuChuh/Pokeshrimp?style=flat-square" alt="Release" /></a>
-  <a href="https://github.com/HuangYuChuh/Pokeshrimp/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square" alt="License" /></a>
-  <a href="https://github.com/HuangYuChuh/Pokeshrimp"><img src="https://img.shields.io/github/stars/HuangYuChuh/Pokeshrimp?style=flat-square" alt="Stars" /></a>
+<p>
+  <a href="#overview">Overview</a> ·
+  <a href="#current-status">Current Status</a> ·
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#configuration">Configuration</a> ·
+  <a href="#skills">Skills</a> ·
+  <a href="#architecture">Architecture</a>
 </p>
 
-<p align="center">
-  <a href="./README.zh-CN.md">中文</a>
+<p>
+  <strong>English</strong> · <a href="./README.zh-CN.md">中文</a>
 </p>
 
-<!-- TODO: Add screenshot here -->
-<!-- <p align="center"><img src="docs/screenshot.png" width="800" /></p> -->
+</div>
 
 ---
 
-## Why Pokeshrimp?
+<a id="overview"></a>
 
-The current landscape of AI image and video tools forces you to choose: **ease of use** (Midjourney), **full control** (ComfyUI), or **smart automation** (Lovart). You shouldn't have to pick just one.
+## Overview
 
-Pokeshrimp is a desktop workstation that combines all three — an AI Agent that understands your intent and intelligently routes tasks to the best tools, while keeping everything editable, transparent, and extensible.
+Pokeshrimp is a local-first creative workstation built around one idea:
 
-### Core Principles
+**humans should not need to memorize CLIs, but agents should be able to use them fluently.**
 
-- **Natural language drives everything.** Describe what you want in plain language. The Agent handles tool selection, prompt engineering, and execution orchestration.
+Instead of forcing users to jump between chat tools, ComfyUI graphs, shell commands, and desktop folders, Pokeshrimp puts an agent in the middle:
 
-- **Everything is editable.** Every generated result comes with its "source code" — parameters, prompts, workflow JSON, SVG code. Modify and re-render instantly.
+- the desktop app provides a chat-first interface
+- the agent runtime decides which tools to call
+- skills teach the agent how to use external tools
+- every workflow stays editable because it is backed by files, commands, and structured config
 
-- **Every capability is a plugin.** Pokeshrimp produces nothing itself. It routes to the best tool via MCP Servers and Skills. New model dropped? Community writes an MCP Server, everyone gets access. Zero code changes.
+The current repository is an early product foundation, not a fully finished creative suite. The desktop shell, agent runtime, session persistence, CLI mode, and skill discovery are already here. More advanced MCP-driven creative tooling is partially scaffolded and still being wired in.
 
-- **Open ecosystem.** All configuration is human-readable files (Markdown, YAML, JSON) — Git-manageable, shareable, hackable. The long-term value is in the community-contributed Skills and MCP Servers, not our code.
+## Why This Project
 
----
+Image and video creation tools are increasingly exposing CLI and API surfaces: ComfyUI, FFmpeg, rembg, ImageMagick, custom MCP servers, and many internal scripts.
+
+That is powerful, but fragmented:
+
+- GUI tools are easier for humans but harder to automate
+- raw CLI tools are easy for agents but unfriendly for most creators
+- cloud agent products hide too much of the execution layer
+
+Pokeshrimp is meant to bridge that gap with a desktop-native, inspectable workflow:
+
+- chat to describe intent
+- skills to encode tool knowledge
+- local execution for files, models, and commands
+- a shared runtime for GUI and CLI entry points
+
+<a id="current-status"></a>
+
+## Current Status
+
+What is implemented in this repo today:
+
+| Area | Current state |
+|------|---------------|
+| Desktop shell | Electron app that boots a local Next.js frontend |
+| Chat UI | Conversation interface, model switcher, settings dialog, recent-session sidebar |
+| Agent runtime | Vercel AI SDK based loop with middleware support |
+| Built-in tools | `read_file`, `write_file`, `list_directory`, `run_command` |
+| Skills | Global + project-level `.skill.md` discovery and slash command suggestions |
+| Persistence | SQLite-backed sessions and messages |
+| CLI mode | Terminal REPL using the same core agent runtime |
+| Config system | Global, project, and local JSON config merge |
+
+What exists but should still be treated as work in progress:
+
+| Area | Notes |
+|------|-------|
+| MCP integration | Client and adapter layers exist, but MCP tools are not yet fully registered into the default runtime path |
+| Preview / output workflow | Store and UI scaffolding exist, but the right-side creative inspector is not yet fully connected in the main screen |
+| Hooks / advanced automation | Config schema and execution helpers exist, but this is not yet a finished end-user workflow |
+| Permission UX | Allow/deny policy wiring exists in config, but there is no full interactive approval UI yet |
+
+<a id="quick-start"></a>
 
 ## Quick Start
 
@@ -45,8 +103,9 @@ Pokeshrimp is a desktop workstation that combines all three — an AI Agent that
 | Node.js | 20+ |
 | npm | 9+ |
 | Git | 2.x |
+| macOS | Recommended for the current Electron packaging setup |
 
-### Install from Source
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/HuangYuChuh/Pokeshrimp.git
@@ -54,213 +113,275 @@ cd Pokeshrimp
 npm install
 ```
 
-### Development
+### 2. Start the desktop app
 
 ```bash
-# Start Next.js dev server
 npm run dev
-
-# Launch Electron shell (in another terminal)
-npm run dev:electron
 ```
 
-### Build
+This starts Electron, and Electron launches the local Next.js development server on port `3099`.
+
+### 3. Or run the web UI only
 
 ```bash
-# Build for production
-npm run build
-
-# Package as desktop app
-npm run package
+npm run dev:web
 ```
 
+### 4. Or run the CLI mode
+
+```bash
+npm run cli
+```
+
+The CLI uses the same core runtime, skill loading, and config system as the desktop app.
+
+## First-Run Setup
+
+You need at least one API key before chatting with the agent.
+
+### Option A: use the Settings dialog
+
+Open the desktop app, click `Settings`, then save your API key and default model.
+
+### Option B: write the config file manually
+
+Create `~/.visagent/config.json`:
+
+```json
+{
+  "defaultModel": "claude-sonnet",
+  "apiKeys": {
+    "anthropic": "sk-ant-...",
+    "openai": "sk-..."
+  }
+}
+```
+
+Minimal CLI-only setup also works through environment variables:
+
+```bash
+export ANTHROPIC_API_KEY="sk-ant-..."
+export OPENAI_API_KEY="sk-..."
+```
+
+<a id="configuration"></a>
+
+## Configuration
+
+Pokeshrimp currently loads configuration in this order:
+
+1. `~/.visagent/config.json`
+2. `<project>/.visagent/config.json`
+3. `<project>/.visagent/config.local.json`
+
+Later files override earlier ones.
+
+### Example config
+
+```json
+{
+  "defaultModel": "claude-sonnet",
+  "apiKeys": {
+    "anthropic": "sk-ant-...",
+    "openai": "sk-..."
+  },
+  "mcpServers": {
+    "comfyui": {
+      "command": "node",
+      "args": ["./servers/comfyui.js"],
+      "env": {},
+      "transport": "stdio",
+      "enabled": true
+    }
+  },
+  "permissions": {
+    "alwaysAllow": ["pwd", "ls *"],
+    "alwaysDeny": ["rm -rf *"],
+    "alwaysAsk": []
+  }
+}
+```
+
+### Current on-disk paths
+
+| Purpose | Path |
+|---------|------|
+| Global config | `~/.visagent/config.json` |
+| Global skills | `~/.visagent/skills/` |
+| Project config | `.visagent/config.json` |
+| Project local override | `.visagent/config.local.json` |
+| Project skills | `.visagent/skills/` |
+| Session database | `~/.pokeshrimp/data.db` |
+
+Note: the current codebase uses `.visagent` for config/skills and `.pokeshrimp` for SQLite session storage. That split is intentional in the code today, even if it may be unified later.
+
+<a id="skills"></a>
+
+## Skills
+
+Skills are Markdown files that teach the agent how to use specific workflows or tools. They are discovered from:
+
+```bash
+~/.visagent/skills/
+.visagent/skills/
+```
+
+Project-level skills override global skills with the same command name.
+
+### Example skill
+
+```markdown
 ---
+name: Remove Background
+command: /remove-bg
+description: Remove the background from an image with rembg
+requiredTools:
+  - run_command
+inputParams:
+  - name: input
+    type: string
+    description: Path to the source image
+outputs:
+  - type: image
+    description: Background-removed PNG
+---
+
+Use `rembg` to remove the background from the input image.
+
+Example:
+`rembg i input.jpg output.png`
+```
+
+### What skills do in the current app
+
+- they are loaded into the system prompt
+- they appear in slash-command suggestions when you type `/`
+- they give the agent a structured way to discover reusable workflows
+
+What they do not do yet by themselves:
+
+- they do not automatically register custom executable code
+- they do not bypass tool permissions
+- they do not replace the need for an actual CLI or MCP backend
+
+## Built-in Tools
+
+The default runtime currently exposes these built-in tools:
+
+| Tool | Purpose |
+|------|---------|
+| `read_file` | Read a file from disk |
+| `write_file` | Write a file to disk |
+| `list_directory` | Inspect directory contents |
+| `run_command` | Execute a shell command |
+
+These are enough for early file-based automation and CLI orchestration.
+
+## CLI Mode
+
+Run:
+
+```bash
+npm run cli
+```
+
+Example session:
+
+```text
+Pokeshrimp CLI v0.1.0
+Human use GUI, Agent use CLI, Create use Pokeshrimp.
+
+you > list files in this folder
+pokeshrimp > I'll inspect the current directory first...
+```
+
+CLI mode is useful when you want the Pokeshrimp runtime without opening the desktop shell.
+
+<a id="architecture"></a>
 
 ## Architecture
 
-Pokeshrimp uses a three-layer architecture with clear separation of concerns:
+### Runtime layout
 
-| Layer | Responsibility | Technology |
-|-------|---------------|------------|
-| **UI Layer** | Rendering, chat interface, preview & editing | Electron + Next.js + React + TypeScript |
-| **Agent Core** | Intent understanding, LLM calls, tool routing, Skill engine | Vercel AI SDK + MCP Client |
-| **MCP Capability Layer** | All image/video processing capabilities as standardized servers | MCP TypeScript SDK |
-
-### Electron as Pure Shell
-
-Electron only does three things: create the window, fork the Next.js standalone server, and provide Context Bridge. All business logic runs in Next.js App Router with API Routes as the backend.
-
-### Three-Column Layout
-
-| Panel | Width | Purpose |
-|-------|-------|---------|
-| Sidebar | 260px | Task history, Skill library, MCP status, model switching |
-| Chat | Flex | Core interaction — messages, tool calls, result thumbnails |
-| Preview/Edit | 600px | Image preview, parameter editing, workflow details, output management |
-
----
-
-## Core Capabilities
-
-### Agent & Interaction
-
-| Feature | Description |
-|---------|-------------|
-| Multi-model support | Claude, GPT, Gemini, DeepSeek — switch with one click |
-| Natural language routing | Describe your intent, Agent picks the right tools |
-| Editable artifacts | Every output includes modifiable source (params, prompts, SVG, etc.) |
-| Session persistence | Long tasks survive app restarts, with full history |
-
-### Extensibility
-
-| Feature | Description |
-|---------|-------------|
-| MCP Servers | Standardized protocol for image/video capabilities |
-| Skills (Markdown) | Define multi-step creative workflows as readable Markdown files |
-| CLI Skills | Teach the Agent to use command-line tools (ffmpeg, rembg, imagemagick) via Markdown docs |
-| Slash Commands | Every registered Skill gets a `/command` for quick access |
-| Hooks | `post-generate`, `pre-export`, `on-approve` — custom scripts at key events |
-
-### Creative Workflows
-
-| Feature | Description |
-|---------|-------------|
-| Skill Pipeline | Chain Skills like Unix pipes: `/remove-bg → /upscale → /watermark → /export` |
-| Designfile | Declare asset dependency graphs (like Makefile for brand assets) |
-| Version Control | Content-addressed asset history — rollback, diff, branch explorations |
-| Two-tier Scoping | Global Skills (`~/.pokeshrimp/skills/`) + Project Skills (`.pokeshrimp/skills/`) |
-
----
-
-## MCP Servers
-
-### Built-in (Planned)
-
-| Server | Capability | Priority |
-|--------|-----------|----------|
-| comfyui-server | Run custom ComfyUI workflows locally | P0 |
-| image-gen-server | Cloud image generation APIs (FLUX, SD, etc.) | P0 |
-| bg-remove-server | Intelligent background removal | P0 |
-| filesystem-server | Local file system access | P0 |
-| web-search-server | Web search via Brave Search API | P0 |
-| video-gen-server | Video generation APIs (Kling, Runway, etc.) | P1 |
-| ffmpeg-server | Video editing, transcoding, compositing | P1 |
-| svg-editor-server | SVG creation and editing | P1 |
-| browser-server | Browser automation, web scraping | P1 |
-| image-upscale-server | Image super-resolution | P2 |
-
-### Custom MCP Servers
-
-Developing a custom MCP Server is intentionally simple:
-
-1. Write a Node.js or Python script using the official MCP SDK
-2. Define your tool functions
-3. Add one line of JSON to the config file
-4. Restart — done
-
----
-
-## Tech Stack
-
-| Decision | Choice | Why |
-|----------|--------|-----|
-| Desktop framework | Electron | JS/TS full-stack unity; mature ecosystem |
-| Frontend | React + TypeScript | Largest ecosystem; Vercel AI SDK official support |
-| LLM layer | Vercel AI SDK | Model-agnostic; built-in MCP integration |
-| Tool protocol | MCP TypeScript SDK | Industry standard; massive ecosystem reuse |
-| Database | SQLite | Lightweight embedded; structured queries |
-| Styling | Tailwind CSS v4 | Utility-first; fast iteration |
-| License | Apache 2.0 | Patent protection; community-friendly; MCP ecosystem aligned |
-
----
-
-## Project Structure
-
-```
-pokeshrimp/
-├── electron/                # Electron main process
-│   ├── main.ts              # Window creation, Next.js server fork
-│   └── preload.ts           # Context Bridge
-├── src/
-│   ├── app/                 # Next.js App Router
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   └── globals.css
-│   └── components/          # React components
-│       ├── sidebar.tsx
-│       ├── chat-panel.tsx
-│       └── preview-panel.tsx
-├── CLAUDE.md                # Project conventions for AI-assisted dev
-├── LICENSE                  # Apache 2.0
-├── package.json
-└── tsconfig.json
+```text
+Electron shell
+  -> Next.js app
+  -> API routes
+  -> agent runtime
+  -> tool registry
+  -> local filesystem / shell / future MCP servers
 ```
 
----
+### Source layout
+
+```text
+src/
+├── app/                     # Next.js app router and API routes
+├── components/              # Desktop UI components
+├── cli/                     # Terminal entry point
+├── core/
+│   ├── agent/               # Runtime loop, middleware, sub-agent scaffolding
+│   ├── ai/                  # Model provider and AI tool bridge
+│   ├── config/              # Config schema and loader
+│   ├── hooks/               # Hook execution primitives
+│   ├── mcp/                 # MCP client and adapter layer
+│   ├── permission/          # Command permission matching
+│   ├── session/             # SQLite session manager
+│   ├── skill/               # Skill parser and loader
+│   └── tool/                # Tool types, registry, executor, built-ins
+├── lib/                     # Compatibility wrappers used by UI/API routes
+└── hooks/                   # React hooks
+
+electron/                    # Electron main/preload
+```
+
+### Tech stack
+
+| Layer | Technology |
+|------|------------|
+| Desktop shell | Electron |
+| Frontend | Next.js 15 + React 19 |
+| Agent runtime | Vercel AI SDK |
+| Model providers | Anthropic + OpenAI |
+| Persistence | SQLite via `better-sqlite3` |
+| Validation | Zod |
+| Language | TypeScript |
 
 ## Roadmap
 
-### Phase 0 — Validate Core Hypothesis
-> Before writing product code, validate "context in → Agent routes tools → quality output" using Claude Desktop + ComfyUI on real tasks.
+Near-term work implied by the current codebase:
 
-### Phase 1 — MVP
-- Electron + Next.js desktop shell
-- Chat UI + image preview + parameter editing
-- Vercel AI SDK with Claude support
-- MCP Client + 1 core MCP Server (ComfyUI) + filesystem
-- First Skill implementation
-- Session persistence (SQLite)
-
-### Phase 2 — Core Experience
-- Slash Commands + full Skill system (global + project-level)
-- CLI Skill mechanism
-- Multi-model switching
-- Version management (history, diff, rollback)
-- More MCP Servers
-
-### Phase 3 — Ecosystem
-- MCP Server plugin registry & marketplace
-- Designfile engine + Skill pipeline composition
-- Hooks mechanism
-- Community contribution workflow
-- Enterprise edition exploration
-
----
+- finish MCP tool registration in the default runtime
+- connect the preview/output/editor panel to real creative results
+- improve session restore and message replay in the desktop UI
+- expose hooks and automation in a user-facing workflow
+- unify config, storage, and naming conventions
 
 ## Contributing
 
-We welcome contributions! Here's how to get started:
+Contributions are welcome, especially in these areas:
+
+- skill design and reusable `.skill.md` examples
+- MCP integration and creative tool adapters
+- Electron and Next.js product polish
+- documentation and onboarding
+
+Basic workflow:
 
 ```bash
-# Fork and clone
 git clone https://github.com/YOUR_USERNAME/Pokeshrimp.git
 cd Pokeshrimp
 npm install
-
-# Development
 npm run dev
-
-# Build and test before submitting PR
-npm run build
 ```
 
-The easiest ways to contribute:
-- **Write a Skill** — Create a Markdown file that teaches the Agent a new creative workflow
-- **Build an MCP Server** — Wrap an image/video tool as a standardized MCP Server
-- **Report bugs** — Open an issue with steps to reproduce
-- **Improve docs** — Fix typos, add examples, translate
+Before opening a PR:
 
----
-
-## Community
-
-- [GitHub Issues](https://github.com/HuangYuChuh/Pokeshrimp/issues) — Bug reports and feature requests
-- [GitHub Discussions](https://github.com/HuangYuChuh/Pokeshrimp/discussions) — Questions and ideas
-
----
+```bash
+npm run build
+npm run build:electron
+```
 
 ## License
 
-Pokeshrimp is open source under the [Apache License 2.0](./LICENSE).
-
-Copyright 2026 科林 KELIN
+Apache License 2.0. See [LICENSE](./LICENSE).
