@@ -3,6 +3,9 @@ import type { ToolRegistry } from "@/core/tool/registry";
 import type { ToolContext } from "@/core/tool/types";
 import type { Middleware } from "./middleware";
 import { runAgent } from "./runtime";
+import crypto from "crypto";
+import path from "path";
+import fs from "fs";
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -12,9 +15,9 @@ export interface SubAgentConfig {
   registry: ToolRegistry;
   context: ToolContext;
   middlewares?: Middleware[];
-  /** Tool names the sub-agent is allowed to use. If empty, all tools are available. */
+  /** Tool names the sub-agent is allowed to use. Empty = all tools. */
   toolWhitelist?: string[];
-  /** Max iterations for the sub-agent (default 32) */
+  /** Max iterations (default 32) */
   maxIterations?: number;
 }
 
@@ -22,39 +25,57 @@ export interface SubAgentResult {
   text: string;
   success: boolean;
   error?: string;
+  agentId: string;
 }
 
 // ─── Constants ───────────────────────────────────────────────
 
 const MAX_CONCURRENT = 3;
-const MAX_DEPTH = 1; // sub-agents cannot spawn sub-agents
 
 let activeCount = 0;
 
 // ─── Sub-Agent ───────────────────────────────────────────────
 
 /**
- * Spawn a sub-agent to handle a task. The sub-agent uses the same
- * AgentRuntime but with a filtered tool set.
+ * Spawn a sub-agent with fully isolated context.
  *
- * Rules (frozen):
- * - Max concurrent sub-agents: 3
- * - Max nesting depth: 1 (no recursive spawning)
- * - Sub-agents cannot use spawn_agent tool
+ * Isolation guarantees:
+ * - Own conversation history (starts empty, only the task prompt)
+ * - Own tool registry (filtered by whitelist, no spawn_agent)
+ * - Own working directory (temp dir under parent's cwd)
+ * - Own session ID (not shared with parent)
+ * - Own system prompt (appended with sub-agent instructions)
+ *
+ * Frozen rules:
+ * - Max concurrent: 3
+ * - Max depth: 1 (sub-agents cannot spawn sub-agents)
  */
 export async function spawnSubAgent(
   config: SubAgentConfig,
   prompt: string,
 ): Promise<SubAgentResult> {
+  const agentId = crypto.randomUUID().slice(0, 8);
+
   if (activeCount >= MAX_CONCURRENT) {
     return {
       text: "",
       success: false,
-      error: `Max concurrent sub-agents (${MAX_CONCURRENT}) reached. Wait for others to finish.`,
+      error: `Max concurrent sub-agents (${MAX_CONCURRENT}) reached.`,
+      agentId,
     };
   }
 
-  // Create a filtered registry
+  // Create isolated working directory
+  const isolatedCwd = path.join(config.context.cwd, ".visagent", ".agents", agentId);
+  fs.mkdirSync(isolatedCwd, { recursive: true });
+
+  // Create isolated context — no shared state with parent
+  const isolatedContext: ToolContext = {
+    sessionId: `subagent-${agentId}`,
+    cwd: isolatedCwd,
+  };
+
+  // Create filtered registry — no recursive spawning
   const filteredRegistry = createFilteredRegistry(
     config.registry,
     config.toolWhitelist,
@@ -68,13 +89,17 @@ export async function spawnSubAgent(
     const stream = runAgent(
       {
         model: config.model,
-        systemPrompt: config.systemPrompt + "\n\nYou are a sub-agent. Focus only on the delegated task. Be concise.",
+        systemPrompt:
+          config.systemPrompt +
+          "\n\nYou are a sub-agent (ID: " + agentId + "). " +
+          "Focus only on the delegated task. Be concise. " +
+          "Your working directory is isolated — files you create won't affect other agents.",
         registry: filteredRegistry,
-        context: config.context,
+        context: isolatedContext,
         middlewares: config.middlewares,
         maxIterations: config.maxIterations ?? 32,
       },
-      [{ role: "user", content: prompt }],
+      [{ role: "user" as const, content: prompt }],
       {
         async onFinish({ text }) {
           resultText = text;
@@ -87,15 +112,22 @@ export async function spawnSubAgent(
       // drain
     }
 
-    return { text: resultText, success: true };
+    return { text: resultText, success: true, agentId };
   } catch (err) {
     return {
       text: "",
       success: false,
       error: err instanceof Error ? err.message : String(err),
+      agentId,
     };
   } finally {
     activeCount--;
+    // Clean up isolated directory
+    try {
+      fs.rmSync(isolatedCwd, { recursive: true, force: true });
+    } catch {
+      // best effort cleanup
+    }
   }
 }
 
@@ -112,7 +144,6 @@ function createFilteredRegistry(
     // Never allow sub-agents to spawn more sub-agents
     if (tool.name === "spawn_agent") continue;
 
-    // Apply whitelist if provided
     if (whitelist && whitelist.length > 0 && !whitelist.includes(tool.name)) {
       continue;
     }
