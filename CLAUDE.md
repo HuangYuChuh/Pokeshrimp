@@ -1,32 +1,51 @@
 # Pokeshrimp
 
-AI-powered image & video creative workstation — a super router for visual creation tools.
+AI-powered image & video creative workstation — a CLI orchestrator for visual creation tools.
+
+**Core philosophy**: Humans use GUI, Agent uses CLI. The Agent orchestrates image/video creation tools through their CLI interfaces.
+
+## Design Principles
+
+1. **Minimal + Extensible** — Least code, most flexibility. No heavy frameworks.
+2. **CLI is the primary tool channel** — Image tools are called via shell commands, not MCP.
+3. **Skill files are the ecosystem** — A .skill.md file teaches the Agent a new CLI tool. No code needed.
+4. **Middleware is the extension point** — Core loop never changes. All behavior changes go through middleware.
 
 ## Tech Stack
 
 - **Desktop**: Electron (pure shell)
 - **Frontend**: Next.js App Router + React 19 + TypeScript
-- **Styling**: CSS Variables + Tailwind CSS v4
+- **Styling**: shadcn/ui + Tailwind CSS v4
 - **LLM**: Vercel AI SDK (multi-model support)
-- **Tool Protocol**: MCP TypeScript SDK
+- **Agent**: Self-built AgentRuntime + Middleware Chain
 - **Database**: SQLite via better-sqlite3
 - **Schema Validation**: Zod
 - **License**: Apache 2.0
 
 ## Architecture
 
-**Core + Shell** pattern — `src/core/` is framework-agnostic business logic, GUI and CLI are consumers.
+**AgentRuntime + Middleware Chain** — inspired by Claude Code (loop), DeerFlow (middleware), OpenClaw (CLI approval).
 
-- `src/core/` — Framework-agnostic core (Tool system, Permission, Hooks, Config, MCP, Skill, Session, AI)
-- `src/app/` — Next.js App Router (thin API route wrappers over core/)
-- `src/components/` — React client components (UI only)
-- `src/lib/` — Compatibility shims (re-exports from core/ for API routes)
-- `electron/` — Main process (window creation, Next.js server fork)
-- `.visagent/` — Project-level config, skills, hooks (Git-managed)
+- `src/core/agent/` — AgentRuntime (core loop), Middleware, Sub-agent
+- `src/core/tool/` — Tool interface, Registry, Executor, Builtin tools (run_command etc.)
+- `src/core/skill/` — Skill engine (.skill.md parsing + prompt injection)
+- `src/core/permission/` — CLI command approval (allow/deny/ask)
+- `src/core/config/` — Three-level config + Zod validation
+- `src/core/session/` — SQLite persistence
+- `src/core/ai/` — LLM provider abstraction
+- `src/app/` — Next.js GUI (thin wrapper over core/)
+- `src/lib/` — Compatibility shims
+- `.visagent/skills/` — Skill files (the ecosystem)
 
-**Key rule**: `src/core/` MUST NOT import `next`, `react`, or `electron`.
+**Frozen rules** (do not change):
+1. Agent loop is ONE function: `AgentRuntime.run()`. No other loop mechanisms.
+2. Extensions only through middleware. No business logic in the core loop.
+3. CLI is the primary tool channel. No MCP servers for image tools.
+4. New tool integration = write a .skill.md. No code required.
+5. No Python dependencies. Full-stack TypeScript.
+6. `src/core/` MUST NOT import `next`, `react`, or `electron`.
 
-See [docs/architecture.md](docs/architecture.md) for full technical architecture documentation.
+See [docs/01-设计哲学与技术架构.md](docs/01-设计哲学与技术架构.md) for full technical architecture documentation (gitignored, internal only).
 
 ## Development
 
