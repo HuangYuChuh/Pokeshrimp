@@ -11,7 +11,8 @@
     "build:electron": "tsc -p tsconfig.electron.json",
     "start": "next start",
     "lint": "next lint",
-    "package": "npm run build && npm run build:electron && electron-builder --mac"
+    "package": "npm run build && npm run build:electron && electron-builder --mac",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.0",
@@ -45,6 +46,7 @@
     "@types/react-dom": "^19.1.0",
     "electron": "^35.1.0",
     "electron-builder": "^25.1.0",
+    "husky": "^9.1.7",
     "postcss": "^8.5.0",
     "tailwindcss": "^4.1.0",
     "typescript": "^5.8.0"
