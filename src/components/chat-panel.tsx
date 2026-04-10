@@ -29,7 +29,9 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
 
   const currentModel = MODEL_OPTIONS.find((m) => m.id === modelId);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
+  const skills = useSkills();
+
+  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, error } =
     useChat({
       api: "/api/chat",
       body: { modelId },
@@ -80,6 +82,13 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
     [input, isLoading, handleSubmit],
   );
 
+  const handleSelectSkill = useCallback(
+    (command: string) => {
+      setInput(command + " ");
+    },
+    [setInput],
+  );
+
   const isEmpty = messages.length === 0;
 
   return (
@@ -108,9 +117,11 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
             modelLabel={currentModel?.label ?? "Model"}
             modelId={modelId}
             onModelChange={onModelChange}
+            skills={skills}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onSubmit={handleSubmit}
+            onSelectSkill={handleSelectSkill}
           />
         </div>
       ) : (
@@ -177,9 +188,11 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
             modelLabel={currentModel?.label ?? "Model"}
             modelId={modelId}
             onModelChange={onModelChange}
+            skills={skills}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onSubmit={handleSubmit}
+            onSelectSkill={handleSelectSkill}
           />
         </>
       )}
@@ -187,36 +200,92 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
   );
 }
 
+/* ─── Skill Data ─── */
+
+interface SkillInfo {
+  name: string;
+  command: string;
+  description: string;
+}
+
+function useSkills() {
+  const [skills, setSkills] = useState<SkillInfo[]>([]);
+  useEffect(() => {
+    fetch("/api/skills")
+      .then((r) => (r.ok ? r.json() : { skills: [] }))
+      .then((d) => setSkills(d.skills ?? []))
+      .catch(() => {});
+  }, []);
+  return skills;
+}
+
 /* ─── Input Area ─── */
 
 import { forwardRef } from "react";
+import { Slash } from "lucide-react";
 
 interface InputAreaProps {
   input: string;
   isLoading: boolean;
   modelLabel: string;
   modelId: string;
+  skills: SkillInfo[];
   onModelChange: (id: string) => void;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSelectSkill: (command: string) => void;
 }
 
 const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
   function InputArea(
-    { input, isLoading, modelLabel, modelId, onModelChange, onChange, onKeyDown, onSubmit },
+    { input, isLoading, modelLabel, modelId, skills, onModelChange, onChange, onKeyDown, onSubmit, onSelectSkill },
     ref
   ) {
+    // Show skill menu when input starts with "/" (no space yet)
+    const slashQuery = input.startsWith("/") && !input.includes(" ") ? input.slice(1).toLowerCase() : null;
+    const filteredSkills = slashQuery !== null
+      ? skills.filter((s) =>
+          s.command.toLowerCase().includes(slashQuery) ||
+          s.name.toLowerCase().includes(slashQuery)
+        )
+      : [];
+    const isSlashMode = slashQuery !== null && filteredSkills.length > 0;
+
     return (
       <div className="shrink-0 px-6 pb-6">
-        <form onSubmit={onSubmit} className="mx-auto max-w-[680px]">
+        <form onSubmit={onSubmit} className="relative mx-auto max-w-[680px]">
+          {/* Slash command popup */}
+          {isSlashMode && (
+            <div className="absolute bottom-full left-0 mb-2 w-full rounded-xl border border-border bg-popover p-1 shadow-lg">
+              {filteredSkills.map((skill) => (
+                <button
+                  key={skill.command}
+                  type="button"
+                  className="nodrag flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent"
+                  onClick={() => {
+                    onSelectSkill(skill.command);
+                  }}
+                >
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-muted text-muted-foreground">
+                    <Slash size={11} strokeWidth={2} />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-[13px] font-medium text-foreground">{skill.command}</div>
+                    <div className="truncate text-[12px] text-muted-foreground">{skill.description}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             <textarea
               ref={ref}
               value={input}
               onChange={onChange}
               onKeyDown={onKeyDown}
-              placeholder="描述你的需求..."
+              placeholder="描述你的需求，输入 / 查看可用技能..."
               rows={1}
               disabled={isLoading}
               className="selectable nodrag block w-full resize-none bg-transparent px-4 pt-4 pb-2 text-[14px] leading-6 text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:opacity-50"
