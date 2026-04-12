@@ -128,9 +128,10 @@ function OutputContent({
     <ScrollArea className="h-full">
       <div className="p-4">
         {files.map((file, i) => (
-          <div
+          <button
             key={i}
-            className="mb-0.5 flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 transition-colors hover:bg-muted"
+            type="button"
+            className="mb-0.5 flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
               {file.type}
@@ -138,7 +139,7 @@ function OutputContent({
             <span className="flex-1 truncate text-sm text-foreground">
               {file.name}
             </span>
-          </div>
+          </button>
         ))}
       </div>
     </ScrollArea>

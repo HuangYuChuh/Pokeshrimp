@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, X } from "lucide-react";
 import { useAppState, useAppDispatch } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,15 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
     [dispatch],
   );
 
+  const handleDeleteSession = useCallback(
+    (e: React.MouseEvent, id: string) => {
+      e.stopPropagation();
+      fetch(`/api/sessions/${id}`, { method: "DELETE" }).catch(() => {});
+      dispatch({ type: "REMOVE_SESSION", id });
+    },
+    [dispatch],
+  );
+
   return (
     <aside className="drag flex h-full w-[260px] shrink-0 flex-col bg-sidebar">
       {/* macOS traffic light space */}
@@ -77,18 +86,29 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
       <ScrollArea className="flex-1">
         <div className="flex flex-col gap-px px-3">
           {sessions.map((session) => (
-            <button
+            <div
               key={session.id}
-              onClick={() => handleSelectSession(session.id)}
               className={cn(
-                "nodrag w-full truncate rounded-lg px-3 py-1.5 text-left text-[13px] transition-colors",
+                "nodrag group relative flex items-center rounded-lg transition-colors",
                 session.id === currentSessionId
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
               )}
             >
-              {session.title}
-            </button>
+              <button
+                onClick={() => handleSelectSession(session.id)}
+                className="w-full truncate px-3 py-1.5 text-left text-[13px]"
+              >
+                {session.title}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => handleDeleteSession(e, session.id)}
+                className="absolute right-1.5 hidden h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-foreground group-hover:flex"
+              >
+                <X size={12} />
+              </button>
+            </div>
           ))}
         </div>
       </ScrollArea>

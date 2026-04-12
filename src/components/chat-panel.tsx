@@ -8,7 +8,7 @@ import { ChevronDown as ChevronDownIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowUp, ChevronDown } from "lucide-react";
-import { MODEL_OPTIONS } from "./model-options";
+import { MODEL_OPTIONS } from "@/core/ai/provider";
 import { ApprovalCard, parseApprovalEvents } from "@/components/approval-card";
 import {
   DropdownMenu,
@@ -130,7 +130,7 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
     [setInput],
   );
 
-  const isEmpty = messages.length === 0;
+  const isEmpty = messages.length === 0 && !isLoading;
 
   return (
     <div className="flex min-w-0 flex-1 flex-col bg-background">

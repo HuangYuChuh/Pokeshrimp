@@ -31,9 +31,10 @@ export const writeFileTool: Tool = {
 
   async call(input: unknown, context: ToolContext): Promise<ToolResult> {
     const { path: filePath, content } = input as z.infer<typeof inputSchema>;
-    const resolved = path.isAbsolute(filePath)
-      ? filePath
-      : path.resolve(context.cwd, filePath);
+    const resolved = path.resolve(context.cwd, filePath);
+    if (resolved !== context.cwd && !resolved.startsWith(context.cwd + path.sep)) {
+      return { success: false, data: null, error: `Path "${filePath}" is outside the working directory` };
+    }
     try {
       fs.mkdirSync(path.dirname(resolved), { recursive: true });
       fs.writeFileSync(resolved, content, "utf-8");

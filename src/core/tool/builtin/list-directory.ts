@@ -26,9 +26,10 @@ export const listDirectoryTool: Tool = {
 
   async call(input: unknown, context: ToolContext): Promise<ToolResult> {
     const { path: dirPath } = input as z.infer<typeof inputSchema>;
-    const resolved = path.isAbsolute(dirPath)
-      ? dirPath
-      : path.resolve(context.cwd, dirPath);
+    const resolved = path.resolve(context.cwd, dirPath);
+    if (resolved !== context.cwd && !resolved.startsWith(context.cwd + path.sep)) {
+      return { success: false, data: null, error: `Path "${dirPath}" is outside the working directory` };
+    }
     try {
       const entries = fs.readdirSync(resolved, { withFileTypes: true });
       const items = entries.map((entry) => ({

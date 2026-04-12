@@ -46,6 +46,7 @@ export type AppAction =
   | { type: "SET_SESSIONS"; sessions: Session[] }
   | { type: "SET_CURRENT_SESSION"; id: string | null }
   | { type: "ADD_SESSION"; session: Session }
+  | { type: "REMOVE_SESSION"; id: string }
   | { type: "SET_PREVIEW_TAB"; tab: PreviewTab }
   | { type: "SET_PREVIEW_CONTENT"; content: PreviewContent }
   | { type: "SET_EDITOR_PARAMS"; params: string }
@@ -76,6 +77,15 @@ function appReducer(state: AppState, action: AppAction): AppState {
         sessions: [action.session, ...state.sessions],
         currentSessionId: action.session.id,
       };
+    case "REMOVE_SESSION": {
+      const filtered = state.sessions.filter((s) => s.id !== action.id);
+      return {
+        ...state,
+        sessions: filtered,
+        currentSessionId:
+          state.currentSessionId === action.id ? null : state.currentSessionId,
+      };
+    }
     case "SET_PREVIEW_TAB":
       return { ...state, previewTab: action.tab };
     case "SET_PREVIEW_CONTENT":

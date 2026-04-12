@@ -32,10 +32,12 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
     resolved ? mapDecisionToState(resolved.decision, resolved.reason) : "pending",
   );
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleDecision = useCallback(
     async (decision: "allow-once" | "always-allow" | "deny") => {
       setLoading(true);
+      setError(null);
       try {
         const res = await fetch("/api/approval", {
           method: "POST",
@@ -56,10 +58,12 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
             setState("expired");
           } else {
             console.error("Approval failed:", data);
+            setError("Failed to send approval — server error");
           }
         }
       } catch (err) {
         console.error("Approval request failed:", err);
+        setError("Failed to send approval — check your connection");
       } finally {
         setLoading(false);
       }
@@ -104,28 +108,33 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
           </div>
 
           {isPending ? (
-            <div className="mt-3 flex items-center gap-2">
-              <button
-                onClick={() => handleDecision("allow-once")}
-                disabled={loading}
-                className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-              >
-                Allow Once
-              </button>
-              <button
-                onClick={() => handleDecision("always-allow")}
-                disabled={loading}
-                className="rounded-md border border-border px-3 py-1.5 text-[12px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
-              >
-                Always Allow
-              </button>
-              <button
-                onClick={() => handleDecision("deny")}
-                disabled={loading}
-                className="rounded-md border border-destructive/30 px-3 py-1.5 text-[12px] font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
-              >
-                Deny
-              </button>
+            <div className="mt-3">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleDecision("allow-once")}
+                  disabled={loading}
+                  className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  Allow Once
+                </button>
+                <button
+                  onClick={() => handleDecision("always-allow")}
+                  disabled={loading}
+                  className="rounded-md border border-border px-3 py-1.5 text-[12px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                >
+                  Always Allow
+                </button>
+                <button
+                  onClick={() => handleDecision("deny")}
+                  disabled={loading}
+                  className="rounded-md border border-destructive/30 px-3 py-1.5 text-[12px] font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+                >
+                  Deny
+                </button>
+              </div>
+              {error && (
+                <p className="mt-1.5 text-[11px] text-red-500">{error}</p>
+              )}
             </div>
           ) : (
             <div

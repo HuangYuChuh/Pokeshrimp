@@ -77,17 +77,22 @@ export function parseSkillFile(filePath: string): Skill | null {
   }
 
   const requiredTools = Array.isArray(frontmatter.requiredTools)
-    ? (frontmatter.requiredTools as unknown[]).map((t) => String(t))
+    ? (frontmatter.requiredTools as unknown[]).filter(
+        (t): t is string => typeof t === "string",
+      )
     : [];
 
   const inputParams: SkillInputParam[] = Array.isArray(frontmatter.inputParams)
     ? (frontmatter.inputParams as unknown[])
         .filter(
           (p): p is Record<string, unknown> =>
-            !!p && typeof p === "object" && !Array.isArray(p),
+            !!p &&
+            typeof p === "object" &&
+            !Array.isArray(p) &&
+            typeof (p as Record<string, unknown>).name === "string",
         )
         .map((p) => ({
-          name: String(p.name ?? ""),
+          name: String(p.name),
           type: String(p.type ?? "string"),
           description: toStringOrUndefined(p.description),
           default: toStringOrUndefined(p.default),
@@ -98,10 +103,13 @@ export function parseSkillFile(filePath: string): Skill | null {
     ? (frontmatter.outputs as unknown[])
         .filter(
           (o): o is Record<string, unknown> =>
-            !!o && typeof o === "object" && !Array.isArray(o),
+            !!o &&
+            typeof o === "object" &&
+            !Array.isArray(o) &&
+            typeof (o as Record<string, unknown>).type === "string",
         )
         .map((o) => ({
-          type: String(o.type ?? ""),
+          type: String(o.type),
           description: toStringOrUndefined(o.description),
         }))
     : [];

@@ -285,7 +285,9 @@ export function createLoopDetectionMiddleware(
     async before(toolName, input) {
       const key = `${toolName}:${stableStringify(input)}`;
       history.push(key);
-      if (history.length > LOOP_WINDOW * 4) history.shift();
+      if (history.length > LOOP_WINDOW * 2) {
+        history.splice(0, history.length - LOOP_WINDOW);
+      }
 
       const window = history.slice(-LOOP_WINDOW);
       const occurrences = window.filter((h) => h === key).length;
