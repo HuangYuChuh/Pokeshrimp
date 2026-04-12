@@ -93,6 +93,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
   ) {
     const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
     const [isDragOver, setIsDragOver] = useState(false);
+    const [modelMenuOpen, setModelMenuOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Slash command popup
@@ -307,7 +308,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
                 </button>
               </div>
               <div className="flex items-center gap-2">
-                <DropdownMenu>
+                <DropdownMenu open={modelMenuOpen} onOpenChange={setModelMenuOpen}>
                   <DropdownMenuTrigger className="nodrag flex h-7 items-center gap-1 rounded-lg px-2 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none">
                     {modelLabel}
                     <ChevronDown size={12} />
@@ -315,7 +316,10 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
                   <DropdownMenuContent align="end" sideOffset={8}>
                     <DropdownMenuRadioGroup
                       value={modelId}
-                      onValueChange={onModelChange}
+                      onValueChange={(v) => {
+                        onModelChange(v);
+                        setModelMenuOpen(false);
+                      }}
                     >
                       {MODEL_OPTIONS.map((m) => (
                         <DropdownMenuRadioItem
