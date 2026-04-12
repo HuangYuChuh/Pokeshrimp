@@ -130,7 +130,7 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
     [setInput],
   );
 
-  const isEmpty = messages.length === 0;
+  const isEmpty = messages.length === 0 && !isLoading;
 
   return (
     <div className="flex min-w-0 flex-1 flex-col bg-background">

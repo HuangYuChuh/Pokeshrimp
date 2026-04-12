@@ -26,8 +26,27 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const [saved, setSaved] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
+  const [theme, setThemeState] = useState<"dark" | "light" | "system">("dark");
 
   const isElectron = typeof window !== "undefined" && !!window.pokeshrimp?.auth;
+
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("pokeshrimp-theme") as "dark" | "light" | "system" | null;
+    if (stored) setThemeState(stored);
+  }, []);
+
+  const handleThemeChange = useCallback((value: "dark" | "light" | "system") => {
+    setThemeState(value);
+    localStorage.setItem("pokeshrimp-theme", value);
+    const root = document.documentElement;
+    if (value === "system") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      root.classList.toggle("dark", prefersDark);
+    } else {
+      root.classList.toggle("dark", value === "dark");
+    }
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -134,6 +153,18 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                   {MODEL_OPTIONS.map((m) => (
                     <option key={m.id} value={m.id}>{m.label}</option>
                   ))}
+                </select>
+              </Field>
+
+              <Field label="Theme">
+                <select
+                  value={theme}
+                  onChange={(e) => handleThemeChange(e.target.value as "dark" | "light" | "system")}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="dark">Dark</option>
+                  <option value="light">Light</option>
+                  <option value="system">System</option>
                 </select>
               </Field>
 

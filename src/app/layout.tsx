@@ -17,8 +17,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN" className={cn("dark font-sans", geist.variable)}>
+    <html lang="zh-CN" className={cn("dark font-sans", geist.variable)} suppressHydrationWarning>
       <body className="h-full overflow-hidden">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("pokeshrimp-theme");if(t==="light")document.documentElement.classList.remove("dark");else if(t==="system"&&!window.matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.classList.remove("dark")}catch(e){}})()`,
+          }}
+        />
         <TooltipProvider>{children}</TooltipProvider>
       </body>
     </html>
