@@ -4,6 +4,9 @@
   "description": "Pokeshrimp — AI-powered image & video creative workstation",
   "private": true,
   "main": "dist-electron/main.js",
+  "bin": {
+    "pokeshrimp": "./bin/pokeshrimp.js"
+  },
   "scripts": {
     "dev": "npm run build:electron && electron .",
     "dev:web": "next dev --port 3099",
@@ -12,6 +15,7 @@
     "start": "next start",
     "lint": "next lint",
     "package": "npm run build && npm run build:electron && electron-builder --mac",
+    "build:cli": "tsc -p tsconfig.cli.json",
     "cli": "npx tsx src/cli/index.ts",
     "prepare": "husky"
   },
