@@ -6,6 +6,38 @@ import { getConfig, reloadConfig } from "@/core/config/loader";
 
 const GLOBAL_CONFIG_PATH = path.join(os.homedir(), ".visagent", "config.json");
 
+const KNOWN_HOOK_EVENTS = [
+  "session-start",
+  "pre-tool-call",
+  "post-tool-call",
+  "post-generate",
+  "pre-export",
+  "on-error",
+  "on-approve",
+  "session-end",
+];
+
+function discoverConventionHooks(): string[] {
+  const hooksDir = path.join(process.cwd(), ".visagent", "hooks");
+  const found: string[] = [];
+  try {
+    if (!fs.existsSync(hooksDir)) return found;
+    for (const filename of fs.readdirSync(hooksDir)) {
+      if (KNOWN_HOOK_EVENTS.includes(filename)) {
+        const filePath = path.join(hooksDir, filename);
+        try {
+          if (fs.statSync(filePath).isFile()) found.push(filename);
+        } catch {
+          // skip
+        }
+      }
+    }
+  } catch {
+    // skip
+  }
+  return found;
+}
+
 export async function GET() {
   const config = getConfig();
   return NextResponse.json({
@@ -18,6 +50,7 @@ export async function GET() {
       anthropic: !!process.env.ANTHROPIC_API_KEY,
       openai: !!process.env.OPENAI_API_KEY,
     },
+    conventionHooks: discoverConventionHooks(),
   });
 }
 
@@ -44,6 +77,18 @@ export async function PUT(req: Request) {
 
   if (body.defaultModel !== undefined) {
     current.defaultModel = body.defaultModel;
+  }
+
+  if (body.mcpServers !== undefined) {
+    current.mcpServers = body.mcpServers;
+  }
+
+  if (body.hooks !== undefined) {
+    current.hooks = body.hooks;
+  }
+
+  if (body.permissions !== undefined) {
+    current.permissions = body.permissions;
   }
 
   const dir = path.dirname(GLOBAL_CONFIG_PATH);

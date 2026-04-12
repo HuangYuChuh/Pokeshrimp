@@ -7,6 +7,14 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { X } from "lucide-react";
 import { ToolStatusList } from "@/components/tool-status";
+import {
+  McpServersSection,
+  HooksSection,
+  PermissionsSection,
+  type McpServerConfig,
+  type HookEntryConfig,
+  type PermissionConfig,
+} from "@/components/settings-sections";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -17,6 +25,10 @@ interface SettingsData {
   defaultModel: string;
   apiKeys: { anthropic: string; openai: string };
   envKeys?: { anthropic: boolean; openai: boolean };
+  mcpServers?: Record<string, McpServerConfig>;
+  hooks?: Record<string, HookEntryConfig[]>;
+  permissions?: PermissionConfig;
+  conventionHooks?: string[];
 }
 
 export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
@@ -30,6 +42,14 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [oauthConnected, setOauthConnected] = useState(false);
   const [theme, setThemeState] = useState<"dark" | "light" | "system">("dark");
+  const [mcpServers, setMcpServers] = useState<Record<string, McpServerConfig>>({});
+  const [hooks, setHooks] = useState<Record<string, HookEntryConfig[]>>({});
+  const [permissions, setPermissions] = useState<PermissionConfig>({
+    alwaysAllow: [],
+    alwaysDeny: [],
+    alwaysAsk: [],
+  });
+  const [conventionHooks, setConventionHooks] = useState<string[]>([]);
 
   const isElectron = typeof window !== "undefined" && !!window.pokeshrimp?.auth;
 
@@ -82,6 +102,12 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
         setAnthropicKey(data.apiKeys?.anthropic ?? "");
         setOpenaiKey(data.apiKeys?.openai ?? "");
         setDefaultModel(data.defaultModel ?? "claude-sonnet");
+        setMcpServers(data.mcpServers ?? {});
+        setHooks(data.hooks ?? {});
+        setPermissions(
+          data.permissions ?? { alwaysAllow: [], alwaysDeny: [], alwaysAsk: [] },
+        );
+        setConventionHooks(data.conventionHooks ?? []);
       })
       .catch(() => {});
   }, [open]);
@@ -108,6 +134,9 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             anthropic: anthropicKey.includes("****") ? undefined : anthropicKey,
             openai: openaiKey.includes("****") ? undefined : openaiKey,
           },
+          mcpServers,
+          hooks,
+          permissions,
         }),
       });
       setSaved(true);
@@ -117,7 +146,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
     } finally {
       setSaving(false);
     }
-  }, [defaultModel, anthropicKey, openaiKey]);
+  }, [defaultModel, anthropicKey, openaiKey, mcpServers, hooks, permissions]);
 
   const handleOpenAIOAuth = useCallback(async () => {
     if (!window.pokeshrimp?.auth) return;
@@ -299,6 +328,24 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
               <Field label="CLI Tools">
                 <ToolStatusList open={open} />
               </Field>
+
+              <Separator />
+
+              <McpServersSection
+                servers={mcpServers}
+                onChange={setMcpServers}
+              />
+
+              <HooksSection
+                hooks={hooks}
+                conventionHooks={conventionHooks}
+                onChange={setHooks}
+              />
+
+              <PermissionsSection
+                permissions={permissions}
+                onChange={setPermissions}
+              />
 
               <p className="text-[11px] text-muted-foreground/60">
                 Saved to ~/.visagent/config.json

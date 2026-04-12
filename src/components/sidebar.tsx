@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { PanelLeft, Plus, Settings, X } from "lucide-react";
+import { PanelLeft, Plus, Puzzle, Settings, X } from "lucide-react";
 import { useAppState, useAppDispatch } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -16,13 +16,14 @@ interface SidebarProps {
   open: boolean;
   onToggle: () => void;
   onOpenSettings?: () => void;
+  onOpenSkills?: () => void;
 }
 
 /* ---------------------------------------------------------------------------
  * Sidebar
  * --------------------------------------------------------------------------- */
 
-export function Sidebar({ open, onToggle, onOpenSettings }: SidebarProps) {
+export function Sidebar({ open, onToggle, onOpenSettings, onOpenSkills }: SidebarProps) {
   const { sessions, currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
@@ -147,20 +148,34 @@ export function Sidebar({ open, onToggle, onOpenSettings }: SidebarProps) {
         </div>
       </ScrollArea>
 
-      {/* Settings button at bottom with separator */}
-      {onOpenSettings && (
+      {/* Bottom actions with separator */}
+      {(onOpenSettings || onOpenSkills) && (
         <div className="shrink-0 px-3 py-3">
           <Separator className="mb-3 bg-border" />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
-            onClick={onOpenSettings}
-          >
-            <Settings size={15} strokeWidth={1.5} />
-            <span className="truncate">Settings</span>
-          </Button>
+          {onOpenSkills && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
+              onClick={onOpenSkills}
+            >
+              <Puzzle size={15} strokeWidth={1.5} />
+              <span className="truncate">Skills</span>
+            </Button>
+          )}
+          {onOpenSettings && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
+              onClick={onOpenSettings}
+            >
+              <Settings size={15} strokeWidth={1.5} />
+              <span className="truncate">Settings</span>
+            </Button>
+          )}
         </div>
       )}
     </aside>

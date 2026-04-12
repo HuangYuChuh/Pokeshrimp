@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/sidebar";
 import { ChatPanel } from "@/components/chat-panel";
 import { PreviewPanel } from "@/components/preview-panel";
 import { SettingsDialog } from "@/components/settings-dialog";
+import { SkillsManager } from "@/components/skills-manager";
 import { SkillDropOverlay } from "@/components/skill-drop-overlay";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,7 @@ function useMediaQuery(query: string) {
 function HomeInner() {
   const [modelId, setModelId] = useState("claude-sonnet");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [skillsOpen, setSkillsOpen] = useState(false);
   const chatInputRef = useRef<HTMLTextAreaElement>(null);
   const dispatch = useAppDispatch();
 
@@ -218,6 +220,7 @@ function HomeInner() {
           open={sidebarOpen}
           onToggle={toggleSidebar}
           onOpenSettings={() => setSettingsOpen(true)}
+          onOpenSkills={() => setSkillsOpen(true)}
         />
 
         {/* Center: Chat panel */}
@@ -256,6 +259,10 @@ function HomeInner() {
       <SettingsDialog
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+      />
+      <SkillsManager
+        open={skillsOpen}
+        onClose={() => setSkillsOpen(false)}
       />
     </>
   );
