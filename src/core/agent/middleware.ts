@@ -1,7 +1,11 @@
 import { generateText, type CoreMessage, type LanguageModel } from "ai";
 import type { ToolContext, ToolResult } from "@/core/tool/types";
-import { classifyCommand } from "@/core/permission/checker";
+import { classifyCommand, assessRisk } from "@/core/permission/checker";
+import { persistAlwaysAllow, derivePattern } from "@/core/permission/persist";
+import { reloadConfig } from "@/core/config/loader";
 import { HooksEngine, detectGeneratedFiles } from "@/core/hooks/engine";
+import type { ApprovalRequest } from "@/core/permission/approval";
+import crypto from "crypto";
 
 // ─── Middleware Interface ────────────────────────────────────
 //
@@ -185,14 +189,16 @@ export function createSkillInjectionMiddleware(
 
 /**
  * Per docs/01 §3.3: shell command risk analysis + tiered approval.
- * Delegates pattern matching to the permission module so there is a
- * single source of truth for command policy.
  *
- * Behavior:
- *   - "deny" → block the call with the policy reason
- *   - "allow" → pass through silently
- *   - "ask" → currently passes through (the user-prompt UI is a
- *     future phase). Logged so we can wire it later.
+ *   "deny"  → block immediately
+ *   "allow" → pass through silently
+ *   "ask"   → pause execution, prompt the user via ApprovalChannel,
+ *             resume or deny based on their decision
+ *
+ * The "ask" path works by returning a Promise from before() that
+ * does not resolve until the user responds (or the timeout fires).
+ * The runtime and AI SDK are unaware of the pause — they just see
+ * a slow middleware await. This keeps the core loop clean.
  */
 export function createCommandApprovalMiddleware(config: {
   alwaysAllow: string[];
@@ -201,7 +207,7 @@ export function createCommandApprovalMiddleware(config: {
 }): Middleware {
   return {
     name: "CommandApproval",
-    async before(toolName, input) {
+    async before(toolName, input, context?) {
       if (toolName !== "run_command") return { action: "continue" };
       const cmd = (input as { command?: string })?.command ?? "";
 
@@ -217,10 +223,45 @@ export function createCommandApprovalMiddleware(config: {
           reason: `Command blocked by policy: ${cmd}`,
         };
       }
-      // "ask" path is not yet wired to a user-facing prompt. We let
-      // it through for now and rely on alwaysDeny to catch dangerous
-      // commands. To be revisited when the approval UI lands.
-      return { action: "continue" };
+
+      if (decision === "allow") {
+        return { action: "continue" };
+      }
+
+      // decision === "ask" — prompt the user if an approval channel exists
+      const channel = context?.approvalChannel;
+      if (!channel) {
+        // No channel (CLI mode or caller didn't provide one) → allow
+        return { action: "continue" };
+      }
+
+      const req: ApprovalRequest = {
+        id: crypto.randomUUID().slice(0, 12),
+        command: cmd,
+        toolName,
+        riskLevel: assessRisk(cmd),
+        createdAt: Date.now(),
+      };
+
+      try {
+        const response = await channel.request(req);
+
+        if (response.decision === "deny") {
+          return { action: "deny", reason: `User denied: ${cmd}` };
+        }
+
+        if (response.decision === "always-allow") {
+          const pattern = derivePattern(cmd);
+          persistAlwaysAllow(pattern, context?.cwd ?? process.cwd());
+          reloadConfig();
+        }
+
+        // "allow-once" or "always-allow" → continue
+        return { action: "continue" };
+      } catch {
+        // Channel error (timeout, abort, etc.) → deny for safety
+        return { action: "deny", reason: `Approval failed for: ${cmd}` };
+      }
     },
   };
 }

@@ -1,4 +1,5 @@
 import type { PermissionConfig } from "./types";
+import type { RiskLevel } from "./approval";
 
 /**
  * Match a shell command string against a glob pattern.
@@ -43,4 +44,48 @@ export function classifyCommand(
     if (matchCommandPattern(command, pattern)) return "ask";
   }
   return "ask";
+}
+
+// ─── Risk Assessment (display-only) ──────────────────────────
+
+const DANGEROUS_PATTERNS = [
+  /^rm\s/,
+  /^sudo\s/,
+  /^chmod\s/,
+  /^chown\s/,
+  /^mkfs/,
+  /^dd\s/,
+  /\brm\s+-rf\b/,
+  />\s*\/dev\//,
+];
+
+const SAFE_PATTERNS = [
+  /^ls\b/,
+  /^cat\b/,
+  /^head\b/,
+  /^tail\b/,
+  /^echo\b/,
+  /^which\b/,
+  /^pwd$/,
+  /^whoami$/,
+  /^date$/,
+  /^uname\b/,
+  /^wc\b/,
+  /^file\b/,
+  /^stat\b/,
+];
+
+/**
+ * Heuristic risk assessment for display in the approval card.
+ * Does NOT affect the allow/deny decision — purely informational.
+ */
+export function assessRisk(command: string): RiskLevel {
+  const trimmed = command.trim();
+  for (const p of DANGEROUS_PATTERNS) {
+    if (p.test(trimmed)) return "dangerous";
+  }
+  for (const p of SAFE_PATTERNS) {
+    if (p.test(trimmed)) return "safe";
+  }
+  return "moderate";
 }
