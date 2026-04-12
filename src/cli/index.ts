@@ -10,7 +10,7 @@ import type { CoreMessage } from "ai";
 // ─── Setup ───────────────────────────────────────────────────
 
 const config = getConfig();
-const runtime = getRuntime();
+const runtime = await getRuntime();
 
 let model: ReturnType<typeof getModel>;
 try {
