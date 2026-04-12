@@ -14,6 +14,7 @@ interface SettingsDialogProps {
 interface SettingsData {
   defaultModel: string;
   apiKeys: { anthropic: string; openai: string };
+  envKeys?: { anthropic: boolean; openai: boolean };
 }
 
 export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
@@ -112,6 +113,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                   }}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
                 />
+                <EnvKeyHint envAvailable={settings.envKeys?.anthropic} hasConfigKey={!!settings.apiKeys?.anthropic} envVarName="ANTHROPIC_API_KEY" />
               </Field>
 
               <Field label="OpenAI API Key" hint="Required for GPT models">
@@ -125,6 +127,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                   }}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
                 />
+                <EnvKeyHint envAvailable={settings.envKeys?.openai} hasConfigKey={!!settings.apiKeys?.openai} envVarName="OPENAI_API_KEY" />
               </Field>
 
               <p className="text-[11px] text-muted-foreground/60">
@@ -156,4 +159,12 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
       {children}
     </div>
   );
+}
+
+function EnvKeyHint({ envAvailable, hasConfigKey, envVarName }: { envAvailable?: boolean; hasConfigKey: boolean; envVarName: string }) {
+  if (!envAvailable) return null;
+  if (hasConfigKey) {
+    return <p className="mt-1.5 text-[11px] text-muted-foreground">Config key takes priority over env var</p>;
+  }
+  return <p className="mt-1.5 text-[11px] text-emerald-500">Using {envVarName} from environment</p>;
 }

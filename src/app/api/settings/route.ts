@@ -14,6 +14,10 @@ export async function GET() {
       anthropic: maskKey(config.apiKeys?.anthropic),
       openai: maskKey(config.apiKeys?.openai),
     },
+    envKeys: {
+      anthropic: !!process.env.ANTHROPIC_API_KEY,
+      openai: !!process.env.OPENAI_API_KEY,
+    },
   });
 }
 
