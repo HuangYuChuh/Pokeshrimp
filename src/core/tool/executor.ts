@@ -1,16 +1,11 @@
 import type { ToolRegistry } from "@/core/tool/registry";
-import type {
-  ToolContext,
-  ToolExecutionHooks,
-  ToolResult,
-} from "@/core/tool/types";
+import type { ToolContext, ToolResult } from "@/core/tool/types";
 
 export async function executeTool(
   registry: ToolRegistry,
   toolName: string,
   input: unknown,
   context: ToolContext,
-  hooks?: ToolExecutionHooks,
 ): Promise<ToolResult> {
   const tool = registry.getTool(toolName);
   if (!tool) {
@@ -40,29 +35,12 @@ export async function executeTool(
     validatedInput = perm.updatedInput;
   }
 
-  if (hooks?.onPreToolUse) {
-    const pre = await hooks.onPreToolUse(toolName, validatedInput);
-    if (!pre.allow) {
-      return { success: false, data: null, error: "Blocked by pre-tool hook" };
-    }
-    if (pre.updatedInput !== undefined) {
-      validatedInput = pre.updatedInput;
-    }
-  }
-
   let result: ToolResult;
   try {
     result = await tool.call(validatedInput, context);
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
-    if (hooks?.onPostToolUseFailure) {
-      await hooks.onPostToolUseFailure(toolName, validatedInput, error);
-    }
     return { success: false, data: null, error: error.message };
-  }
-
-  if (hooks?.onPostToolUse) {
-    await hooks.onPostToolUse(toolName, validatedInput, result);
   }
 
   return result;

@@ -18,6 +18,8 @@ export {
   buildSkillPromptSection,
   createSkillInjectionMiddleware,
   createCommandApprovalMiddleware,
+  createHooksMiddleware,
   createLoopDetectionMiddleware,
   createContextCompactionMiddleware,
+  runOnRunCompleteMiddlewares,
 } from "./middleware";

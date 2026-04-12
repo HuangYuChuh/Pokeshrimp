@@ -1,6 +1,7 @@
 import { generateText, type CoreMessage, type LanguageModel } from "ai";
-import type { ToolResult } from "@/core/tool/types";
+import type { ToolContext, ToolResult } from "@/core/tool/types";
 import { classifyCommand } from "@/core/permission/checker";
+import { HooksEngine, detectGeneratedFiles } from "@/core/hooks/engine";
 
 // ─── Middleware Interface ────────────────────────────────────
 //
@@ -37,9 +38,15 @@ export interface Middleware {
   ): Promise<CoreMessage[]> | CoreMessage[];
   /**
    * Called before each tool invocation. May rewrite input or deny.
-   * Used by CommandApprovalMiddleware and LoopDetectionMiddleware.
+   * Used by CommandApprovalMiddleware, HooksMiddleware, LoopDetection.
+   * The optional `context` param carries ToolContext (needed by the
+   * approval channel in Task 2).
    */
-  before?(toolName: string, input: unknown): Promise<MiddlewareAction>;
+  before?(
+    toolName: string,
+    input: unknown,
+    context?: ToolContext,
+  ): Promise<MiddlewareAction>;
   /**
    * Called after each tool invocation. Read-only — for logging.
    */
@@ -48,6 +55,15 @@ export interface Middleware {
     input: unknown,
     result: ToolResult,
   ): Promise<void>;
+  /**
+   * Called once after the AgentRuntime.run() loop completes.
+   * Used by HooksMiddleware to emit session-end.
+   */
+  onRunComplete?(context: {
+    sessionId?: string;
+    iterations: number;
+    cwd: string;
+  }): Promise<void>;
 }
 
 // ─── Runners ─────────────────────────────────────────────────
@@ -80,11 +96,12 @@ export async function runMiddlewaresBefore(
   middlewares: Middleware[],
   toolName: string,
   input: unknown,
+  context?: ToolContext,
 ): Promise<{ allowed: boolean; input: unknown; reason?: string }> {
   let currentInput = input;
   for (const mw of middlewares) {
     if (!mw.before) continue;
-    const result = await mw.before(toolName, currentInput);
+    const result = await mw.before(toolName, currentInput, context);
     if (result.action === "deny") {
       return { allowed: false, input: currentInput, reason: result.reason };
     }
@@ -105,6 +122,20 @@ export async function runMiddlewaresAfter(
   for (const mw of middlewares) {
     if (!mw.after) continue;
     await mw.after(toolName, input, result);
+  }
+}
+
+export async function runOnRunCompleteMiddlewares(
+  middlewares: Middleware[],
+  context: { sessionId?: string; iterations: number; cwd: string },
+): Promise<void> {
+  for (const mw of middlewares) {
+    if (!mw.onRunComplete) continue;
+    try {
+      await mw.onRunComplete(context);
+    } catch {
+      // onRunComplete failures must not crash the return path
+    }
   }
 }
 
@@ -429,6 +460,98 @@ function estimateChars(m: CoreMessage): number {
     else n += 80; // tool call args / structured result estimate
   }
   return n;
+}
+
+// ─── Built-in: HooksMiddleware ────────────────────────────────
+
+/**
+ * Per docs/01 §3.5 "Hooks 機制（Git Hooks 哲学）":
+ * dispatches named business events to user shell scripts via the
+ * HooksEngine. Sits at position 3 in the middleware chain (after
+ * CommandApproval, before LoopDetection) so hooks only fire for
+ * commands that already passed approval.
+ */
+export function createHooksMiddleware(engine: HooksEngine): Middleware {
+  return {
+    name: "Hooks",
+
+    async onConversationStart(ctx) {
+      await engine.emit("session-start", {
+        event: "session-start",
+        session_id: undefined, // not available at this point
+        cwd: process.cwd(),
+      });
+      return ctx;
+    },
+
+    async before(toolName, input) {
+      const response = await engine.emit("pre-tool-call", {
+        event: "pre-tool-call",
+        tool: toolName,
+        input,
+        cwd: process.cwd(),
+      });
+      if (response?.decision === "deny") {
+        return {
+          action: "deny",
+          reason: response.reason ?? "Denied by pre-tool-call hook",
+        };
+      }
+      if (response?.modified_input !== undefined) {
+        return { action: "continue", input: response.modified_input };
+      }
+      return { action: "continue" };
+    },
+
+    async after(toolName, input, result) {
+      // post-tool-call (fire-and-forget)
+      await engine.emit("post-tool-call", {
+        event: "post-tool-call",
+        tool: toolName,
+        input,
+        result,
+        cwd: process.cwd(),
+      });
+
+      // post-generate: check if run_command produced visual assets
+      if (
+        toolName === "run_command" &&
+        result.success &&
+        typeof result.data === "string"
+      ) {
+        const cmd = (input as { command?: string })?.command ?? "";
+        const files = detectGeneratedFiles(cmd, result.data);
+        if (files.length > 0) {
+          await engine.emit("post-generate", {
+            event: "post-generate",
+            tool: toolName,
+            command: cmd,
+            output_files: files,
+            cwd: process.cwd(),
+          });
+        }
+      }
+
+      // on-error
+      if (!result.success && result.error) {
+        await engine.emit("on-error", {
+          event: "on-error",
+          tool: toolName,
+          input,
+          error: result.error,
+          cwd: process.cwd(),
+        });
+      }
+    },
+
+    async onRunComplete(context) {
+      await engine.emit("session-end", {
+        event: "session-end",
+        session_id: context.sessionId,
+        cwd: context.cwd,
+      });
+    },
+  };
 }
 
 // ─── Helpers ─────────────────────────────────────────────────

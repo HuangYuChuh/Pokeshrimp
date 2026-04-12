@@ -1,2 +1,9 @@
-export * from "./types";
-export { matchEvent, executeHookAction, runHooks } from "./engine";
+export type {
+  HookEventName,
+  HookEntry,
+  HookPayload,
+  HookResponse,
+} from "./types";
+export { BLOCKING_EVENTS } from "./types";
+export { HooksEngine, detectGeneratedFiles } from "./engine";
+export { loadHooks } from "./loader";

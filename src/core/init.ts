@@ -9,12 +9,15 @@ import {
   AgentRuntime,
   createSkillInjectionMiddleware,
   createCommandApprovalMiddleware,
+  createHooksMiddleware,
   createLoopDetectionMiddleware,
   createContextCompactionMiddleware,
   type Middleware,
 } from "@/core/agent";
 import { listSkills } from "@/core/skill/engine";
 import { getModel } from "@/core/ai/provider";
+import { HooksEngine } from "@/core/hooks/engine";
+import { loadHooks } from "@/core/hooks/loader";
 import type { AppConfig } from "@/core/config/schema";
 import type { LanguageModel } from "ai";
 
@@ -59,9 +62,15 @@ function buildMiddlewares(): Middleware[] {
   const config = getConfig();
   const globalSkillsDir = path.join(os.homedir(), ".visagent", "skills");
   const projectSkillsDir = path.join(process.cwd(), ".visagent", "skills");
+  const hooksDir = path.join(process.cwd(), ".visagent", "hooks");
+
+  // Load user hook scripts from convention dir + config
+  const hookEntries = loadHooks(config.hooks ?? {}, hooksDir);
+  const hooksEngine = new HooksEngine(hookEntries);
 
   return [
-    // Order matters — see docs/01 §3.2.
+    // Order matters — see docs/01 §3.2 + design doc.
+    // 1. SkillInjection: enrich system prompt with available skills
     createSkillInjectionMiddleware(() => {
       const skills = listSkills(globalSkillsDir, projectSkillsDir);
       return skills.map((s) => ({
@@ -70,11 +79,15 @@ function buildMiddlewares(): Middleware[] {
         description: s.description,
       }));
     }),
+    // 2. CommandApproval: allow/deny/ask before any tool execution
     createCommandApprovalMiddleware({
       alwaysAllow: config.permissions?.alwaysAllow ?? [],
       alwaysDeny: config.permissions?.alwaysDeny ?? [],
       alwaysAsk: config.permissions?.alwaysAsk ?? [],
     }),
+    // 3. Hooks: dispatch named events to user shell scripts
+    createHooksMiddleware(hooksEngine),
+    // 4. LoopDetection: safety net for repeated calls
     createLoopDetectionMiddleware(3),
     createContextCompactionMiddleware({
       maxCharBudget: 80_000,

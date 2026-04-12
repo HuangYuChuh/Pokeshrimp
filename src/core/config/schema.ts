@@ -13,15 +13,10 @@ export const McpServerConfigSchema = z.object({
   enabled: z.boolean().default(true),
 });
 
-export const HookActionSchema = z.object({
-  type: z.literal("command"),
+export const HookEntrySchema = z.object({
   command: z.string(),
-  timeout: z.number().optional(),
-});
-
-export const HookConfigSchema = z.object({
+  timeout: z.number().default(10_000),
   matcher: z.string().optional(),
-  hooks: z.array(HookActionSchema),
 });
 
 export const PermissionConfigSchema = z.object({
@@ -34,10 +29,10 @@ export const AppConfigSchema = z.object({
   defaultModel: z.string().default("claude-sonnet"),
   apiKeys: ApiKeysSchema.default({}),
   mcpServers: z.record(McpServerConfigSchema).default({}),
-  hooks: z.record(z.array(HookConfigSchema)).default({}),
+  hooks: z.record(z.array(HookEntrySchema)).default({}),
   permissions: PermissionConfigSchema.default({}),
 });
 
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 export type McpServerConfig = z.infer<typeof McpServerConfigSchema>;
-export type HookConfigEntry = z.infer<typeof HookConfigSchema>;
+export type HookEntryConfig = z.infer<typeof HookEntrySchema>;
