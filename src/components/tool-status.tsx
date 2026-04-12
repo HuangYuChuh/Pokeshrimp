@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ToolStatus {
   name: string;
@@ -29,11 +31,16 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
   }, [open]);
 
   if (loading) {
-    return <p className="text-[13px] text-muted-foreground">Checking tools...</p>;
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-[52px] w-full rounded-lg" />
+        <Skeleton className="h-[52px] w-full rounded-lg" />
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-[13px] text-red-500">{error}</p>;
+    return <p className="text-[13px] text-destructive">{error}</p>;
   }
 
   if (tools.length === 0) {
@@ -52,24 +59,27 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
           className="flex items-start gap-2.5 rounded-lg border border-border bg-background px-3 py-2"
         >
           <span
-            className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-              tool.status === "available" ? "bg-emerald-500" : "bg-red-500"
-            }`}
+            className={cn(
+              "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+              tool.status === "available" ? "bg-green-400" : "bg-red-500",
+            )}
+            aria-hidden="true"
           />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[13px] font-medium">{tool.name}</span>
+              <span className="text-[13px] font-medium">{tool.name}</span>
               <span
-                className={`text-[11px] ${
+                className={cn(
+                  "text-[11px]",
                   tool.status === "available"
-                    ? "text-emerald-500"
-                    : "text-red-500"
-                }`}
+                    ? "text-green-400"
+                    : "text-red-500",
+                )}
               >
                 {tool.status === "available" ? "Available" : "Not installed"}
               </span>
             </div>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
+            <p className="mt-0.5 text-[12px] text-muted-foreground">
               Used by: {tool.skills.join(", ")}
             </p>
           </div>

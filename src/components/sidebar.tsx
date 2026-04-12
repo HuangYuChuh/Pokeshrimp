@@ -6,6 +6,11 @@ import { useAppState, useAppDispatch } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+
+/* ---------------------------------------------------------------------------
+ * Types
+ * --------------------------------------------------------------------------- */
 
 interface SidebarProps {
   open: boolean;
@@ -13,10 +18,15 @@ interface SidebarProps {
   onOpenSettings?: () => void;
 }
 
+/* ---------------------------------------------------------------------------
+ * Sidebar
+ * --------------------------------------------------------------------------- */
+
 export function Sidebar({ open, onToggle, onOpenSettings }: SidebarProps) {
   const { sessions, currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
+  /* --- Fetch sessions on mount ------------------------------------------ */
   useEffect(() => {
     fetch("/api/sessions")
       .then((res) => (res.ok ? res.json() : { sessions: [] }))
@@ -28,6 +38,7 @@ export function Sidebar({ open, onToggle, onOpenSettings }: SidebarProps) {
       .catch(() => {});
   }, [dispatch]);
 
+  /* --- Session actions -------------------------------------------------- */
   const handleNewTask = useCallback(() => {
     const id = crypto.randomUUID();
     const session = {
@@ -59,28 +70,30 @@ export function Sidebar({ open, onToggle, onOpenSettings }: SidebarProps) {
     [dispatch],
   );
 
+  /* --- Render ----------------------------------------------------------- */
   return (
     <aside
       className={cn(
-        "drag flex h-full shrink-0 flex-col bg-sidebar overflow-hidden transition-[width] duration-200 ease-in-out",
-        open ? "w-[260px]" : "w-0"
+        "flex h-full shrink-0 flex-col overflow-hidden bg-sidebar transition-all duration-200",
+        open ? "w-[260px]" : "w-0",
       )}
     >
       {/* macOS traffic light space + sidebar toggle */}
-      <div className="flex h-13 shrink-0 items-end justify-end px-3 pb-1">
+      <div className="drag flex h-13 shrink-0 items-end justify-end px-3 pb-1">
         <button
           type="button"
           onClick={onToggle}
           className="nodrag flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
           title="Close sidebar"
         >
-          <PanelLeft size={16} strokeWidth={1.5} />
+          <PanelLeft size={15} strokeWidth={1.5} />
         </button>
       </div>
 
-      {/* New task */}
+      {/* New task button */}
       <div className="px-3 pb-4">
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
@@ -93,7 +106,7 @@ export function Sidebar({ open, onToggle, onOpenSettings }: SidebarProps) {
 
       {/* Recents label */}
       <div className="px-5 pb-2">
-        <span className="text-[11px] font-medium tracking-wide text-muted-foreground/60 whitespace-nowrap">
+        <span className="whitespace-nowrap text-[11px] font-medium tracking-wide text-muted-foreground/60">
           Recents
         </span>
       </div>
@@ -108,10 +121,11 @@ export function Sidebar({ open, onToggle, onOpenSettings }: SidebarProps) {
                 "nodrag group relative flex items-center rounded-lg transition-colors",
                 session.id === currentSessionId
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                  : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
               )}
             >
               <button
+                type="button"
                 onClick={() => handleSelectSession(session.id)}
                 className="w-full truncate px-3 py-1.5 text-left text-[13px]"
               >
@@ -120,19 +134,25 @@ export function Sidebar({ open, onToggle, onOpenSettings }: SidebarProps) {
               <button
                 type="button"
                 onClick={(e) => handleDeleteSession(e, session.id)}
-                className="absolute right-1.5 hidden h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-foreground group-hover:flex"
+                className={cn(
+                  "absolute right-1.5 hidden h-5 w-5 shrink-0 items-center justify-center rounded",
+                  "text-muted-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-destructive",
+                  "group-hover:flex",
+                )}
               >
-                <X size={12} />
+                <X size={12} strokeWidth={1.5} />
               </button>
             </div>
           ))}
         </div>
       </ScrollArea>
 
-      {/* Settings */}
+      {/* Settings button at bottom with separator */}
       {onOpenSettings && (
-        <div className="shrink-0 border-t border-sidebar-border px-3 py-3">
+        <div className="shrink-0 px-3 py-3">
+          <Separator className="mb-3 bg-border" />
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"

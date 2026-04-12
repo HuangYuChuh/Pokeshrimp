@@ -34,12 +34,14 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
   );
 
   return (
-    <aside className={cn(
-      "flex h-screen shrink-0 flex-col border-l border-border bg-sidebar overflow-hidden transition-[width] duration-200 ease-in-out",
-      open ? "w-[380px]" : "w-0 border-l-0"
-    )}>
-      {/* Navbar spacer */}
-      <div className="drag h-12 shrink-0" />
+    <aside
+      className={cn(
+        "flex h-screen shrink-0 flex-col border-l border-border bg-sidebar overflow-hidden transition-all duration-200",
+        open ? "w-[380px] min-w-[380px]" : "w-0 min-w-0 border-l-0",
+      )}
+    >
+      {/* macOS traffic light spacer */}
+      <div className="drag h-13 shrink-0" />
 
       <Tabs
         value={previewTab}
@@ -53,25 +55,27 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
           <TabsTrigger value="designfile">Designfile</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="preview" className="flex-1 overflow-auto">
+        <TabsContent value="preview" className="flex-1 overflow-hidden">
           <PreviewContent content={previewContent} />
         </TabsContent>
 
-        <TabsContent value="editor" className="flex-1 overflow-auto">
+        <TabsContent value="editor" className="flex-1 overflow-hidden">
           <EditorContent value={editorParams} onChange={handleEditorChange} />
         </TabsContent>
 
-        <TabsContent value="output" className="flex-1 overflow-auto">
+        <TabsContent value="output" className="flex-1 overflow-hidden">
           <OutputContent files={outputFiles} />
         </TabsContent>
 
-        <TabsContent value="designfile" className="flex-1 overflow-auto">
+        <TabsContent value="designfile" className="flex-1 overflow-hidden">
           <DesignfileGraph />
         </TabsContent>
       </Tabs>
     </aside>
   );
 }
+
+// ─── Media type detection ───────────────────────────────────
 
 const VIDEO_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
 const AUDIO_EXTENSIONS = ["mp3", "wav", "flac", "ogg"];
@@ -85,9 +89,13 @@ function getMediaType(url: string): "image" | "video" | "audio" | "unknown" {
   return "unknown";
 }
 
+// ─── Zoom constants ─────────────────────────────────────────
+
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
 const ZOOM_STEP = 0.25;
+
+// ─── Preview tab content ────────────────────────────────────
 
 function PreviewContent({
   content,
@@ -111,7 +119,10 @@ function PreviewContent({
     }
   }, [content.url]);
 
-  const clampZoom = useCallback((z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z)), []);
+  const clampZoom = useCallback(
+    (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z)),
+    [],
+  );
 
   const handleZoomIn = useCallback(() => {
     setZoom((z) => clampZoom(z + ZOOM_STEP));
@@ -148,16 +159,13 @@ function PreviewContent({
     [zoom, pan],
   );
 
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      if (!isDragging.current) return;
-      setPan({
-        x: panStart.current.x + (e.clientX - dragStart.current.x),
-        y: panStart.current.y + (e.clientY - dragStart.current.y),
-      });
-    },
-    [],
-  );
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging.current) return;
+    setPan({
+      x: panStart.current.x + (e.clientX - dragStart.current.x),
+      y: panStart.current.y + (e.clientY - dragStart.current.y),
+    });
+  }, []);
 
   const handlePointerUp = useCallback(() => {
     isDragging.current = false;
@@ -171,6 +179,7 @@ function PreviewContent({
         ? getMediaType(content.url)
         : content.type;
 
+  // Video
   if (effectiveType === "video" && content.url) {
     return (
       <div className="flex h-full items-center justify-center p-4">
@@ -178,7 +187,7 @@ function PreviewContent({
           key={content.url}
           controls
           preload="metadata"
-          className="max-h-full max-w-full rounded-lg object-contain"
+          className="max-h-full max-w-full object-contain"
         >
           <source src={content.url} />
         </video>
@@ -186,19 +195,26 @@ function PreviewContent({
     );
   }
 
+  // Audio
   if (effectiveType === "audio" && content.url) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 p-4">
         <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
-          <Music className="h-10 w-10 text-muted-foreground" />
+          <Music size={15} strokeWidth={1.5} className="h-10 w-10 text-muted-foreground" />
         </div>
-        <audio key={content.url} controls preload="metadata" className="w-full max-w-xs">
+        <audio
+          key={content.url}
+          controls
+          preload="metadata"
+          className="w-full max-w-xs"
+        >
           <source src={content.url} />
         </audio>
       </div>
     );
   }
 
+  // Image with zoom/pan
   if (content.type === "image" && content.url) {
     return (
       <div className="flex h-full flex-col">
@@ -207,29 +223,29 @@ function PreviewContent({
           <button
             type="button"
             onClick={handleZoomOut}
-            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             title="Zoom out"
           >
-            <ZoomOut className="h-3.5 w-3.5" />
+            <ZoomOut size={15} strokeWidth={1.5} />
           </button>
-          <span className="min-w-[3.5rem] text-center text-xs tabular-nums text-muted-foreground">
+          <span className="min-w-[3.5rem] text-center text-[12px] tabular-nums text-muted-foreground">
             {Math.round(zoom * 100)}%
           </span>
           <button
             type="button"
             onClick={handleZoomIn}
-            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             title="Zoom in"
           >
-            <ZoomIn className="h-3.5 w-3.5" />
+            <ZoomIn size={15} strokeWidth={1.5} />
           </button>
           <button
             type="button"
             onClick={handleReset}
-            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             title="Reset zoom"
           >
-            <Maximize className="h-3.5 w-3.5" />
+            <Maximize size={15} strokeWidth={1.5} />
           </button>
         </div>
 
@@ -237,7 +253,14 @@ function PreviewContent({
         <div
           ref={containerRef}
           className="flex flex-1 items-center justify-center overflow-hidden"
-          style={{ cursor: zoom > 1 ? (isDragging.current ? "grabbing" : "grab") : "default" }}
+          style={{
+            cursor:
+              zoom > 1
+                ? isDragging.current
+                  ? "grabbing"
+                  : "grab"
+                : "default",
+          }}
           onWheel={handleWheel}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
@@ -247,7 +270,7 @@ function PreviewContent({
             src={content.url}
             alt="Preview"
             draggable={false}
-            className="max-h-full max-w-full select-none rounded-lg object-contain"
+            className="max-h-full max-w-full select-none object-contain"
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: "center center",
@@ -257,21 +280,27 @@ function PreviewContent({
       </div>
     );
   }
+
+  // Text
   if (content.type === "text" && content.text) {
     return (
       <ScrollArea className="h-full">
-        <div className="selectable whitespace-pre-wrap p-5 text-sm leading-relaxed text-foreground">
+        <div className="selectable whitespace-pre-wrap p-5 text-[14px] leading-7 text-foreground">
           {content.text}
         </div>
       </ScrollArea>
     );
   }
+
+  // Empty state
   return (
-    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+    <div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
       Generated content will appear here
     </div>
   );
 }
+
+// ─── Editor tab content ─────────────────────────────────────
 
 function EditorContent({
   value,
@@ -296,6 +325,8 @@ function EditorContent({
   );
 }
 
+// ─── Output tab content ─────────────────────────────────────
+
 function OutputContent({
   files,
 }: {
@@ -303,7 +334,7 @@ function OutputContent({
 }) {
   if (files.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+      <div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
         Output files will appear here
       </div>
     );
@@ -315,12 +346,12 @@ function OutputContent({
           <button
             key={i}
             type="button"
-            className="mb-0.5 flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-ring"
+            className="mb-0.5 flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition-colors hover:bg-muted focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
               {file.type}
             </span>
-            <span className="flex-1 truncate text-sm text-foreground">
+            <span className="flex-1 truncate text-[13px] text-foreground">
               {file.name}
             </span>
           </button>
