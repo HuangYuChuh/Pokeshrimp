@@ -162,4 +162,106 @@ describe("VersionHistory", () => {
     });
     expect(version.command).toBe("comfyui-cli generate --color red");
   });
+
+  // ─── Content-addressable file storage ───────────────────
+
+  it("copies output files into content-addressable storage", () => {
+    const dir = makeTmpDir();
+    const history = new VersionHistory(dir);
+
+    // Create a temp output file
+    const outDir = makeTmpDir();
+    const outFile = path.join(outDir, "logo.png");
+    fs.writeFileSync(outFile, "fake-png-content");
+
+    const version = history.record("logo", {
+      skill: "/logo-design",
+      params: { color: "red" },
+      outputFiles: [outFile],
+    });
+
+    expect(version.storedFiles).toBeDefined();
+    expect(version.storedFiles!.length).toBe(1);
+    expect(version.storedFiles![0].originalPath).toBe(outFile);
+    expect(version.storedFiles![0].contentHash).toHaveLength(12);
+
+    // Verify the file was actually copied
+    const storedPath = version.storedFiles![0].storedPath;
+    expect(fs.existsSync(storedPath)).toBe(true);
+    expect(fs.readFileSync(storedPath, "utf-8")).toBe("fake-png-content");
+  });
+
+  it("deduplicates files with the same content hash", () => {
+    const dir = makeTmpDir();
+    const history = new VersionHistory(dir);
+
+    const outDir = makeTmpDir();
+    const file1 = path.join(outDir, "logo-v1.png");
+    const file2 = path.join(outDir, "logo-v2.png");
+    fs.writeFileSync(file1, "same-content");
+    fs.writeFileSync(file2, "same-content");
+
+    const v1 = history.record("logo", {
+      skill: "/logo-design",
+      params: { color: "red" },
+      outputFiles: [file1],
+    });
+    const v2 = history.record("logo", {
+      skill: "/logo-design",
+      params: { color: "blue" },
+      outputFiles: [file2],
+    });
+
+    // Same content hash
+    expect(v1.storedFiles![0].contentHash).toBe(v2.storedFiles![0].contentHash);
+
+    // Both stored paths are under the same hash directory
+    const hashDir = path.dirname(v1.storedFiles![0].storedPath);
+    expect(path.dirname(v2.storedFiles![0].storedPath)).toBe(hashDir);
+  });
+
+  it("skips missing output files gracefully", () => {
+    const dir = makeTmpDir();
+    const history = new VersionHistory(dir);
+
+    const version = history.record("logo", {
+      skill: "/logo-design",
+      params: { color: "red" },
+      outputFiles: ["/nonexistent/path/logo.png"],
+    });
+
+    // Should not have storedFiles (or empty)
+    expect(version.storedFiles).toBeUndefined();
+    expect(version.outputFiles).toEqual(["/nonexistent/path/logo.png"]);
+  });
+
+  it("getStoredFile retrieves the stored copy path", () => {
+    const dir = makeTmpDir();
+    const history = new VersionHistory(dir);
+
+    const outDir = makeTmpDir();
+    const outFile = path.join(outDir, "banner.jpg");
+    fs.writeFileSync(outFile, "banner-bytes");
+
+    const version = history.record("banner", {
+      skill: "/banner-gen",
+      params: { width: 1200 },
+      outputFiles: [outFile],
+    });
+
+    const result = history.getStoredFile(
+      "banner",
+      version.hash,
+      "banner.jpg",
+    );
+    expect(result).not.toBeNull();
+    expect(fs.readFileSync(result!, "utf-8")).toBe("banner-bytes");
+  });
+
+  it("getStoredFile returns null for unknown version or filename", () => {
+    const dir = makeTmpDir();
+    const history = new VersionHistory(dir);
+
+    expect(history.getStoredFile("logo", "deadbeef", "nope.png")).toBeNull();
+  });
 });

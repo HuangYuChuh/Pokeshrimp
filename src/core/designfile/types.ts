@@ -22,6 +22,15 @@ export type Designfile = z.infer<typeof DesignfileSchema>;
 
 export type AssetStatus = "clean" | "dirty" | "never-built";
 
+export interface StoredFile {
+  /** Original path of the output file at build time. */
+  originalPath: string;
+  /** SHA-256 content hash (first 12 hex chars). */
+  contentHash: string;
+  /** Path to the stored copy inside .visagent/.history/objects/. */
+  storedPath: string;
+}
+
 export interface AssetVersion {
   /** Deterministic hash of (skill + sorted params JSON). */
   hash: string;
@@ -35,6 +44,8 @@ export interface AssetVersion {
   command?: string;
   /** Paths of output files produced by this build. */
   outputFiles: string[];
+  /** Content-addressable copies of output files (if stored). */
+  storedFiles?: StoredFile[];
 }
 
 export interface AssetState {

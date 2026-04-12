@@ -244,6 +244,18 @@ export class DesignfileEngine {
   }
 
   /**
+   * Get the absolute path to a stored copy of an output file from a
+   * specific version. Returns null if not found.
+   */
+  getStoredFile(
+    assetName: string,
+    versionHash: string,
+    filename: string,
+  ): string | null {
+    return this.history.getStoredFile(assetName, versionHash, filename);
+  }
+
+  /**
    * Diff params between two versions of the same asset.
    */
   diffVersions(
