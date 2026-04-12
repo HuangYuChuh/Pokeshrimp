@@ -102,7 +102,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                 </select>
               </Field>
 
-              <Field label="Anthropic API Key" hint="Required for Claude models">
+              <Field label="Anthropic API Key" hint="Required for Claude models" getKeyUrl="https://console.anthropic.com/settings/keys">
                 <input
                   type="password"
                   value={anthropicKey}
@@ -116,7 +116,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                 <EnvKeyHint envAvailable={settings.envKeys?.anthropic} hasConfigKey={!!settings.apiKeys?.anthropic} envVarName="ANTHROPIC_API_KEY" />
               </Field>
 
-              <Field label="OpenAI API Key" hint="Required for GPT models">
+              <Field label="OpenAI API Key" hint="Required for GPT models" getKeyUrl="https://platform.openai.com/api-keys">
                 <input
                   type="password"
                   value={openaiKey}
@@ -151,10 +151,29 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   );
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function openKeyUrl(url: string) {
+  if (window.pokeshrimp?.auth?.openBrowser) {
+    window.pokeshrimp.auth.openBrowser(url);
+  } else {
+    window.open(url, "_blank");
+  }
+}
+
+function Field({ label, hint, getKeyUrl, children }: { label: string; hint?: string; getKeyUrl?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="mb-1.5 block text-[13px] font-medium">{label}</label>
+      <div className="mb-1.5 flex items-center justify-between">
+        <label className="text-[13px] font-medium">{label}</label>
+        {getKeyUrl && (
+          <button
+            type="button"
+            onClick={() => openKeyUrl(getKeyUrl)}
+            className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Get key &rarr;
+          </button>
+        )}
+      </div>
       {hint && <p className="mb-2 text-[12px] text-muted-foreground">{hint}</p>}
       {children}
     </div>
