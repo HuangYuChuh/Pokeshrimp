@@ -5,6 +5,7 @@ import { MODEL_OPTIONS } from "@/core/ai/provider";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { X } from "lucide-react";
+import { ToolStatusList } from "@/components/tool-status";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -210,6 +211,12 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                   <p className="mt-1 text-[11px] text-red-500">{oauthError}</p>
                 )}
                 <EnvKeyHint envAvailable={settings.envKeys?.openai} hasConfigKey={!!settings.apiKeys?.openai} envVarName="OPENAI_API_KEY" />
+              </Field>
+
+              <Separator />
+
+              <Field label="CLI Tools">
+                <ToolStatusList open={open} />
               </Field>
 
               <p className="text-[11px] text-muted-foreground/60">
