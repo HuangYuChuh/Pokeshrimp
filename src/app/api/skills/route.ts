@@ -9,6 +9,9 @@ export async function GET() {
       command: s.command,
       description: s.description,
       scope: s.scope,
+      requiredTools: s.requiredTools,
+      inputParams: s.inputParams,
+      outputs: s.outputs,
     })),
   });
 }
