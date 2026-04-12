@@ -1,5 +1,7 @@
-# 内部文档（编号前缀的产品/架构文档不公开，公开参考文档照常 tracked）
-docs/0*-*
+# 内部文档（按文件名单独忽略，docs/ 目录本身是公开的）
+docs/00-产品定义与愿景.md
+docs/01-设计哲学与技术架构.md
+docs/02-api-to-cli-design.md
 VisAgent-产品定义与技术架构方案.md
 
 # Dependencies
