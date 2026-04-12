@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppState, useAppDispatch, type PreviewTab } from "@/lib/store";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ZoomIn, ZoomOut, Maximize } from "lucide-react";
 
 export function PreviewPanel() {
   const { previewTab, previewContent, editorParams, outputFiles } =
@@ -57,19 +58,139 @@ export function PreviewPanel() {
   );
 }
 
+const MIN_ZOOM = 0.1;
+const MAX_ZOOM = 5;
+const ZOOM_STEP = 0.25;
+
 function PreviewContent({
   content,
 }: {
   content: { type: string; url?: string; text?: string };
 }) {
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const isDragging = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+  const panStart = useRef({ x: 0, y: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const prevUrl = useRef(content.url);
+
+  // Reset zoom/pan when a new image loads
+  useEffect(() => {
+    if (content.url !== prevUrl.current) {
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+      prevUrl.current = content.url;
+    }
+  }, [content.url]);
+
+  const clampZoom = useCallback((z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z)), []);
+
+  const handleZoomIn = useCallback(() => {
+    setZoom((z) => clampZoom(z + ZOOM_STEP));
+  }, [clampZoom]);
+
+  const handleZoomOut = useCallback(() => {
+    setZoom((z) => clampZoom(z - ZOOM_STEP));
+  }, [clampZoom]);
+
+  const handleReset = useCallback(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+        setZoom((z) => clampZoom(z + delta));
+      }
+    },
+    [clampZoom],
+  );
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (zoom <= 1) return;
+      isDragging.current = true;
+      dragStart.current = { x: e.clientX, y: e.clientY };
+      panStart.current = { ...pan };
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    },
+    [zoom, pan],
+  );
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!isDragging.current) return;
+      setPan({
+        x: panStart.current.x + (e.clientX - dragStart.current.x),
+        y: panStart.current.y + (e.clientY - dragStart.current.y),
+      });
+    },
+    [],
+  );
+
+  const handlePointerUp = useCallback(() => {
+    isDragging.current = false;
+  }, []);
+
   if (content.type === "image" && content.url) {
     return (
-      <div className="flex h-full items-center justify-center p-6">
-        <img
-          src={content.url}
-          alt="Preview"
-          className="max-h-full max-w-full rounded-lg object-contain"
-        />
+      <div className="flex h-full flex-col">
+        {/* Zoom toolbar */}
+        <div className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-1.5">
+          <button
+            type="button"
+            onClick={handleZoomOut}
+            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            title="Zoom out"
+          >
+            <ZoomOut className="h-3.5 w-3.5" />
+          </button>
+          <span className="min-w-[3.5rem] text-center text-xs tabular-nums text-muted-foreground">
+            {Math.round(zoom * 100)}%
+          </span>
+          <button
+            type="button"
+            onClick={handleZoomIn}
+            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            title="Zoom in"
+          >
+            <ZoomIn className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            title="Reset zoom"
+          >
+            <Maximize className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        {/* Image viewport */}
+        <div
+          ref={containerRef}
+          className="flex flex-1 items-center justify-center overflow-hidden"
+          style={{ cursor: zoom > 1 ? (isDragging.current ? "grabbing" : "grab") : "default" }}
+          onWheel={handleWheel}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
+          <img
+            src={content.url}
+            alt="Preview"
+            draggable={false}
+            className="max-h-full max-w-full select-none rounded-lg object-contain"
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transformOrigin: "center center",
+            }}
+          />
+        </div>
       </div>
     );
   }
