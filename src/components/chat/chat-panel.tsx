@@ -10,13 +10,81 @@ import {
 } from "react";
 import { useAppState, useAppDispatch, type OutputFile } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { PanelLeft, PanelRight } from "lucide-react";
+import { PanelLeft, PanelRight, ClipboardList, ChevronUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
 import { MessageBubble } from "./message-bubble";
 import { ApprovalCards } from "./approval-cards";
 import { InputArea, type SkillInfo } from "./input-area";
+
+/* ─── Example prompts for empty state ─── */
+
+const EXAMPLE_PROMPTS = [
+  "\u5E2E\u6211\u6279\u91CF\u53BB\u9664\u4EA7\u54C1\u56FE\u80CC\u666F",
+  "\u8BBE\u8BA1\u4E00\u5957\u5B8C\u6574\u7684\u54C1\u724C VI",
+  "\u7528 ComfyUI \u751F\u6210\u8D5B\u535A\u98CE\u683C\u5934\u50CF",
+];
+
+/* ─── Session summary hook ─── */
+
+interface SessionSummary {
+  summary: string;
+  messageCount: number;
+  lastActiveAt: string;
+}
+
+function useSessionSummary(sessionId: string | null, hasMessages: boolean) {
+  const [data, setData] = useState<SessionSummary | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Only fetch summary when we have a session but no local messages yet
+    // (i.e. user just reopened an old session)
+    if (!sessionId || hasMessages) {
+      setData(null);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+
+    fetch(`/api/sessions/${sessionId}/summary`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled && d?.summary) {
+          setData(d);
+        } else if (!cancelled) {
+          setData(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setData(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, hasMessages]);
+
+  return { summary: data, loading };
+}
+
+function formatRelativeTime(isoDate: string): string {
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  return `${months}mo ago`;
+}
 
 /* ─── Skill data hook ─── */
 
@@ -256,9 +324,41 @@ export function ChatPanel({
     [messages, setMessages, reload]
   );
 
+  /* ─── Session summary ─── */
+
+  const { summary: sessionSummary } = useSessionSummary(
+    currentSessionId,
+    messages.length > 0,
+  );
+  const [summaryCollapsed, setSummaryCollapsed] = useState(false);
+
+  // Auto-collapse summary when user sends a new message
+  const prevMessageCount = useRef(0);
+  useEffect(() => {
+    if (messages.length > prevMessageCount.current && prevMessageCount.current === 0) {
+      setSummaryCollapsed(true);
+    }
+    prevMessageCount.current = messages.length;
+  }, [messages.length]);
+
+  // Reset collapsed state when session changes
+  useEffect(() => {
+    setSummaryCollapsed(false);
+  }, [currentSessionId]);
+
+  /* ─── Example prompt click ─── */
+
+  const handleExampleClick = useCallback(
+    (prompt: string) => {
+      setInput(prompt);
+      textareaRef.current?.focus();
+    },
+    [setInput, textareaRef],
+  );
+
   /* ─── Render ─── */
 
-  const isEmpty = messages.length === 0 && !isLoading;
+  const isEmpty = messages.length === 0 && !isLoading && !sessionSummary;
 
   const inputArea = (
     <InputArea
@@ -315,6 +415,18 @@ export function ChatPanel({
               <p className="mt-3 text-[15px] text-muted-foreground">
                 Describe what you want to create, and leave the rest to me
               </p>
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                {EXAMPLE_PROMPTS.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => handleExampleClick(prompt)}
+                    className="rounded-full border border-border px-4 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           {inputArea}
@@ -323,6 +435,52 @@ export function ChatPanel({
         <>
           <ScrollArea className="flex-1">
             <div className="selectable mx-auto max-w-[680px] px-3 pb-6 pt-4 sm:px-6">
+              {/* Session summary card */}
+              {sessionSummary && !summaryCollapsed && (
+                <div className="mb-6 rounded-xl border border-border bg-card px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
+                      <ClipboardList size={15} strokeWidth={1.5} />
+                      Session Summary
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSummaryCollapsed(true)}
+                      className="flex h-6 items-center gap-1 rounded-md px-2 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      Collapse
+                      <ChevronUp size={12} strokeWidth={1.5} />
+                    </button>
+                  </div>
+                  <p className="mt-1 text-[12px] text-muted-foreground">
+                    {sessionSummary.messageCount} messages
+                    {sessionSummary.lastActiveAt &&
+                      ` \u00B7 Last active ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
+                  </p>
+                  <div className="mt-2 space-y-1 text-[13px] leading-relaxed text-muted-foreground">
+                    {sessionSummary.summary.split("\n").map((line, i) => (
+                      <p key={i}>{line}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Collapsed summary — minimal inline hint */}
+              {sessionSummary && summaryCollapsed && (
+                <div className="mb-4 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setSummaryCollapsed(false)}
+                    className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <ClipboardList size={12} strokeWidth={1.5} />
+                    {sessionSummary.messageCount} messages
+                    {sessionSummary.lastActiveAt &&
+                      ` \u00B7 ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
+                  </button>
+                </div>
+              )}
+
               {messages.map((message) => (
                 <MessageBubble
                   key={message.id}
