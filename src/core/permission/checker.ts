@@ -1,62 +1,46 @@
-import type { PermissionBehavior } from "@/core/tool/types";
-import type { PermissionConfig } from "@/core/permission/types";
+import type { PermissionConfig } from "./types";
 
-export function parsePattern(pattern: string): {
-  toolName: string;
-  argPattern?: string;
-} {
-  const match = pattern.match(/^([^(]+?)(?:\((.+)\))?$/);
-  if (!match) {
-    return { toolName: pattern };
-  }
-  return {
-    toolName: match[1],
-    argPattern: match[2],
-  };
-}
-
-function simpleWildcardMatch(pattern: string, value: string): boolean {
-  const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&");
-  const regex = new RegExp(
-    "^" + escaped.replace(/\*\*/g, "{{GLOBSTAR}}").replace(/\*/g, "[^/]*").replace(/\{\{GLOBSTAR\}\}/g, ".*") + "$",
-  );
-  return regex.test(value);
-}
-
-function inputToString(input: unknown): string {
-  if (typeof input === "string") return input;
-  if (input && typeof input === "object") {
-    const obj = input as Record<string, unknown>;
-    const first = obj["command"] ?? obj["path"] ?? obj["file_path"];
-    if (typeof first === "string") return first;
-  }
-  return JSON.stringify(input);
-}
-
-export function matchPattern(
+/**
+ * Match a shell command string against a glob pattern.
+ * Patterns use `*` as a wildcard for any characters; all regex
+ * metacharacters are escaped before substitution.
+ *
+ *   matchCommandPattern("comfyui-cli generate --w 512", "comfyui-cli *") → true
+ *   matchCommandPattern("rm -rf /tmp/foo", "rm -rf *")                   → true
+ *   matchCommandPattern("ls", "rm *")                                    → false
+ */
+export function matchCommandPattern(
+  command: string,
   pattern: string,
-  toolName: string,
-  input?: unknown,
 ): boolean {
-  const { toolName: pName, argPattern } = parsePattern(pattern);
-  if (pName !== toolName) return false;
-  if (!argPattern) return true;
-  return simpleWildcardMatch(argPattern, inputToString(input));
+  const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp("^" + escaped.replace(/\*/g, ".*") + "$");
+  return regex.test(command);
 }
 
-export function checkPermission(
-  toolName: string,
-  input: unknown,
+export type CommandDecision = "allow" | "deny" | "ask";
+
+/**
+ * Per docs/01 §3.3: classify a shell command against the configured
+ * approval policy.
+ *
+ *   - alwaysDeny patterns win first (safety-critical)
+ *   - alwaysAllow patterns next (whitelisted commands)
+ *   - alwaysAsk patterns next (explicitly require user confirmation)
+ *   - unmatched commands fall through to "ask" so the user can decide
+ */
+export function classifyCommand(
+  command: string,
   config: PermissionConfig,
-): PermissionBehavior {
+): CommandDecision {
   for (const pattern of config.alwaysDeny) {
-    if (matchPattern(pattern, toolName, input)) return "deny";
+    if (matchCommandPattern(command, pattern)) return "deny";
   }
   for (const pattern of config.alwaysAllow) {
-    if (matchPattern(pattern, toolName, input)) return "allow";
+    if (matchCommandPattern(command, pattern)) return "allow";
   }
   for (const pattern of config.alwaysAsk) {
-    if (matchPattern(pattern, toolName, input)) return "ask";
+    if (matchCommandPattern(command, pattern)) return "ask";
   }
   return "ask";
 }

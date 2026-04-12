@@ -3,49 +3,14 @@
 import { createInterface } from "readline";
 import { getModel } from "@/core/ai/provider";
 import { SYSTEM_PROMPT } from "@/core/ai/streaming";
-import { ToolRegistry } from "@/core/tool/registry";
-import { registerBuiltinTools } from "@/core/tool/builtin";
 import { getConfig } from "@/core/config/loader";
-import {
-  runAgent,
-  createCommandApprovalMiddleware,
-  createLoopDetectionMiddleware,
-  buildSkillPromptSection,
-  type Middleware,
-} from "@/core/agent";
-import { listSkills } from "@/core/skill/engine";
-import type { ToolContext } from "@/core/tool/types";
-import path from "path";
-import os from "os";
+import { getRuntime } from "@/core/init";
+import type { CoreMessage } from "ai";
 
 // ─── Setup ───────────────────────────────────────────────────
 
 const config = getConfig();
-const registry = new ToolRegistry();
-registerBuiltinTools(registry);
-
-const context: ToolContext = {
-  cwd: process.cwd(),
-};
-
-const middlewares: Middleware[] = [
-  createCommandApprovalMiddleware({
-    alwaysAllow: config.permissions?.alwaysAllow ?? [],
-    alwaysDeny: config.permissions?.alwaysDeny ?? [],
-  }),
-  createLoopDetectionMiddleware(3),
-];
-
-// Build system prompt with skills
-const globalSkillsDir = path.join(os.homedir(), ".visagent", "skills");
-const projectSkillsDir = path.join(process.cwd(), ".visagent", "skills");
-const skills = listSkills(globalSkillsDir, projectSkillsDir);
-const skillSection = buildSkillPromptSection(
-  skills.map((s) => ({ name: s.name, command: s.command, description: s.description })),
-);
-const systemPrompt = SYSTEM_PROMPT + skillSection;
-
-// ─── Model ───────────────────────────────────────────────────
+const runtime = getRuntime();
 
 let model: ReturnType<typeof getModel>;
 try {
@@ -55,14 +20,16 @@ try {
   });
 } catch {
   console.error("Error: No API key configured.");
-  console.error("Set ANTHROPIC_API_KEY env var or add it to ~/.visagent/config.json:");
+  console.error(
+    "Set ANTHROPIC_API_KEY env var or add it to ~/.visagent/config.json:",
+  );
   console.error('  { "apiKeys": { "anthropic": "sk-ant-..." } }');
   process.exit(1);
 }
 
 // ─── REPL ────────────────────────────────────────────────────
 
-const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
+const messages: CoreMessage[] = [];
 
 const rl = createInterface({
   input: process.stdin,
@@ -71,7 +38,7 @@ const rl = createInterface({
 
 console.log("Pokeshrimp CLI v0.1.0");
 console.log("Human use GUI, Agent use CLI, Create use Pokeshrimp.");
-console.log('Type your message. Press Ctrl+C to exit.\n');
+console.log("Type your message. Press Ctrl+C to exit.\n");
 
 function prompt() {
   rl.question("you > ", async (input) => {
@@ -86,28 +53,23 @@ function prompt() {
     process.stdout.write("pokeshrimp > ");
 
     try {
-      const result = runAgent(
-        {
-          model,
-          systemPrompt,
-          registry,
-          context,
-          middlewares,
-          maxIterations: 32,
-        },
+      const result = await runtime.run({
+        model,
+        systemPrompt: SYSTEM_PROMPT,
         messages,
-      );
-
-      let fullText = "";
-      for await (const chunk of result.textStream) {
-        process.stdout.write(chunk);
-        fullText += chunk;
-      }
+        context: { cwd: process.cwd() },
+        onIterationStream: async (stream) => {
+          // For the CLI we just print text deltas live.
+          for await (const chunk of stream.textStream) {
+            process.stdout.write(chunk);
+          }
+        },
+      });
       console.log("\n");
 
-      if (fullText) {
-        messages.push({ role: "assistant", content: fullText });
-      }
+      // Carry the conversation history forward across REPL turns.
+      messages.length = 0;
+      messages.push(...result.messages);
     } catch (err) {
       console.error("\nError:", err instanceof Error ? err.message : err);
     }

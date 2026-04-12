@@ -1,12 +1,23 @@
-export { runAgent, createAgentTools, type AgentRuntimeConfig, type AgentResult } from "./runtime";
-export { spawnSubAgent, type SubAgentConfig, type SubAgentResult } from "./sub-agent";
+export {
+  AgentRuntime,
+  type AgentRuntimeOptions,
+  type AgentRunOptions,
+  type AgentRunResult,
+} from "./runtime";
+
 export {
   type Middleware,
   type MiddlewareAction,
+  type ConversationStartContext,
+  type SkillSummary,
+  type ContextCompactionConfig,
+  applyConversationStartMiddlewares,
+  applyBeforeLLMMiddlewares,
   runMiddlewaresBefore,
   runMiddlewaresAfter,
   buildSkillPromptSection,
+  createSkillInjectionMiddleware,
   createCommandApprovalMiddleware,
   createLoopDetectionMiddleware,
-  type SkillSummary,
+  createContextCompactionMiddleware,
 } from "./middleware";

@@ -1,42 +1,9 @@
+import { createDataStreamResponse } from "ai";
 import { getModel } from "@/lib/ai";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 import { createSession, addMessage, touchSession } from "@/lib/db";
-import { getToolRegistry } from "@/core/init";
-import { getConfig } from "@/core/config/loader";
-import {
-  runAgent,
-  createCommandApprovalMiddleware,
-  createLoopDetectionMiddleware,
-  buildSkillPromptSection,
-  type Middleware,
-} from "@/core/agent";
-import { listSkills } from "@/lib/skill-engine";
+import { getRuntime } from "@/core/init";
 import type { ToolContext } from "@/core/tool/types";
-
-// Build middlewares once (reused across requests)
-function getMiddlewares(): Middleware[] {
-  const config = getConfig();
-  return [
-    createCommandApprovalMiddleware({
-      alwaysAllow: config.permissions?.alwaysAllow ?? [],
-      alwaysDeny: config.permissions?.alwaysDeny ?? [],
-    }),
-    createLoopDetectionMiddleware(3),
-  ];
-}
-
-// Build system prompt with available skills
-function getSystemPrompt(): string {
-  const skills = listSkills();
-  const skillSection = buildSkillPromptSection(
-    skills.map((s) => ({
-      name: s.name,
-      command: s.command,
-      description: s.description,
-    })),
-  );
-  return SYSTEM_PROMPT + skillSection;
-}
 
 export async function POST(req: Request) {
   const { messages, modelId, sessionId } = await req.json();
@@ -60,7 +27,7 @@ export async function POST(req: Request) {
     await addMessage(sid, lastMsg.role, lastMsg.content);
   }
 
-  // Get model (with error handling for missing API key)
+  // Resolve model (with error handling for missing API key)
   let model;
   try {
     model = getModel(modelId);
@@ -73,28 +40,36 @@ export async function POST(req: Request) {
     );
   }
 
-  // Run agent with middleware chain
-  const result = runAgent(
-    {
-      model,
-      systemPrompt: getSystemPrompt(),
-      registry: getToolRegistry(),
-      context: { sessionId: sid, cwd: process.cwd() } as ToolContext,
-      middlewares: getMiddlewares(),
-      maxIterations: 32,
-    },
-    messages,
-    {
-      async onFinish({ text }) {
-        if (sid && text) {
-          await addMessage(sid, "assistant", text);
-          await touchSession(sid);
-        }
-      },
-    },
-  );
+  const runtime = getRuntime();
+  const context: ToolContext = {
+    sessionId: sid,
+    cwd: process.cwd(),
+    // Forward client-cancellation through to long-running tools
+    // (e.g. run_command) so they can abort early.
+    signal: req.signal,
+  };
 
-  return result.toDataStreamResponse({
+  // Stream every iteration's data into a single client-facing stream.
+  // The runtime owns the loop; createDataStreamResponse owns the protocol.
+  return createDataStreamResponse({
     headers: { "X-Session-Id": sid },
+    execute: async (dataStream) => {
+      const result = await runtime.run({
+        model,
+        systemPrompt: SYSTEM_PROMPT,
+        messages,
+        context,
+        onIterationStream: (stream) => {
+          stream.mergeIntoDataStream(dataStream);
+        },
+      });
+
+      if (sid && result.text) {
+        await addMessage(sid, "assistant", result.text);
+        await touchSession(sid);
+      }
+    },
+    onError: (error) =>
+      error instanceof Error ? error.message : "Unknown error",
   });
 }
