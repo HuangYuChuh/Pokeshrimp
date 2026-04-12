@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { PanelLeft, Plus, Puzzle, Settings, X } from "lucide-react";
+import { Plus, Puzzle, Settings, X } from "lucide-react";
 import { useAppState, useAppDispatch } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 
 interface SidebarProps {
   open: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
   onOpenSettings?: () => void;
   onOpenSkills?: () => void;
 }
@@ -23,7 +23,7 @@ interface SidebarProps {
  * Sidebar
  * --------------------------------------------------------------------------- */
 
-export function Sidebar({ open, onToggle, onOpenSettings, onOpenSkills }: SidebarProps) {
+export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
   const { sessions, currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
@@ -79,17 +79,10 @@ export function Sidebar({ open, onToggle, onOpenSettings, onOpenSkills }: Sideba
         open ? "w-[260px]" : "w-0",
       )}
     >
-      {/* macOS traffic light space + sidebar toggle */}
-      <div className="drag flex h-13 shrink-0 items-end justify-end px-3 pb-1">
-        <button
-          type="button"
-          onClick={onToggle}
-          className="nodrag flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
-          title="Close sidebar"
-        >
-          <PanelLeft size={15} strokeWidth={1.5} />
-        </button>
-      </div>
+      {/* macOS traffic light spacer — no interactive elements here to avoid
+          overlap with the native close/minimize/maximize buttons at { x: 12, y: 16 }.
+          Sidebar toggle lives in the ChatPanel header (PanelLeft button). */}
+      <div className="drag h-13 shrink-0" />
 
       {/* New task button */}
       <div className="px-3 pb-4">

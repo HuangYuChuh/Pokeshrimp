@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { AppProvider, useAppDispatch } from "@/lib/store";
+import { AppProvider, useAppDispatch, useAppState } from "@/lib/store";
 import { Sidebar } from "@/components/sidebar";
 import { ChatPanel } from "@/components/chat-panel";
 import { PreviewPanel } from "@/components/preview-panel";
@@ -46,6 +46,7 @@ function HomeInner() {
   const [settingsTab, setSettingsTab] = useState<SettingsTabId>("accounts");
   const chatInputRef = useRef<HTMLTextAreaElement>(null);
   const dispatch = useAppDispatch();
+  const { previewContent } = useAppState();
 
   /* --- Responsive breakpoints ------------------------------------------- */
   const isAbove1200 = useMediaQuery("(min-width: 1200px)");
@@ -68,7 +69,7 @@ function HomeInner() {
   }, []);
 
   const sidebarOpen = sidebarOverride ?? isAbove1200;
-  const previewOpen = previewOverride ?? isAbove1000;
+  const previewOpen = previewOverride ?? false;
 
   const toggleSidebar = useCallback(() => {
     setSidebarOverride((prev) => {
@@ -94,13 +95,17 @@ function HomeInner() {
     });
   }, [isAbove1000]);
 
-  // Reset overrides when crossing responsive breakpoints
+  // Reset sidebar override when crossing responsive breakpoint
   useEffect(() => {
     setSidebarOverride(null);
   }, [isAbove1200]);
+
+  // Auto-expand preview panel when new content arrives
   useEffect(() => {
-    setPreviewOverride(null);
-  }, [isAbove1000]);
+    if (previewContent.type !== "none") {
+      setPreviewOverride(true);
+    }
+  }, [previewContent]);
 
   /* --- Session management ----------------------------------------------- */
   const handleNewSession = useCallback(() => {
