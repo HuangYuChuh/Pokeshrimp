@@ -6,6 +6,7 @@ import { readSkillTool } from "./read-skill";
 import { readDesignfileTool } from "./read-designfile";
 import { rebuildAssetTool } from "./rebuild-asset";
 import { markAssetBuiltTool } from "./mark-asset-built";
+import { runPipelineTool } from "./run-pipeline";
 import type { ToolRegistry } from "../registry";
 
 export const builtinTools = [
@@ -17,6 +18,7 @@ export const builtinTools = [
   readDesignfileTool,
   rebuildAssetTool,
   markAssetBuiltTool,
+  runPipelineTool,
 ];
 
 export function registerBuiltinTools(registry: ToolRegistry): void {
