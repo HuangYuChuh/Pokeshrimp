@@ -55,7 +55,8 @@ npm run dev:web      # Next.js only (http://localhost:3099, no Electron)
 | `npm run build:cli` | Compile CLI entry point |
 | `npm test` | Run vitest test suite (77 tests) |
 | `npx tsc --noEmit` | TypeScript type check |
-| `npx pokeshrimp` | Launch CLI REPL |
+| `npm run cli` | Launch CLI REPL (dev mode, runs TypeScript directly via tsx) |
+| `npx pokeshrimp` | Launch CLI REPL (requires `npm install` to link the bin entry) |
 
 ## Project Structure
 
@@ -123,12 +124,25 @@ echo '{}' # JSON response on stdout
 
 Available events: `session-start`, `pre-tool-call`, `post-tool-call`, `post-generate`, `pre-export`, `on-error`, `on-approve`, `session-end`.
 
+## CLI Mode
+
+There are two ways to run the CLI:
+
+| Method | When to use | How it works |
+|--------|-------------|--------------|
+| `npm run cli` | During development | Runs `src/cli/index.ts` directly via `tsx` — no compile step needed |
+| `npx pokeshrimp` | After `npm install` in the repo | Uses the `bin/pokeshrimp.js` entry point, which bootstraps `tsx` and loads the TypeScript source |
+
+Both methods use the same core agent runtime, skill loading, config system, and tool registry. The difference is only in how Node finds and loads the entry point.
+
+Note: `npx pokeshrimp` works after `npm install` because the `bin` field in `package.json` links `bin/pokeshrimp.js`. It does **not** require a separate build step — the bin script uses `tsx` to run TypeScript directly at runtime.
+
 ## Troubleshooting
 
 **"API key not configured"** — Set `ANTHROPIC_API_KEY` env var or add it in Settings.
 
 **Electron window is blank** — The Next.js dev server takes a few seconds to start. Wait for the terminal to show "Ready in Xs".
 
-**`npx pokeshrimp` doesn't work** — Run `npm install` first so the bin entry is linked.
+**`npx pokeshrimp` doesn't work** — Run `npm install` first so the bin entry is linked. If it still fails, use `npm run cli` as the dev alternative.
 
 **MCP server fails to connect** — Check the server command in config. MCP failures are logged as warnings and don't crash the app.

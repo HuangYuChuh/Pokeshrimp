@@ -79,21 +79,23 @@ What is implemented in this repo today:
 |------|---------------|
 | Desktop shell | Electron app that boots a local Next.js frontend |
 | Chat UI | Conversation interface, model switcher, settings dialog, recent-session sidebar |
-| Agent runtime | Vercel AI SDK based loop with middleware support |
-| Built-in tools | `read_file`, `write_file`, `list_directory`, `run_command` |
+| Agent runtime | Vercel AI SDK based loop with 5 built-in middlewares |
+| Built-in tools | 10 tools: `read_file`, `write_file`, `list_directory`, `run_command`, `read_skill`, `read_designfile`, `rebuild_asset`, `mark_asset_built`, `spawn_agent` + MCP-bridged tools |
+| Designfile | Asset dependency graph (`.visagent/designfile.yaml`) with build state tracking and incremental rebuild |
+| Hooks engine | 8 named lifecycle events (`session-start`, `pre-tool-call`, `post-tool-call`, `post-generate`, `pre-export`, `on-error`, `on-approve`, `session-end`) dispatched to user shell scripts |
+| Interactive approval | Command risk analysis with tiered approval UI (Allow Once / Always Allow / Deny) |
 | Skills | Global + project-level `.skill.md` discovery and slash command suggestions |
 | Persistence | SQLite-backed sessions and messages |
 | CLI mode | Terminal REPL using the same core agent runtime |
 | Config system | Global, project, and local JSON config merge |
+| Test suite | 77 automated tests via Vitest |
 
 What exists but should still be treated as work in progress:
 
 | Area | Notes |
 |------|-------|
-| MCP integration | Client and adapter layers exist, but MCP tools are not yet fully registered into the default runtime path |
+| MCP integration | Client manager and tool adapter exist; configured servers connect at boot, but MCP tooling is not yet a primary workflow |
 | Preview / output workflow | Store and UI scaffolding exist, but the right-side creative inspector is not yet fully connected in the main screen |
-| Hooks / advanced automation | Config schema and execution helpers exist, but this is not yet a finished end-user workflow |
-| Permission UX | Allow/deny policy wiring exists in config, but there is no full interactive approval UI yet |
 
 <a id="quick-start"></a>
 
@@ -269,16 +271,21 @@ What they do not do yet by themselves:
 
 ## Built-in Tools
 
-The default runtime currently exposes these built-in tools:
+The default runtime exposes 10 built-in tools:
 
 | Tool | Purpose |
 |------|---------|
 | `read_file` | Read a file from disk |
 | `write_file` | Write a file to disk |
 | `list_directory` | Inspect directory contents |
-| `run_command` | Execute a shell command |
+| `run_command` | Execute a shell command (subject to permission approval) |
+| `read_skill` | Load a `.skill.md` file into the conversation |
+| `read_designfile` | Read the asset dependency graph from `.visagent/designfile.yaml` |
+| `rebuild_asset` | Trigger an incremental rebuild of a Designfile asset |
+| `mark_asset_built` | Mark an asset as successfully built in the Designfile state |
+| `spawn_agent` | Delegate a sub-task to a child agent with its own tool whitelist |
 
-These are enough for early file-based automation and CLI orchestration.
+Additional tools from configured MCP servers are registered at boot time.
 
 ## CLI Mode
 
@@ -323,15 +330,16 @@ src/
 ├── components/              # Desktop UI components
 ├── cli/                     # Terminal entry point
 ├── core/
-│   ├── agent/               # Runtime loop, middleware, sub-agent scaffolding
+│   ├── agent/               # Runtime loop, middleware chain, sub-agent
 │   ├── ai/                  # Model provider and AI tool bridge
 │   ├── config/              # Config schema and loader
-│   ├── hooks/               # Hook execution primitives
-│   ├── mcp/                 # MCP client and adapter layer
-│   ├── permission/          # Command permission matching
+│   ├── designfile/          # Asset dependency graph and build state
+│   ├── hooks/               # Event-driven hook engine (8 lifecycle events)
+│   ├── mcp/                 # MCP client manager and tool adapter
+│   ├── permission/          # Command risk analysis and interactive approval
 │   ├── session/             # SQLite session manager
 │   ├── skill/               # Skill parser and loader
-│   └── tool/                # Tool types, registry, executor, built-ins
+│   └── tool/                # Tool types, registry, executor, 10 built-ins
 ├── lib/                     # Compatibility wrappers used by UI/API routes
 └── hooks/                   # React hooks
 

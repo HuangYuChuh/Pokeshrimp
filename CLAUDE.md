@@ -26,16 +26,20 @@ AI-powered image & video creative workstation — a CLI orchestrator for visual 
 
 **AgentRuntime + Middleware Chain** — inspired by Claude Code (loop), DeerFlow (middleware), OpenClaw (CLI approval).
 
-- `src/core/agent/` — AgentRuntime (core loop), Middleware, Sub-agent
-- `src/core/tool/` — Tool interface, Registry, Executor, Builtin tools (run_command etc.)
+- `src/core/agent/` — AgentRuntime (core loop), Middleware chain (5 built-in), Sub-agent
+- `src/core/tool/` — Tool interface, Registry, Executor, 10 builtin tools: `read_file`, `write_file`, `list_directory`, `run_command`, `read_skill`, `read_designfile`, `rebuild_asset`, `mark_asset_built` (registered at boot) + `spawn_agent` (registered after runtime init)
 - `src/core/skill/` — Skill engine (.skill.md parsing + prompt injection)
-- `src/core/permission/` — CLI command approval (allow/deny/ask)
+- `src/core/permission/` — CLI command approval (allow/deny/ask) with interactive approval channel
 - `src/core/config/` — Three-level config + Zod validation
+- `src/core/hooks/` — Event-driven hooks engine (8 named events, shell script dispatch)
+- `src/core/designfile/` — Designfile system (asset dependency graph, build state tracking)
 - `src/core/session/` — SQLite persistence
 - `src/core/ai/` — LLM provider abstraction
+- `src/core/mcp/` — MCP client manager and tool adapter
 - `src/app/` — Next.js GUI (thin wrapper over core/)
 - `src/lib/` — Compatibility shims
 - `.visagent/skills/` — Skill files (the ecosystem)
+- `.visagent/hooks/` — Hook scripts (event-driven automation)
 
 **Frozen rules** (do not change):
 1. Agent loop is ONE function: `AgentRuntime.run()`. No other loop mechanisms.
@@ -98,7 +102,7 @@ Use **Conventional Commits** with scope:
 **Types**: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`
 
 **Scopes** (match project modules):
-- `core/tool`, `core/permission`, `core/hooks`, `core/config`, `core/mcp`, `core/skill`, `core/session`, `core/ai`
+- `core/tool`, `core/permission`, `core/hooks`, `core/config`, `core/mcp`, `core/skill`, `core/session`, `core/ai`, `core/designfile`
 - `electron`, `ui`, `api`
 - Omit scope for cross-cutting changes
 
