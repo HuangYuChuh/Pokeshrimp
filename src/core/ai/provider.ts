@@ -113,15 +113,20 @@ export function getModel(
     case "openai": {
       const key = apiKeys?.openai || process.env.OPENAI_API_KEY || "";
       const authMode = apiKeys?.openaiAuthMode ?? detectAuthMode(key);
-      const openai = createOpenAI({ apiKey: key });
 
       if (authMode === "oauth") {
-        // OAuth tokens (from "Login with OpenAI") use the Responses API.
-        // The OAuth flow requests codex_cli_simplified_flow=true which
-        // grants the api.responses.write scope needed for this endpoint.
-        return openai.responses(option.modelId);
+        // OAuth tokens are ChatGPT session tokens (not API platform keys).
+        // They only work against chatgpt.com/backend-api, NOT api.openai.com.
+        // This is how OpenClaw does it — verified from their source code.
+        const codex = createOpenAI({
+          apiKey: key,
+          baseURL: "https://chatgpt.com/backend-api",
+        });
+        return codex.responses(option.modelId);
       }
-      // Standard API keys (sk-xxx) use Chat Completions.
+
+      // Standard API keys (sk-xxx) use the normal OpenAI API.
+      const openai = createOpenAI({ apiKey: key });
       return openai(option.modelId);
     }
     default:
