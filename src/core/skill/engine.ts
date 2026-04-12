@@ -1,8 +1,9 @@
 import fs from "fs";
 import path from "path";
+import { parse as parseYaml } from "yaml";
 import type { Skill, SkillInputParam, SkillOutput } from "./types";
 
-// --- Frontmatter parser (no external deps) ---
+// --- Frontmatter parser ---
 
 interface ParsedSkillFile {
   frontmatter: Record<string, unknown>;
@@ -11,111 +12,51 @@ interface ParsedSkillFile {
 
 /**
  * Parse a SKILL.md file into YAML frontmatter fields and markdown body.
- * Uses simple string splitting — no third-party YAML library needed for
- * the flat/shallow structures used in Skill definitions.
+ *
+ * The frontmatter is delimited by lines containing only `---`, following the
+ * standard Jekyll/Hugo convention. Parsing is delegated to the `yaml` package
+ * so that standard YAML features — nested objects, multiline strings,
+ * comments, quoted values containing colons — all work correctly.
  */
 export function parseSkillFrontmatter(raw: string): ParsedSkillFile {
-  const trimmed = raw.trimStart();
+  const trimmed = raw.replace(/^\uFEFF/, "").trimStart();
   if (!trimmed.startsWith("---")) {
     return { frontmatter: {}, body: trimmed };
   }
 
-  const endIndex = trimmed.indexOf("\n---", 3);
-  if (endIndex === -1) {
+  // Match the opening fence (`---` possibly followed by whitespace + newline)
+  // and the closing fence on its own line.
+  const match = trimmed.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/);
+  if (!match) {
     return { frontmatter: {}, body: trimmed };
   }
 
-  const yamlBlock = trimmed.slice(4, endIndex); // skip opening "---\n"
-  const body = trimmed.slice(endIndex + 4).trim(); // skip closing "---\n"
-  const frontmatter = parseSimpleYaml(yamlBlock);
+  const yamlBlock = match[1];
+  const body = trimmed.slice(match[0].length).trim();
+
+  let parsed: unknown;
+  try {
+    parsed = parseYaml(yamlBlock);
+  } catch {
+    // Malformed YAML falls back to an empty frontmatter so that callers can
+    // still surface a useful error ("missing name/command") without crashing.
+    return { frontmatter: {}, body };
+  }
+
+  const frontmatter =
+    parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : {};
 
   return { frontmatter, body };
 }
 
-/**
- * Minimal YAML parser that handles:
- * - scalar key: value
- * - sequence of scalars (- item)
- * - sequence of objects (- name: ...\n  type: ...)
- */
-function parseSimpleYaml(yaml: string): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  const lines = yaml.split("\n");
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-    if (!line.trim() || line.trim().startsWith("#")) {
-      i++;
-      continue;
-    }
-
-    const topMatch = line.match(/^(\w[\w-]*):\s*(.*)/);
-    if (!topMatch) {
-      i++;
-      continue;
-    }
-
-    const key = topMatch[1];
-    const inlineValue = topMatch[2].trim();
-
-    if (!inlineValue && i + 1 < lines.length && lines[i + 1].match(/^\s+-\s/)) {
-      const items: unknown[] = [];
-      i++;
-      while (i < lines.length && lines[i].match(/^\s+-\s/)) {
-        const itemLine = lines[i];
-        const itemMatch = itemLine.match(/^\s+-\s+(.*)/);
-        if (!itemMatch) {
-          i++;
-          continue;
-        }
-
-        const itemValue = itemMatch[1].trim();
-        const kvMatch = itemValue.match(/^(\w[\w-]*):\s*(.*)/);
-        if (kvMatch) {
-          const obj: Record<string, string> = {};
-          obj[kvMatch[1]] = unquote(kvMatch[2].trim());
-          i++;
-          while (
-            i < lines.length &&
-            lines[i].match(/^\s+\w/) &&
-            !lines[i].match(/^\s+-/)
-          ) {
-            const contMatch = lines[i]
-              .trim()
-              .match(/^(\w[\w-]*):\s*(.*)/);
-            if (contMatch) {
-              obj[contMatch[1]] = unquote(contMatch[2].trim());
-            }
-            i++;
-          }
-          items.push(obj);
-        } else {
-          items.push(unquote(itemValue));
-          i++;
-        }
-      }
-      result[key] = items;
-    } else {
-      result[key] = inlineValue ? unquote(inlineValue) : "";
-      i++;
-    }
-  }
-
-  return result;
-}
-
-function unquote(s: string): string {
-  if (
-    (s.startsWith('"') && s.endsWith('"')) ||
-    (s.startsWith("'") && s.endsWith("'"))
-  ) {
-    return s.slice(1, -1);
-  }
-  return s;
-}
-
 // --- Skill file parsing ---
+
+function toStringOrUndefined(v: unknown): string | undefined {
+  if (v === undefined || v === null) return undefined;
+  return String(v);
+}
 
 export function parseSkillFile(filePath: string): Skill | null {
   let raw: string;
@@ -136,23 +77,33 @@ export function parseSkillFile(filePath: string): Skill | null {
   }
 
   const requiredTools = Array.isArray(frontmatter.requiredTools)
-    ? (frontmatter.requiredTools as string[]).map(String)
+    ? (frontmatter.requiredTools as unknown[]).map((t) => String(t))
     : [];
 
   const inputParams: SkillInputParam[] = Array.isArray(frontmatter.inputParams)
-    ? (frontmatter.inputParams as Record<string, string>[]).map((p) => ({
-        name: p.name || "",
-        type: p.type || "string",
-        description: p.description,
-        default: p.default,
-      }))
+    ? (frontmatter.inputParams as unknown[])
+        .filter(
+          (p): p is Record<string, unknown> =>
+            !!p && typeof p === "object" && !Array.isArray(p),
+        )
+        .map((p) => ({
+          name: String(p.name ?? ""),
+          type: String(p.type ?? "string"),
+          description: toStringOrUndefined(p.description),
+          default: toStringOrUndefined(p.default),
+        }))
     : [];
 
   const outputs: SkillOutput[] = Array.isArray(frontmatter.outputs)
-    ? (frontmatter.outputs as Record<string, string>[]).map((o) => ({
-        type: o.type || "",
-        description: o.description,
-      }))
+    ? (frontmatter.outputs as unknown[])
+        .filter(
+          (o): o is Record<string, unknown> =>
+            !!o && typeof o === "object" && !Array.isArray(o),
+        )
+        .map((o) => ({
+          type: String(o.type ?? ""),
+          description: toStringOrUndefined(o.description),
+        }))
     : [];
 
   return {
