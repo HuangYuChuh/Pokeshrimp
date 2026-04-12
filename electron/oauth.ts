@@ -1,4 +1,4 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindow, net } from "electron";
 import crypto from "crypto";
 import http from "http";
 import { saveTokens } from "./token-store";
@@ -205,7 +205,11 @@ async function exchangeCodeForToken(
   code: string,
   codeVerifier: string,
 ): Promise<OAuthResult> {
-  const response = await fetch(`${AUTH_DOMAIN}/oauth/token`, {
+  // Use Electron's net.fetch instead of Node's fetch so the request
+  // goes through Chromium's network stack and respects system proxy.
+  // Without this, users behind a proxy/VPN will get 403 from OpenAI
+  // because Node's fetch bypasses the system proxy.
+  const response = await net.fetch(`${AUTH_DOMAIN}/oauth/token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -214,7 +218,7 @@ async function exchangeCodeForToken(
       code,
       code_verifier: codeVerifier,
       redirect_uri: REDIRECT_URI,
-    }),
+    }).toString(),
   });
 
   if (!response.ok) {
