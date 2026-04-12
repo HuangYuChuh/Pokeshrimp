@@ -45,6 +45,7 @@ function generatePKCE(): { verifier: string; challenge: string } {
 
 export async function startOpenAIOAuth(): Promise<OAuthResult> {
   const { verifier, challenge } = generatePKCE();
+  const state = crypto.randomBytes(16).toString("hex"); // ≥32 chars, satisfies ≥8 requirement
 
   const authURL = new URL(`${AUTH_DOMAIN}/oauth/authorize`);
   authURL.searchParams.set("response_type", "code");
@@ -53,6 +54,7 @@ export async function startOpenAIOAuth(): Promise<OAuthResult> {
   authURL.searchParams.set("scope", SCOPES);
   authURL.searchParams.set("code_challenge", challenge);
   authURL.searchParams.set("code_challenge_method", "S256");
+  authURL.searchParams.set("state", state);
 
   return new Promise<OAuthResult>((resolve, reject) => {
     const authWindow = new BrowserWindow({
@@ -100,6 +102,7 @@ export async function startOpenAIOAuth(): Promise<OAuthResult> {
 
       const parsed = new URL(url);
       const code = parsed.searchParams.get("code");
+      const returnedState = parsed.searchParams.get("state");
       const error = parsed.searchParams.get("error");
 
       if (error) {
@@ -107,6 +110,11 @@ export async function startOpenAIOAuth(): Promise<OAuthResult> {
           reject,
           new Error(`OAuth error: ${error} - ${parsed.searchParams.get("error_description") ?? ""}`)
         );
+        return;
+      }
+
+      if (returnedState !== state) {
+        settle(reject, new Error("OAuth state mismatch — possible CSRF attack"));
         return;
       }
 
