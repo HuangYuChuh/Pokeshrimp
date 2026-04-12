@@ -1,24 +1,28 @@
 import { BrowserWindow } from "electron";
 import crypto from "crypto";
+import http from "http";
 import { saveTokens } from "./token-store";
 
 /**
  * OpenAI OAuth 2.0 PKCE flow via Electron BrowserWindow.
  *
- * Uses OpenAI's Auth0 tenant (auth0.openai.com) with their known public
- * CLI client ID. The flow opens a BrowserWindow for the user to log in,
- * intercepts the redirect to capture the authorization code, then exchanges
- * it for an access token.
+ * Verified against OpenClaw's @mariozechner/pi-ai/oauth (openai-codex.js).
+ * The flow:
+ *   1. Start a localhost HTTP server on port 1455 to receive the callback
+ *   2. Open a BrowserWindow to OpenAI's authorize endpoint
+ *   3. User logs in on OpenAI
+ *   4. OpenAI redirects to localhost:1455/auth/callback with the auth code
+ *   5. Our HTTP server captures the code, shows a success page, closes
+ *   6. Exchange the code for an access token via POST to /oauth/token
  *
- * If OpenAI changes their Auth0 configuration or revokes the client ID,
- * this flow will fail gracefully and the user can fall back to manually
- * pasting an API key in Settings.
+ * If the port is busy or the flow fails, the user can fall back to
+ * manually pasting an API key in Settings.
  */
 
-// Correct values from OpenClaw's @mariozechner/pi-ai/oauth implementation
 const AUTH_DOMAIN = "https://auth.openai.com";
 const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
 const REDIRECT_URI = "http://localhost:1455/auth/callback";
+const CALLBACK_PORT = 1455;
 const SCOPES = "openid profile email offline_access";
 
 export interface OAuthResult {
@@ -26,6 +30,8 @@ export interface OAuthResult {
   refreshToken: string | null;
   expiresAt: number;
 }
+
+// ─── PKCE ────────────────────────────────────────────────────
 
 function base64URLEncode(buffer: Buffer): string {
   return buffer
@@ -38,14 +44,25 @@ function base64URLEncode(buffer: Buffer): string {
 function generatePKCE(): { verifier: string; challenge: string } {
   const verifier = base64URLEncode(crypto.randomBytes(32));
   const challenge = base64URLEncode(
-    crypto.createHash("sha256").update(verifier).digest()
+    crypto.createHash("sha256").update(verifier).digest(),
   );
   return { verifier, challenge };
 }
 
+// ─── HTML responses for the callback server ──────────────────
+
+const SUCCESS_HTML = `<!DOCTYPE html><html><body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#1a1a2e;color:#e0e0e0">
+<div style="text-align:center"><h1 style="color:#4ade80">✓ Authenticated</h1><p>You can close this window and return to Pokeshrimp.</p></div></body></html>`;
+
+const ERROR_HTML = (msg: string) =>
+  `<!DOCTYPE html><html><body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#1a1a2e;color:#e0e0e0">
+<div style="text-align:center"><h1 style="color:#f87171">✗ Authentication Failed</h1><p>${msg}</p></div></body></html>`;
+
+// ─── Main OAuth flow ─────────────────────────────────────────
+
 export async function startOpenAIOAuth(): Promise<OAuthResult> {
   const { verifier, challenge } = generatePKCE();
-  const state = crypto.randomBytes(16).toString("hex"); // ≥32 chars, satisfies ≥8 requirement
+  const state = crypto.randomBytes(16).toString("hex");
 
   const authURL = new URL(`${AUTH_DOMAIN}/oauth/authorize`);
   authURL.searchParams.set("response_type", "code");
@@ -57,75 +74,75 @@ export async function startOpenAIOAuth(): Promise<OAuthResult> {
   authURL.searchParams.set("state", state);
 
   return new Promise<OAuthResult>((resolve, reject) => {
-    const authWindow = new BrowserWindow({
-      width: 600,
-      height: 700,
-      show: false,
-      autoHideMenuBar: true,
-      webPreferences: {
-        contextIsolation: true,
-        nodeIntegration: false,
-      },
-    });
-
     let settled = false;
+    let callbackServer: http.Server | null = null;
+    let authWindow: BrowserWindow | null = null;
 
-    function settle(
-      fn: typeof resolve | typeof reject,
-      value: OAuthResult | Error
-    ) {
-      if (settled) return;
-      settled = true;
-      if (!authWindow.isDestroyed()) authWindow.close();
-      (fn as (v: unknown) => void)(value);
+    function cleanup() {
+      if (callbackServer) {
+        try { callbackServer.close(); } catch { /* ignore */ }
+        callbackServer = null;
+      }
+      if (authWindow && !authWindow.isDestroyed()) {
+        authWindow.close();
+      }
+      authWindow = null;
     }
 
-    authWindow.once("ready-to-show", () => authWindow.show());
-
-    authWindow.on("closed", () => {
-      if (!settled) {
-        settle(reject, new Error("User closed the login window"));
+    function settle(result: OAuthResult | Error) {
+      if (settled) return;
+      settled = true;
+      // Delay cleanup slightly so the success page renders
+      setTimeout(cleanup, 500);
+      if (result instanceof Error) {
+        reject(result);
+      } else {
+        resolve(result);
       }
-    });
+    }
 
-    // Intercept navigation to the redirect URI
-    authWindow.webContents.on("will-redirect", (_event, url) => {
-      handleRedirect(url);
-    });
+    // 1. Start localhost HTTP server to receive the OAuth callback
+    callbackServer = http.createServer((req, res) => {
+      if (!req.url?.startsWith("/auth/callback")) {
+        res.writeHead(404);
+        res.end("Not found");
+        return;
+      }
 
-    authWindow.webContents.on("will-navigate", (_event, url) => {
-      handleRedirect(url);
-    });
-
-    function handleRedirect(url: string) {
-      if (!url.startsWith(REDIRECT_URI)) return;
-
-      const parsed = new URL(url);
-      const code = parsed.searchParams.get("code");
-      const returnedState = parsed.searchParams.get("state");
-      const error = parsed.searchParams.get("error");
+      const url = new URL(req.url, `http://localhost:${CALLBACK_PORT}`);
+      const code = url.searchParams.get("code");
+      const returnedState = url.searchParams.get("state");
+      const error = url.searchParams.get("error");
+      const errorDesc = url.searchParams.get("error_description");
 
       if (error) {
-        settle(
-          reject,
-          new Error(`OAuth error: ${error} - ${parsed.searchParams.get("error_description") ?? ""}`)
-        );
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(ERROR_HTML(`${error}: ${errorDesc ?? "Unknown error"}`));
+        settle(new Error(`OAuth error: ${error} - ${errorDesc ?? ""}`));
         return;
       }
 
       if (returnedState !== state) {
-        settle(reject, new Error("OAuth state mismatch — possible CSRF attack"));
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(ERROR_HTML("State mismatch — possible CSRF attack"));
+        settle(new Error("OAuth state mismatch"));
         return;
       }
 
       if (!code) {
-        settle(reject, new Error("No authorization code in redirect"));
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(ERROR_HTML("No authorization code received"));
+        settle(new Error("No authorization code in callback"));
         return;
       }
 
+      // Show success page immediately
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(SUCCESS_HTML);
+
+      // Exchange code for token
       exchangeCodeForToken(code, verifier)
         .then((result) => {
-          // Persist tokens to secure file store
           if (result.refreshToken) {
             saveTokens("openai", {
               accessToken: result.accessToken,
@@ -133,14 +150,49 @@ export async function startOpenAIOAuth(): Promise<OAuthResult> {
               expiresAt: result.expiresAt,
             });
           }
-          settle(resolve, result);
+          settle(result);
         })
-        .catch((err) => settle(reject, err));
-    }
+        .catch((err) => settle(err instanceof Error ? err : new Error(String(err))));
+    });
 
-    authWindow.loadURL(authURL.toString());
+    callbackServer.on("error", (err) => {
+      settle(
+        new Error(
+          `Cannot start OAuth callback server on port ${CALLBACK_PORT}: ${err.message}. ` +
+            `Another application may be using this port.`,
+        ),
+      );
+    });
+
+    callbackServer.listen(CALLBACK_PORT, "127.0.0.1", () => {
+      // 2. Open BrowserWindow to the authorize URL
+      authWindow = new BrowserWindow({
+        width: 600,
+        height: 700,
+        show: false,
+        title: "Login with OpenAI — Pokeshrimp",
+        autoHideMenuBar: true,
+        webPreferences: {
+          contextIsolation: true,
+          nodeIntegration: false,
+        },
+      });
+
+      authWindow.once("ready-to-show", () => authWindow?.show());
+
+      authWindow.on("closed", () => {
+        authWindow = null;
+        if (!settled) {
+          settle(new Error("User closed the login window"));
+        }
+      });
+
+      authWindow.loadURL(authURL.toString());
+    });
   });
 }
+
+// ─── Token Exchange ──────────────────────────────────────────
 
 interface TokenExchangeResponse {
   access_token: string;
@@ -151,7 +203,7 @@ interface TokenExchangeResponse {
 
 async function exchangeCodeForToken(
   code: string,
-  codeVerifier: string
+  codeVerifier: string,
 ): Promise<OAuthResult> {
   const response = await fetch(`${AUTH_DOMAIN}/oauth/token`, {
     method: "POST",
@@ -166,7 +218,7 @@ async function exchangeCodeForToken(
   });
 
   if (!response.ok) {
-    const text = await response.text();
+    const text = await response.text().catch(() => "");
     throw new Error(`Token exchange failed (${response.status}): ${text}`);
   }
 
