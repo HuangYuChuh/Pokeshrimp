@@ -1,3 +1,4 @@
+import { net } from "electron";
 import { saveTokens, clearTokens, type TokenSet } from "./token-store";
 
 const AUTH_DOMAIN = "https://auth.openai.com";
@@ -14,14 +15,14 @@ export async function refreshAccessToken(
   refreshToken: string
 ): Promise<TokenSet | null> {
   try {
-    const response = await fetch(`${AUTH_DOMAIN}/oauth/token`, {
+    const response = await net.fetch(`${AUTH_DOMAIN}/oauth/token`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: JSON.stringify({
+      body: new URLSearchParams({
         grant_type: "refresh_token",
         client_id: CLIENT_ID,
         refresh_token: refreshToken,
-      }),
+      }).toString(),
     });
 
     if (!response.ok) {
