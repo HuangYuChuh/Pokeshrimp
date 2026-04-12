@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ZoomIn, ZoomOut, Maximize } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize, Music } from "lucide-react";
 
 interface PreviewPanelProps {
   open: boolean;
@@ -65,6 +65,18 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
       </Tabs>
     </aside>
   );
+}
+
+const VIDEO_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
+const AUDIO_EXTENSIONS = ["mp3", "wav", "flac", "ogg"];
+const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp"];
+
+function getMediaType(url: string): "image" | "video" | "audio" | "unknown" {
+  const ext = url.split(".").pop()?.toLowerCase();
+  if (ext && VIDEO_EXTENSIONS.includes(ext)) return "video";
+  if (ext && AUDIO_EXTENSIONS.includes(ext)) return "audio";
+  if (ext && IMAGE_EXTENSIONS.includes(ext)) return "image";
+  return "unknown";
 }
 
 const MIN_ZOOM = 0.1;
@@ -144,6 +156,42 @@ function PreviewContent({
   const handlePointerUp = useCallback(() => {
     isDragging.current = false;
   }, []);
+
+  // Resolve effective media type: explicit type or detect from URL extension
+  const effectiveType =
+    content.type === "video" || content.type === "audio"
+      ? content.type
+      : content.url
+        ? getMediaType(content.url)
+        : content.type;
+
+  if (effectiveType === "video" && content.url) {
+    return (
+      <div className="flex h-full items-center justify-center p-4">
+        <video
+          key={content.url}
+          controls
+          preload="metadata"
+          className="max-h-full max-w-full rounded-lg object-contain"
+        >
+          <source src={content.url} />
+        </video>
+      </div>
+    );
+  }
+
+  if (effectiveType === "audio" && content.url) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 p-4">
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
+          <Music className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <audio key={content.url} controls preload="metadata" className="w-full max-w-xs">
+          <source src={content.url} />
+        </audio>
+      </div>
+    );
+  }
 
   if (content.type === "image" && content.url) {
     return (

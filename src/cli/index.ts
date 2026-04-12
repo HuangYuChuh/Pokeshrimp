@@ -8,6 +8,7 @@ import { SYSTEM_PROMPT } from "@/core/ai/system-prompt";
 import { getConfig } from "@/core/config/loader";
 import { getRuntime } from "@/core/init";
 import { parseArgs, getHelpText } from "./args";
+import { handleInit } from "./init";
 import type { CoreMessage } from "ai";
 
 // ─── Parse CLI arguments ────────────────────────────────────
@@ -37,6 +38,13 @@ if (opts.version) {
 
 if (opts.cwd) {
   process.chdir(resolve(opts.cwd));
+}
+
+// ─── Subcommands ───────────────────────────────────────────
+
+if (opts.subcommand === "init") {
+  handleInit(opts.message, opts.cwd ? process.cwd() : undefined);
+  process.exit(0);
 }
 
 // ─── Setup ──────────────────────────────────────────────────

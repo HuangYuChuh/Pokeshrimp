@@ -19,7 +19,7 @@ export interface Session {
 export type PreviewTab = "preview" | "editor" | "output";
 
 export interface PreviewContent {
-  type: "image" | "text" | "none";
+  type: "image" | "video" | "audio" | "text" | "none";
   url?: string;
   text?: string;
 }

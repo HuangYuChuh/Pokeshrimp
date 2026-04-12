@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { useRef, useEffect, useCallback, useState, useMemo, type KeyboardEvent } from "react";
 import { useAppState, useAppDispatch, type OutputFile } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { ChevronDown as ChevronDownIcon, Pencil, Trash2, RefreshCw, PanelLeft, PanelRight } from "lucide-react";
+import { ChevronDown as ChevronDownIcon, Pencil, Trash2, RefreshCw, PanelLeft, PanelRight, Paperclip, X, FileIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowUp, ChevronDown } from "lucide-react";
@@ -158,6 +158,13 @@ export function ChatPanel({ modelId, onModelChange, inputRef, sidebarOpen, previ
     [input, isLoading, handleSubmit],
   );
 
+  const handleSubmitWithAttachments = useCallback(
+    (e: React.FormEvent<HTMLFormElement>, options?: { experimental_attachments?: FileList }) => {
+      handleSubmit(e, options);
+    },
+    [handleSubmit],
+  );
+
   const handleSelectSkill = useCallback(
     (command: string) => {
       setInput(command + " ");
@@ -284,7 +291,7 @@ export function ChatPanel({ modelId, onModelChange, inputRef, sidebarOpen, previ
             skills={skills}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmitWithAttachments}
             onSelectSkill={handleSelectSkill}
           />
         </div>
@@ -384,7 +391,7 @@ editingId === message.id ? (
             skills={skills}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmitWithAttachments}
             onSelectSkill={handleSelectSkill}
           />
         </>
@@ -559,6 +566,44 @@ function EditBubble({
 import { forwardRef } from "react";
 import { Slash } from "lucide-react";
 
+/* ─── Attachment helpers ─── */
+
+interface LocalAttachment {
+  id: string;
+  file: File;
+  name: string;
+  size: number;
+  type: string;
+  previewUrl?: string; // object URL for image thumbnails
+}
+
+function isImageType(mimeType: string) {
+  return mimeType.startsWith("image/");
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+let attachmentIdCounter = 0;
+function createLocalAttachment(file: File): LocalAttachment {
+  const id = `att-${++attachmentIdCounter}-${Date.now()}`;
+  return {
+    id,
+    file,
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    previewUrl: isImageType(file.type) ? URL.createObjectURL(file) : undefined,
+  };
+}
+
+const ACCEPTED_TYPES = "image/*,.pdf,.txt,.md,.json,.csv,.svg,.html,.css,.js,.ts,.tsx,.jsx,.yaml,.yml,.xml,.log,.sh,.py,.zip";
+
+/* ─── Input Area ─── */
+
 interface InputAreaProps {
   input: string;
   isLoading: boolean;
@@ -568,7 +613,7 @@ interface InputAreaProps {
   onModelChange: (id: string) => void;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>, options?: { experimental_attachments?: FileList }) => void;
   onSelectSkill: (command: string) => void;
 }
 
@@ -577,6 +622,10 @@ const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
     { input, isLoading, modelLabel, modelId, skills, onModelChange, onChange, onKeyDown, onSubmit, onSelectSkill },
     ref
   ) {
+    const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
+    const [isDragOver, setIsDragOver] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     // Show skill menu when input starts with "/" (no space yet)
     const slashQuery = input.startsWith("/") && !input.includes(" ") ? input.slice(1).toLowerCase() : null;
     const filteredSkills = slashQuery !== null
@@ -587,9 +636,88 @@ const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
       : [];
     const isSlashMode = slashQuery !== null && filteredSkills.length > 0;
 
+    const addFiles = useCallback((files: FileList | File[]) => {
+      const newAttachments = Array.from(files).map(createLocalAttachment);
+      setAttachments((prev) => [...prev, ...newAttachments]);
+    }, []);
+
+    const removeAttachment = useCallback((id: string) => {
+      setAttachments((prev) => {
+        const removed = prev.find((a) => a.id === id);
+        if (removed?.previewUrl) URL.revokeObjectURL(removed.previewUrl);
+        return prev.filter((a) => a.id !== id);
+      });
+    }, []);
+
+    const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files.length > 0) {
+        addFiles(e.target.files);
+      }
+      // Reset so the same file can be re-selected
+      e.target.value = "";
+    }, [addFiles]);
+
+    const handleDragOver = useCallback((e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(true);
+    }, []);
+
+    const handleDragLeave = useCallback((e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
+    }, []);
+
+    const handleDrop = useCallback((e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        addFiles(e.dataTransfer.files);
+      }
+    }, [addFiles]);
+
+    const handleFormSubmit = useCallback(
+      (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if ((!input.trim() && attachments.length === 0) || isLoading) return;
+        // Build a FileList from attached files using DataTransfer
+        let fileList: FileList | undefined;
+        if (attachments.length > 0) {
+          const dt = new DataTransfer();
+          for (const a of attachments) dt.items.add(a.file);
+          fileList = dt.files;
+        }
+        // Clean up preview URLs
+        for (const a of attachments) {
+          if (a.previewUrl) URL.revokeObjectURL(a.previewUrl);
+        }
+        setAttachments([]);
+        onSubmit(e, fileList ? { experimental_attachments: fileList } : undefined);
+      },
+      [input, attachments, isLoading, onSubmit],
+    );
+
+    // Allow Enter to submit with attachments even if input is empty
+    const handleKeyDownWithAttachments = useCallback(
+      (e: KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          if (attachments.length > 0 && !input.trim() && !isLoading) {
+            e.preventDefault();
+            const syntheticEvent = { preventDefault: () => {} } as React.FormEvent<HTMLFormElement>;
+            handleFormSubmit(syntheticEvent);
+            return;
+          }
+        }
+        onKeyDown(e);
+      },
+      [attachments, input, isLoading, onKeyDown, handleFormSubmit],
+    );
+
     return (
       <div className="shrink-0 px-3 pb-4 sm:px-6 sm:pb-6">
-        <form onSubmit={onSubmit} className="relative mx-auto max-w-[680px]">
+        <form onSubmit={handleFormSubmit} className="relative mx-auto max-w-[680px]">
           {/* Slash command popup */}
           {isSlashMode && (
             <div className="absolute bottom-full left-0 mb-2 w-full rounded-xl border border-border bg-popover p-1 shadow-lg">
@@ -614,19 +742,80 @@ const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
             </div>
           )}
 
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <div
+            className={cn(
+              "overflow-hidden rounded-2xl border bg-card shadow-sm transition-colors",
+              isDragOver ? "border-primary bg-primary/5" : "border-border",
+            )}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            {/* Attachment previews */}
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 px-4 pt-3">
+                {attachments.map((att) => (
+                  <div
+                    key={att.id}
+                    className="group/att relative flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-2.5 py-1.5"
+                  >
+                    {att.previewUrl ? (
+                      <img
+                        src={att.previewUrl}
+                        alt={att.name}
+                        className="h-10 w-10 rounded object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded bg-muted">
+                        <FileIcon size={16} className="text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="min-w-0 max-w-[120px]">
+                      <div className="truncate text-[12px] font-medium text-foreground">{att.name}</div>
+                      <div className="text-[11px] text-muted-foreground">{formatFileSize(att.size)}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(att.id)}
+                      className="nodrag absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-background opacity-0 transition-opacity group-hover/att:opacity-100"
+                    >
+                      <X size={10} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <textarea
               ref={ref}
               value={input}
               onChange={onChange}
-              onKeyDown={onKeyDown}
+              onKeyDown={handleKeyDownWithAttachments}
               placeholder="描述你的需求，输入 / 查看可用技能..."
               rows={1}
               disabled={isLoading}
               className="selectable nodrag block w-full resize-none bg-transparent px-4 pt-4 pb-2 text-[14px] leading-6 text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:opacity-50"
             />
             <div className="flex items-center justify-between px-3 pb-2.5">
-              <div />
+              <div className="flex items-center">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept={ACCEPTED_TYPES}
+                  onChange={handleFileInputChange}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading}
+                  className="nodrag flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+                  title="Attach files"
+                >
+                  <Paperclip size={15} strokeWidth={1.5} />
+                </button>
+              </div>
               <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger className="nodrag flex h-7 items-center gap-1 rounded-lg px-2 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none">
@@ -645,7 +834,7 @@ const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
                 </DropdownMenu>
                 <button
                   type="submit"
-                  disabled={!input.trim() || isLoading}
+                  disabled={(!input.trim() && attachments.length === 0) || isLoading}
                   className="nodrag flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity disabled:opacity-20"
                 >
                   <ArrowUp size={15} strokeWidth={2} />

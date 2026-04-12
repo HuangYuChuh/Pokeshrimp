@@ -13,17 +13,23 @@ export interface CliOptions {
   json: boolean;
   help: boolean;
   version: boolean;
+  /** Subcommand (e.g. "init"). */
+  subcommand?: string;
   /** Positional message (one-shot mode). */
   message?: string;
 }
 
 const HELP_TEXT = `
 Usage: pokeshrimp [options] [message]
+       pokeshrimp init [project-name]
 
 AI-powered image & video creative workstation CLI.
 
 If a message is provided (positional arg or piped via stdin),
 run it as a one-shot query. Otherwise start an interactive REPL.
+
+Commands:
+  init [project-name]  Scaffold a new .visagent/ project directory
 
 Options:
   -m, --model <id>     Model to use (default: from config or "claude-sonnet")
@@ -93,7 +99,15 @@ export function parseArgs(argv: string[]): CliOptions {
     }
   }
 
-  if (positional.length > 0) {
+  // Detect subcommands (first positional word)
+  const SUBCOMMANDS = ["init"];
+  if (positional.length > 0 && SUBCOMMANDS.includes(positional[0]!)) {
+    opts.subcommand = positional[0];
+    // Remaining positional args become the message (e.g. project name)
+    if (positional.length > 1) {
+      opts.message = positional.slice(1).join(" ");
+    }
+  } else if (positional.length > 0) {
     opts.message = positional.join(" ");
   }
 
