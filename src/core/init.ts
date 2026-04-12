@@ -14,7 +14,9 @@ import {
   type Middleware,
 } from "@/core/agent";
 import { listSkills } from "@/core/skill/engine";
+import { getModel } from "@/core/ai/provider";
 import type { AppConfig } from "@/core/config/schema";
+import type { LanguageModel } from "ai";
 
 let registry: ToolRegistry | null = null;
 let runtime: AgentRuntime | null = null;
@@ -77,6 +79,26 @@ function buildMiddlewares(): Middleware[] {
     createContextCompactionMiddleware({
       maxCharBudget: 80_000,
       keepRecent: 8,
+      // Resolve the summarizer model lazily: API keys may not be
+      // present at boot (e.g. first-run desktop app before the user
+      // pastes a key). Re-reading config on each compaction lets us
+      // pick up keys added mid-session without restarting.
+      summarizerModel: (): LanguageModel | undefined => {
+        const cfg = getConfig();
+        const anthropicKey =
+          cfg.apiKeys?.anthropic || process.env.ANTHROPIC_API_KEY;
+        const openaiKey = cfg.apiKeys?.openai || process.env.OPENAI_API_KEY;
+        if (!anthropicKey && !openaiKey) return undefined;
+        try {
+          // Prefer the cheap/fast Haiku tier for summarization.
+          return getModel("claude-haiku", {
+            anthropic: cfg.apiKeys?.anthropic,
+            openai: cfg.apiKeys?.openai,
+          });
+        } catch {
+          return undefined;
+        }
+      },
     }),
   ];
 }

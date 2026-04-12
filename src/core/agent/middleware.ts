@@ -1,4 +1,4 @@
-import type { CoreMessage } from "ai";
+import { generateText, type CoreMessage, type LanguageModel } from "ai";
 import type { ToolResult } from "@/core/tool/types";
 import { classifyCommand } from "@/core/permission/checker";
 
@@ -237,19 +237,41 @@ export interface ContextCompactionConfig {
   /** Number of recent messages to keep verbatim. */
   keepRecent?: number;
   /**
-   * Optional summarizer. If omitted, older messages are replaced
-   * with a placeholder (truncation only). Wire a real LLM-based
-   * summarizer here for higher-quality compaction.
+   * Custom summarizer. If provided, it takes precedence over
+   * `summarizerModel`. Return a plain-text synopsis of the given
+   * messages.
    */
   summarize?: (messages: CoreMessage[]) => Promise<string>;
+  /**
+   * Fallback LLM-backed summarizer. Used when `summarize` is not
+   * given. Accepts either a live `LanguageModel` or a thunk that
+   * resolves one lazily (so callers can defer model construction
+   * until API keys are actually available). Return/yield `undefined`
+   * to opt out — compaction will then degrade to the placeholder
+   * string.
+   */
+  summarizerModel?: LanguageModel | (() => LanguageModel | undefined);
 }
 
 /**
  * Per docs/01 §3.2 #4: 上下文超长时自动压缩.
  *
- * Strategy: when total characters exceed the budget, replace
- * everything older than the last `keepRecent` messages with a
- * single condensed system note.
+ * Strategy: when the serialized message history exceeds the budget,
+ * everything older than the last `keepRecent` messages is replaced
+ * with a single condensed system note. The condensation has three
+ * modes, tried in order:
+ *
+ *   1. `config.summarize` — a caller-supplied async function. Wins
+ *      if provided.
+ *   2. `config.summarizerModel` — a `LanguageModel` (or lazy thunk
+ *      returning one). We build a compact summarization prompt and
+ *      call `generateText` from the `ai` package.
+ *   3. Placeholder fallback — `"[N earlier messages omitted...]"`.
+ *      Also used when modes 1 and 2 throw, so compaction can never
+ *      crash the main runtime loop.
+ *
+ * Summaries are cached by `splitAt` so we don't re-summarize the
+ * same prefix on every iteration.
  */
 export function createContextCompactionMiddleware(
   config: ContextCompactionConfig = {},
@@ -257,6 +279,19 @@ export function createContextCompactionMiddleware(
   const maxCharBudget = config.maxCharBudget ?? 80_000;
   const keepRecent = config.keepRecent ?? 6;
   let cachedSummary: { upTo: number; text: string } | null = null;
+
+  const resolveModel = (): LanguageModel | undefined => {
+    const m = config.summarizerModel;
+    if (!m) return undefined;
+    if (typeof m === "function") {
+      try {
+        return (m as () => LanguageModel | undefined)();
+      } catch {
+        return undefined;
+      }
+    }
+    return m;
+  };
 
   return {
     name: "ContextCompaction",
@@ -269,14 +304,29 @@ export function createContextCompactionMiddleware(
       const oldPart = messages.slice(0, splitAt);
       const recent = messages.slice(splitAt);
 
-      let summary: string;
+      const placeholder = `[${oldPart.length} earlier messages omitted to save context]`;
+      let summary = placeholder;
+
       if (cachedSummary && cachedSummary.upTo === splitAt) {
         summary = cachedSummary.text;
       } else if (config.summarize) {
-        summary = await config.summarize(oldPart);
-        cachedSummary = { upTo: splitAt, text: summary };
+        try {
+          summary = await config.summarize(oldPart);
+          cachedSummary = { upTo: splitAt, text: summary };
+        } catch {
+          // Degrade to placeholder rather than crashing the loop.
+          summary = placeholder;
+        }
       } else {
-        summary = `[${oldPart.length} earlier messages omitted to save context]`;
+        const model = resolveModel();
+        if (model) {
+          try {
+            summary = await summarizeWithModel(model, oldPart);
+            cachedSummary = { upTo: splitAt, text: summary };
+          } catch {
+            summary = placeholder;
+          }
+        }
       }
 
       const summaryMessage: CoreMessage = {
@@ -286,6 +336,85 @@ export function createContextCompactionMiddleware(
       return [summaryMessage, ...recent];
     },
   };
+}
+
+const SUMMARIZER_SYSTEM_PROMPT =
+  "You are a conversation summarizer. Compress the following messages " +
+  "into a brief synopsis preserving facts, decisions, file paths, and " +
+  "tool outcomes. Output plain text only, no preamble.";
+
+async function summarizeWithModel(
+  model: LanguageModel,
+  oldPart: CoreMessage[],
+): Promise<string> {
+  const transcript = serializeMessagesForSummary(oldPart);
+  const result = await generateText({
+    model,
+    system: SUMMARIZER_SYSTEM_PROMPT,
+    prompt: transcript,
+  });
+  const text = (result.text ?? "").trim();
+  if (!text) {
+    throw new Error("Summarizer returned empty text");
+  }
+  return text;
+}
+
+/**
+ * Render messages as `role: content` lines for the summarizer. Tool
+ * calls surface their name and a short argument preview; tool results
+ * surface success/error plus a truncated payload. Long strings are
+ * clipped so a runaway transcript can't blow up the summarizer call.
+ */
+function serializeMessagesForSummary(messages: CoreMessage[]): string {
+  const lines: string[] = [];
+  for (const m of messages) {
+    lines.push(`${m.role}: ${renderContentForSummary(m.content)}`);
+  }
+  return lines.join("\n");
+}
+
+function renderContentForSummary(content: CoreMessage["content"]): string {
+  if (typeof content === "string") return clip(content, 2_000);
+  if (!Array.isArray(content)) return "";
+  const parts: string[] = [];
+  for (const part of content) {
+    if (!part || typeof part !== "object") continue;
+    const p = part as {
+      type?: string;
+      text?: unknown;
+      toolName?: unknown;
+      args?: unknown;
+      result?: unknown;
+      isError?: unknown;
+    };
+    if (p.type === "text" && typeof p.text === "string") {
+      parts.push(clip(p.text, 2_000));
+    } else if (p.type === "tool-call") {
+      const name = typeof p.toolName === "string" ? p.toolName : "tool";
+      parts.push(`<tool-call ${name}(${clip(safeJson(p.args), 300)})>`);
+    } else if (p.type === "tool-result") {
+      const name = typeof p.toolName === "string" ? p.toolName : "tool";
+      const outcome = p.isError ? "error" : "ok";
+      const payload =
+        typeof p.result === "string" ? p.result : safeJson(p.result);
+      parts.push(`<tool-result ${name} ${outcome}: ${clip(payload, 500)}>`);
+    }
+  }
+  return parts.join(" ");
+}
+
+function clip(s: string, max: number): string {
+  if (s.length <= max) return s;
+  return s.slice(0, max) + `…(+${s.length - max} chars)`;
+}
+
+function safeJson(v: unknown): string {
+  try {
+    return JSON.stringify(v) ?? "";
+  } catch {
+    return "[unserializable]";
+  }
 }
 
 function estimateChars(m: CoreMessage): number {

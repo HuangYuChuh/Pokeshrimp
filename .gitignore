@@ -1,5 +1,5 @@
-# 内部文档
-docs/
+# 内部文档（编号前缀的产品/架构文档不公开，公开参考文档照常 tracked）
+docs/0*-*
 VisAgent-产品定义与技术架构方案.md
 
 # Dependencies

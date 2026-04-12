@@ -1,9 +1,19 @@
 import { createDataStreamResponse } from "ai";
-import { getModel } from "@/lib/ai";
+import { getModel, MODEL_OPTIONS } from "@/core/ai/provider";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 import { createSession, addMessage, touchSession } from "@/lib/db";
 import { getRuntime } from "@/core/init";
+import { getConfig } from "@/core/config/loader";
 import type { ToolContext } from "@/core/tool/types";
+
+function missingApiKeyResponse(provider: string): Response {
+  return new Response(
+    JSON.stringify({
+      error: `${provider} API key not configured. Open Settings to add your API key.`,
+    }),
+    { status: 401, headers: { "Content-Type": "application/json" } },
+  );
+}
 
 export async function POST(req: Request) {
   const { messages, modelId, sessionId } = await req.json();
@@ -27,16 +37,38 @@ export async function POST(req: Request) {
     await addMessage(sid, lastMsg.role, lastMsg.content);
   }
 
-  // Resolve model (with error handling for missing API key)
+  // Preflight: figure out which provider this model uses, and verify its
+  // key is set in either config or env. The Anthropic/OpenAI SDKs don't
+  // throw at construction time when the key is missing, so without this
+  // check the failure only surfaces ~10s later after internal retries.
+  const config = getConfig();
+  const option = MODEL_OPTIONS.find((m) => m.id === (modelId ?? "claude-sonnet"));
+  if (!option) {
+    return new Response(
+      JSON.stringify({ error: `Unknown model: ${modelId}` }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+  const apiKey =
+    option.provider === "anthropic"
+      ? config.apiKeys?.anthropic || process.env.ANTHROPIC_API_KEY
+      : config.apiKeys?.openai || process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return missingApiKeyResponse(option.provider);
+  }
+
   let model;
   try {
-    model = getModel(modelId);
-  } catch {
+    model = getModel(option.id, {
+      anthropic: config.apiKeys?.anthropic,
+      openai: config.apiKeys?.openai,
+    });
+  } catch (err) {
     return new Response(
       JSON.stringify({
-        error: "API key not configured. Open Settings to add your API key.",
+        error: err instanceof Error ? err.message : "Failed to resolve model",
       }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
+      { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
 
