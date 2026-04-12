@@ -113,12 +113,12 @@ export function getModel(
     case "openai": {
       const key = apiKeys?.openai || process.env.OPENAI_API_KEY || "";
       const authMode = apiKeys?.openaiAuthMode ?? detectAuthMode(key);
-
       const openai = createOpenAI({ apiKey: key });
 
       if (authMode === "oauth") {
-        // OAuth tokens (from "Login with OpenAI") work with the
-        // Responses API (/v1/responses), not Chat Completions.
+        // OAuth tokens (from "Login with OpenAI") use the Responses API.
+        // The OAuth flow requests codex_cli_simplified_flow=true which
+        // grants the api.responses.write scope needed for this endpoint.
         return openai.responses(option.modelId);
       }
       // Standard API keys (sk-xxx) use Chat Completions.
