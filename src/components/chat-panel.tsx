@@ -10,6 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowUp, ChevronDown } from "lucide-react";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
 import { ApprovalCard, parseApprovalEvents } from "@/components/approval-card";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -17,6 +19,33 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
+
+/* ─── Markdown Components ─── */
+
+const markdownComponents: Components = {
+  code({ className, children, ...props }) {
+    const isInline = !className;
+    if (isInline) {
+      return (
+        <code className="rounded bg-muted px-1.5 py-0.5 text-[13px]" {...props}>
+          {children}
+        </code>
+      );
+    }
+    return (
+      <pre className="overflow-x-auto rounded-lg bg-zinc-900 p-4 text-[13px]">
+        <code className={className} {...props}>
+          {children}
+        </code>
+      </pre>
+    );
+  },
+  pre({ children }) {
+    // Avoid double-wrapping: ReactMarkdown wraps code blocks in <pre><code>,
+    // but our custom `code` already renders the <pre> for block code.
+    return <>{children}</>;
+  },
+};
 
 interface ChatPanelProps {
   modelId: string;
@@ -179,16 +208,20 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
                         message.role === "user" ? "justify-end" : "justify-start"
                       )}
                     >
-                      <div
-                        className={cn(
-                          "max-w-[85%] whitespace-pre-wrap break-words text-[14px] leading-7",
-                          message.role === "user"
-                            ? "rounded-2xl bg-primary px-4 py-2.5 text-primary-foreground"
-                            : "text-foreground"
-                        )}
-                      >
-                        {message.content}
-                      </div>
+                      {message.role === "user" ? (
+                        <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl bg-primary px-4 py-2.5 text-[14px] leading-7 text-primary-foreground">
+                          {message.content}
+                        </div>
+                      ) : (
+                        <div className="max-w-[85%] prose prose-sm dark:prose-invert max-w-none text-[14px] leading-7 text-foreground">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={markdownComponents}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
+                      )}
                     </div>
                   )}
 

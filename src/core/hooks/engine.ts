@@ -181,8 +181,14 @@ function executeScript(
       }
     });
 
-    proc.stdin.write(JSON.stringify(payload));
-    proc.stdin.end();
+    // Guard against EPIPE if the child exits before we finish writing
+    proc.stdin.on("error", () => {});
+    try {
+      proc.stdin.write(JSON.stringify(payload));
+      proc.stdin.end();
+    } catch {
+      // Child already exited — finish() will handle it via the close event
+    }
   });
 }
 
