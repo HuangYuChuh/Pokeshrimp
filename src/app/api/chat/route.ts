@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { createDataStreamResponse } from "ai";
 import { getModel, MODEL_OPTIONS } from "@/core/ai/provider";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
@@ -6,6 +7,16 @@ import { getRuntime } from "@/core/init";
 import { getConfig } from "@/core/config/loader";
 import { approvalBus } from "@/app/api/approval/channel";
 import type { ToolContext } from "@/core/tool/types";
+import type { CoreMessage } from "ai";
+
+const ChatRequestSchema = z.object({
+  messages: z.array(z.object({
+    role: z.string(),
+    content: z.unknown(),
+  }).passthrough()),
+  modelId: z.string().optional(),
+  sessionId: z.string().optional(),
+});
 
 function missingApiKeyResponse(provider: string): Response {
   return new Response(
@@ -17,7 +28,15 @@ function missingApiKeyResponse(provider: string): Response {
 }
 
 export async function POST(req: Request) {
-  const { messages, modelId, sessionId } = await req.json();
+  const body = await req.json();
+  const parsed = ChatRequestSchema.safeParse(body);
+  if (!parsed.success) {
+    return new Response(
+      JSON.stringify({ error: parsed.error.message }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+  const { messages, modelId, sessionId } = parsed.data;
 
   // Auto-create session
   let sid = sessionId as string | undefined;
@@ -35,7 +54,7 @@ export async function POST(req: Request) {
   // Persist latest user message
   const lastMsg = messages[messages.length - 1];
   if (lastMsg) {
-    await addMessage(sid, lastMsg.role, lastMsg.content);
+    await addMessage(sid, lastMsg.role, lastMsg.content as string);
   }
 
   // Preflight: figure out which provider this model uses, and verify its
@@ -101,7 +120,7 @@ export async function POST(req: Request) {
       const result = await runtime.run({
         model,
         systemPrompt: SYSTEM_PROMPT,
-        messages,
+        messages: messages as CoreMessage[],
         context: contextWithApproval,
         onIterationStream: (stream) => {
           stream.mergeIntoDataStream(dataStream);
