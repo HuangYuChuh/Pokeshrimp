@@ -12,6 +12,7 @@ export interface ModelOption {
 }
 
 export const MODEL_OPTIONS: ModelOption[] = [
+  // ─── Anthropic ─────────────────────────────────────────
   {
     id: "claude-sonnet",
     label: "Claude Sonnet 4",
@@ -20,21 +21,58 @@ export const MODEL_OPTIONS: ModelOption[] = [
   },
   {
     id: "claude-haiku",
-    label: "Claude Haiku 3.5",
+    label: "Claude Haiku 4.5",
     provider: "anthropic",
     modelId: "claude-haiku-4-5-20251001",
   },
+  // ─── OpenAI (verified from developers.openai.com/api/docs/models/all, 2026-04) ───
   {
-    id: "gpt-4o",
-    label: "GPT-4o",
+    id: "gpt-5.4",
+    label: "GPT-5.4",
     provider: "openai",
-    modelId: "gpt-4o",
+    modelId: "gpt-5.4",
   },
   {
-    id: "gpt-4o-mini",
-    label: "GPT-4o Mini",
+    id: "gpt-5.4-mini",
+    label: "GPT-5.4 Mini",
     provider: "openai",
-    modelId: "gpt-4o-mini",
+    modelId: "gpt-5.4-mini",
+  },
+  {
+    id: "gpt-5.4-nano",
+    label: "GPT-5.4 Nano",
+    provider: "openai",
+    modelId: "gpt-5.4-nano",
+  },
+  {
+    id: "gpt-5",
+    label: "GPT-5",
+    provider: "openai",
+    modelId: "gpt-5",
+  },
+  {
+    id: "gpt-4.1",
+    label: "GPT-4.1",
+    provider: "openai",
+    modelId: "gpt-4.1",
+  },
+  {
+    id: "o4-mini",
+    label: "o4-mini",
+    provider: "openai",
+    modelId: "o4-mini",
+  },
+  {
+    id: "o3-mini",
+    label: "o3-mini",
+    provider: "openai",
+    modelId: "o3-mini",
+  },
+  {
+    id: "gpt-4o",
+    label: "GPT-4o (legacy)",
+    provider: "openai",
+    modelId: "gpt-4o",
   },
 ];
 
