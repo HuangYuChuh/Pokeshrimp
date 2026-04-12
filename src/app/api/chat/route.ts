@@ -73,7 +73,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const runtime = getRuntime();
+  const runtime = await getRuntime();
   const context: ToolContext = {
     sessionId: sid,
     cwd: process.cwd(),

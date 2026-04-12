@@ -18,11 +18,14 @@ import { listSkills } from "@/core/skill/engine";
 import { getModel } from "@/core/ai/provider";
 import { HooksEngine } from "@/core/hooks/engine";
 import { loadHooks } from "@/core/hooks/loader";
-import type { AppConfig } from "@/core/config/schema";
+import { MCPClientManager, registerMCPTools } from "@/core/mcp";
+import type { AppConfig, McpServerConfig } from "@/core/config/schema";
 import type { LanguageModel } from "ai";
 
 let registry: ToolRegistry | null = null;
 let runtime: AgentRuntime | null = null;
+let runtimePromise: Promise<AgentRuntime> | null = null;
+const mcpClientManager = new MCPClientManager();
 
 /**
  * Lazy singleton — the tool registry is process-wide. Per-request
@@ -38,24 +41,76 @@ export function getToolRegistry(): ToolRegistry {
 }
 
 /**
+ * Connect configured MCP servers and register their tools in the
+ * registry.  Failures are logged and swallowed — a broken MCP server
+ * must never prevent the app from booting.
+ */
+async function connectMCPServers(
+  servers: Record<string, McpServerConfig>,
+  reg: ToolRegistry,
+): Promise<void> {
+  for (const [name, serverConfig] of Object.entries(servers)) {
+    if (serverConfig.enabled === false) continue;
+    try {
+      await mcpClientManager.connectServer(name, {
+        command: serverConfig.command,
+        args: serverConfig.args,
+        env: serverConfig.env,
+      });
+    } catch (err) {
+      console.warn(
+        `[MCP] Failed to connect server "${name}", skipping:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+
+  try {
+    await registerMCPTools(mcpClientManager, reg);
+  } catch (err) {
+    console.warn(
+      "[MCP] Failed to register MCP tools:",
+      err instanceof Error ? err.message : err,
+    );
+  }
+}
+
+/**
  * Lazy singleton AgentRuntime. Constructed once per process with
  * the full middleware chain wired in. Sub-agent registration happens
  * here so that `spawn_agent` can close over the parent runtime.
+ *
+ * Async because MCP server connections happen at boot.
  */
-export function getRuntime(): AgentRuntime {
-  if (!runtime) {
-    const reg = getToolRegistry();
-    const middlewares = buildMiddlewares();
-    runtime = new AgentRuntime({
-      registry: reg,
-      middlewares,
-      maxIterations: 32,
-    });
-    // spawn_agent needs a reference to its parent runtime, so it
-    // must be registered after the runtime exists.
-    reg.registerTool(createSpawnAgentTool(runtime));
+export async function getRuntime(): Promise<AgentRuntime> {
+  if (runtime) return runtime;
+
+  // Deduplicate concurrent callers — only the first call does the
+  // actual construction; subsequent callers await the same promise.
+  if (!runtimePromise) {
+    runtimePromise = (async () => {
+      const reg = getToolRegistry();
+
+      // Connect configured MCP servers and register their tools
+      const config = getConfig();
+      if (config.mcpServers && Object.keys(config.mcpServers).length > 0) {
+        await connectMCPServers(config.mcpServers, reg);
+      }
+
+      const middlewares = buildMiddlewares();
+      runtime = new AgentRuntime({
+        registry: reg,
+        middlewares,
+        maxIterations: 32,
+      });
+      // spawn_agent needs a reference to its parent runtime, so it
+      // must be registered after the runtime exists.
+      reg.registerTool(createSpawnAgentTool(runtime));
+      return runtime;
+    })();
   }
-  return runtime;
+
+  return runtimePromise;
 }
 
 function buildMiddlewares(): Middleware[] {
@@ -116,20 +171,27 @@ function buildMiddlewares(): Middleware[] {
   ];
 }
 
-export function initApp(): {
+export async function initApp(): Promise<{
   registry: ToolRegistry;
   runtime: AgentRuntime;
   config: AppConfig;
-} {
+}> {
   const config = getConfig();
   initAppState(config);
   const reg = getToolRegistry();
-  const rt = getRuntime();
+  const rt = await getRuntime();
   return { registry: reg, runtime: rt, config };
 }
 
+/** Disconnect all MCP servers. Call on app shutdown. */
+export async function shutdown(): Promise<void> {
+  await mcpClientManager.disconnectAll();
+}
+
 /** Reset the runtime/registry — useful for tests or after config reload. */
-export function resetRuntime(): void {
+export async function resetRuntime(): Promise<void> {
+  await mcpClientManager.disconnectAll();
   registry = null;
   runtime = null;
+  runtimePromise = null;
 }
