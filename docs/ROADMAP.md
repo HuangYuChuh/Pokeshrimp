@@ -34,8 +34,8 @@
 
 - [x] CLI REPL entry point (bin/pokeshrimp.js)
 - [x] Streaming text output in terminal
-- [ ] CLI argument parsing (--model, --cwd, --config flags)
-- [ ] Non-interactive mode (pipe input, get output)
+- [x] CLI argument parsing (--model, --cwd, --config flags)
+- [x] Non-interactive mode (pipe input, get output)
 - [ ] `npx pokeshrimp init` project scaffolding
 
 ## Frontend / UI
@@ -50,14 +50,14 @@
 - [x] Output panel (lists detected generated files)
 - [x] Dark / light / system theme toggle
 - [x] First-message loading skeleton
-- [ ] **Markdown rendering** in agent responses (code blocks, bold, lists, tables)
-- [ ] Message edit / delete / regenerate
-- [ ] Image preview zoom + side-by-side comparison
+- [x] **Markdown rendering** in agent responses (code blocks, bold, lists, tables)
+- [x] Message edit / delete / regenerate
+- [x] Image preview zoom + side-by-side comparison
 - [ ] Video playback in preview panel
 - [ ] Tool management UI (installed CLI status: available / needs login / not installed)
 - [ ] Drag-and-drop .skill.md import
-- [ ] Responsive layout for smaller windows
-- [ ] Keyboard shortcuts (new session, focus input, etc.)
+- [x] Responsive layout for smaller windows
+- [x] Keyboard shortcuts (new session, focus input, etc.)
 - [ ] File/image upload in chat input
 - [ ] Designfile visual editor (dependency graph visualization)
 
@@ -66,7 +66,7 @@
 - [x] .skill.md format defined + reference doc
 - [x] Two skill files shipped (comfyui, batch-remove-bg)
 - [ ] **End-to-end skill verification** (run a real CLI tool through the full loop)
-- [ ] Skill pipeline composition (`/remove-bg → /upscale → /watermark`)
+- [x] Skill pipeline composition (`/remove-bg → /upscale → /watermark`)
 - [ ] Skill template generator (`pokeshrimp create-skill`)
 - [ ] Skill marketplace / community sharing (future)
 
@@ -86,8 +86,8 @@
 
 - [x] vitest framework with 77 tests across 6 files
 - [x] Husky commit hooks (commitlint)
-- [ ] **Add vitest to CI** (GitHub Actions)
-- [ ] ESLint + Prettier configuration
+- [x] **Add vitest to CI** (GitHub Actions)
+- [x] ESLint + Prettier configuration
 - [ ] E2E tests (Playwright or Cypress)
 - [ ] Test coverage reporting
 
@@ -95,7 +95,7 @@
 
 - [x] Electron desktop app (macOS)
 - [x] GitHub Actions CI (tsc + build + commitlint)
-- [ ] CI runs vitest
+- [x] CI runs vitest
 - [ ] Electron auto-update (electron-updater)
 - [ ] Windows / Linux builds
 - [ ] Homebrew formula / winget manifest
