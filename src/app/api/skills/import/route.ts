@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { parseSkillFrontmatter } from "@/core/skill/engine";
+import { rateLimit } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ interval: 60_000, limit: 10 });
 
 const ImportSkillSchema = z.object({
   filename: z.string().min(1).refine((f) => f.endsWith(".skill.md"), {
@@ -12,6 +15,15 @@ const ImportSkillSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  const ip = req.headers.get("x-forwarded-for") || "local";
+  const { success } = limiter(ip);
+  if (!success) {
+    return new Response(
+      JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }),
+      { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } },
+    );
+  }
+
   const body = await req.json();
   const parsed = ImportSkillSchema.safeParse(body);
   if (!parsed.success) {

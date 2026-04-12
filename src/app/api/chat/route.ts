@@ -6,8 +6,11 @@ import { createSession, addMessage, touchSession } from "@/lib/db";
 import { getRuntime } from "@/core/init";
 import { getConfig } from "@/core/config/loader";
 import { approvalBus } from "@/app/api/approval/channel";
+import { rateLimit } from "@/lib/rate-limit";
 import type { ToolContext } from "@/core/tool/types";
 import type { CoreMessage } from "ai";
+
+const limiter = rateLimit({ interval: 60_000, limit: 20 });
 
 const ChatRequestSchema = z.object({
   messages: z.array(z.object({
@@ -28,6 +31,15 @@ function missingApiKeyResponse(provider: string): Response {
 }
 
 export async function POST(req: Request) {
+  const ip = req.headers.get("x-forwarded-for") || "local";
+  const { success } = limiter(ip);
+  if (!success) {
+    return new Response(
+      JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }),
+      { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } },
+    );
+  }
+
   const body = await req.json();
   const parsed = ChatRequestSchema.safeParse(body);
   if (!parsed.success) {

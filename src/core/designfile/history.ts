@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import type { AssetVersion } from "./types";
+import type { AssetVersion, StoredFile } from "./types";
 
 /**
  * Content-addressable version history for design assets.
@@ -30,8 +30,14 @@ export class VersionHistory {
     this.baseDir = historyDir;
   }
 
+  /** Directory for content-addressable file storage. */
+  private get objectsDir(): string {
+    return path.join(this.baseDir, "objects");
+  }
+
   /**
    * Record a completed build as a new version.
+   * Copies output files into content-addressable storage for retrieval.
    * Returns the version object (including its computed hash).
    */
   record(
@@ -44,6 +50,45 @@ export class VersionHistory {
     },
   ): AssetVersion {
     const hash = computeHash(build.skill, build.params);
+
+    // Copy output files into content-addressable storage
+    const storedFiles: StoredFile[] = [];
+    for (const filePath of build.outputFiles) {
+      try {
+        if (!fs.existsSync(filePath)) {
+          console.warn(
+            `[VersionHistory] Output file not found, skipping: ${filePath}`,
+          );
+          continue;
+        }
+        const content = fs.readFileSync(filePath);
+        const contentHash = crypto
+          .createHash("sha256")
+          .update(content)
+          .digest("hex")
+          .slice(0, 12);
+        const filename = path.basename(filePath);
+        const objectDir = path.join(this.objectsDir, contentHash);
+        const storedPath = path.join(objectDir, filename);
+
+        if (!fs.existsSync(storedPath)) {
+          fs.mkdirSync(objectDir, { recursive: true });
+          fs.copyFileSync(filePath, storedPath);
+        }
+
+        storedFiles.push({
+          originalPath: filePath,
+          contentHash,
+          storedPath,
+        });
+      } catch (err) {
+        console.warn(
+          `[VersionHistory] Failed to store file ${filePath}:`,
+          err,
+        );
+      }
+    }
+
     const version: AssetVersion = {
       hash,
       timestamp: new Date().toISOString(),
@@ -51,6 +96,7 @@ export class VersionHistory {
       params: build.params,
       command: build.command,
       outputFiles: build.outputFiles,
+      ...(storedFiles.length > 0 ? { storedFiles } : {}),
     };
 
     const assetDir = path.join(this.baseDir, assetName);
@@ -61,6 +107,26 @@ export class VersionHistory {
     );
 
     return version;
+  }
+
+  /**
+   * Get the absolute path to a stored copy of an output file.
+   * Returns null if the version or file is not found.
+   */
+  getStoredFile(
+    assetName: string,
+    versionHash: string,
+    filename: string,
+  ): string | null {
+    const version = this.getVersion(assetName, versionHash);
+    if (!version?.storedFiles) return null;
+
+    const entry = version.storedFiles.find(
+      (sf) => path.basename(sf.originalPath) === filename,
+    );
+    if (!entry) return null;
+
+    return fs.existsSync(entry.storedPath) ? entry.storedPath : null;
   }
 
   /**

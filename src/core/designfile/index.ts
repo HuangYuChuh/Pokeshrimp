@@ -9,6 +9,7 @@ export type {
   AssetStatus,
   AssetState,
   AssetVersion,
+  StoredFile,
   DesignfileState,
   BuildPlan,
   BuildStep,

@@ -54,8 +54,8 @@
 - [x] Message edit / delete / regenerate
 - [x] Image preview zoom + side-by-side comparison
 - [x] Video playback in preview panel
-- [ ] Tool management UI (installed CLI status: available / needs login / not installed)
-- [ ] Drag-and-drop .skill.md import
+- [x] Tool management UI (installed CLI status: available / needs login / not installed)
+- [x] Drag-and-drop .skill.md import
 - [x] Responsive layout for smaller windows
 - [x] Keyboard shortcuts (new session, focus input, etc.)
 - [x] File/image upload in chat input
@@ -67,7 +67,7 @@
 - [x] Two skill files shipped (comfyui, batch-remove-bg)
 - [ ] **End-to-end skill verification** (run a real CLI tool through the full loop)
 - [x] Skill pipeline composition (`/remove-bg → /upscale → /watermark`)
-- [ ] Skill template generator (`pokeshrimp create-skill`)
+- [x] Skill template generator (`pokeshrimp create-skill`)
 - [ ] Skill marketplace / community sharing (future)
 
 ## Designfile
