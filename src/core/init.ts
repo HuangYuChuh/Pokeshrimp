@@ -1,5 +1,6 @@
 import path from "path";
 import os from "os";
+import { initProxySupport } from "@/core/proxy";
 import { ToolRegistry } from "@/core/tool/registry";
 import { registerBuiltinTools } from "@/core/tool/builtin";
 import { createSpawnAgentTool } from "@/core/tool/builtin/spawn-agent";
@@ -88,6 +89,9 @@ async function connectMCPServers(
  * Async because MCP server connections happen at boot.
  */
 export async function getRuntime(): Promise<AgentRuntime> {
+  // Ensure proxy is configured before any API calls
+  await initProxySupport();
+
   if (runtime) return runtime;
 
   // Deduplicate concurrent callers — only the first call does the
