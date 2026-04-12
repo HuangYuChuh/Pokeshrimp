@@ -50,11 +50,13 @@ const markdownComponents: Components = {
 interface ChatPanelProps {
   modelId: string;
   onModelChange: (id: string) => void;
+  inputRef?: React.RefObject<HTMLTextAreaElement | null>;
 }
 
-export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
+export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const internalRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = inputRef ?? internalRef;
   const { currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
