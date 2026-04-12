@@ -1,5 +1,8 @@
 import { approvalBus } from "./channel";
+import { rateLimit } from "@/lib/rate-limit";
 import type { ApprovalDecision } from "@/core/permission/approval";
+
+const limiter = rateLimit({ interval: 60_000, limit: 60 });
 
 const VALID_DECISIONS = new Set<ApprovalDecision>([
   "allow-once",
@@ -18,6 +21,15 @@ const VALID_DECISIONS = new Set<ApprovalDecision>([
  * CommandApprovalMiddleware, which unblocks the tool execution.
  */
 export async function POST(req: Request) {
+  const ip = req.headers.get("x-forwarded-for") || "local";
+  const { success } = limiter(ip);
+  if (!success) {
+    return new Response(
+      JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }),
+      { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } },
+    );
+  }
+
   let body: { id?: string; decision?: string };
   try {
     body = await req.json();
