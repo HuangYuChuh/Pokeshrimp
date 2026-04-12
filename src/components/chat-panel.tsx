@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { useRef, useEffect, useCallback, useState, useMemo, type KeyboardEvent } from "react";
 import { useAppState, useAppDispatch, type OutputFile } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { ChevronDown as ChevronDownIcon } from "lucide-react";
+import { ChevronDown as ChevronDownIcon, Pencil, Trash2, RefreshCw, PanelLeft, PanelRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowUp, ChevronDown } from "lucide-react";
@@ -51,9 +51,13 @@ interface ChatPanelProps {
   modelId: string;
   onModelChange: (id: string) => void;
   inputRef?: React.RefObject<HTMLTextAreaElement | null>;
+  sidebarOpen: boolean;
+  previewOpen: boolean;
+  onToggleSidebar: () => void;
+  onTogglePreview: () => void;
 }
 
-export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) {
+export function ChatPanel({ modelId, onModelChange, inputRef, sidebarOpen, previewOpen, onToggleSidebar, onTogglePreview }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = inputRef ?? internalRef;
@@ -64,7 +68,7 @@ export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) 
 
   const skills = useSkills();
 
-  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, error, data } =
+  const { messages, setMessages, input, setInput, handleInputChange, handleSubmit, isLoading, error, data, reload } =
     useChat({
       api: "/api/chat",
       body: { modelId, sessionId: currentSessionId },
@@ -161,12 +165,100 @@ export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) 
     [setInput],
   );
 
+  /* ─── Edit / Delete / Regenerate ─── */
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState("");
+
+  const handleStartEdit = useCallback((messageId: string, content: string) => {
+    setEditingId(messageId);
+    setEditingContent(content);
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingId(null);
+    setEditingContent("");
+  }, []);
+
+  const handleSaveEdit = useCallback(
+    (messageId: string) => {
+      const trimmed = editingContent.trim();
+      if (!trimmed) return;
+      const idx = messages.findIndex((m) => m.id === messageId);
+      if (idx === -1) return;
+      // Keep messages up to (not including) the edited one, then re-append with new content
+      const before = messages.slice(0, idx);
+      const edited = { ...messages[idx], content: trimmed };
+      setMessages([...before, edited]);
+      setEditingId(null);
+      setEditingContent("");
+      // Re-send from the edited message by reloading
+      // reload() re-sends the last user message in the conversation
+      // Since we just set messages ending with the edited user message, reload will work
+      reload();
+    },
+    [editingContent, messages, setMessages, reload],
+  );
+
+  const handleDelete = useCallback(
+    (messageId: string) => {
+      const idx = messages.findIndex((m) => m.id === messageId);
+      if (idx === -1) return;
+      const msg = messages[idx];
+      if (msg.role === "user") {
+        // Also delete the following assistant message if present
+        const next = messages[idx + 1];
+        const removeIds = new Set([messageId]);
+        if (next && next.role === "assistant") removeIds.add(next.id);
+        setMessages(messages.filter((m) => !removeIds.has(m.id)));
+      } else {
+        setMessages(messages.filter((m) => m.id !== messageId));
+      }
+    },
+    [messages, setMessages],
+  );
+
+  const handleRegenerate = useCallback(
+    (messageId: string) => {
+      const idx = messages.findIndex((m) => m.id === messageId);
+      if (idx === -1) return;
+      // Remove this assistant message and everything after it
+      setMessages(messages.slice(0, idx));
+      // reload re-sends the last user message
+      reload();
+    },
+    [messages, setMessages, reload],
+  );
+
   const isEmpty = messages.length === 0 && !isLoading;
 
   return (
     <div className="flex min-w-0 flex-1 flex-col bg-background">
-      {/* Drag region */}
-      <div className="drag h-13 shrink-0" />
+      {/* Drag region with toggle buttons */}
+      <div className="drag flex h-13 shrink-0 items-center justify-between px-3">
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          className={cn(
+            "nodrag flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+            sidebarOpen && "invisible"
+          )}
+          title="Toggle sidebar"
+        >
+          <PanelLeft size={16} strokeWidth={1.5} />
+        </button>
+        <button
+          type="button"
+          onClick={onTogglePreview}
+          className={cn(
+            "nodrag flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+            previewOpen && "invisible"
+          )}
+          title="Toggle preview"
+        >
+          <PanelRight size={16} strokeWidth={1.5} />
+        </button>
+      </div>
 
       {/* Content area */}
       {isEmpty ? (
@@ -200,9 +292,9 @@ export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) 
         /* Conversation state: messages + bottom input */
         <>
           <ScrollArea className="flex-1">
-            <div className="selectable mx-auto max-w-[680px] px-6 pt-4 pb-6">
+            <div className="selectable mx-auto max-w-[680px] px-3 pt-4 pb-6 sm:px-6">
               {messages.map((message) => (
-                <div key={message.id} className="mb-6">
+                <div key={message.id} className="group/msg relative mb-6">
                   {message.content && (
                     <div
                       className={cn(
@@ -211,17 +303,40 @@ export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) 
                       )}
                     >
                       {message.role === "user" ? (
-                        <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl bg-primary px-4 py-2.5 text-[14px] leading-7 text-primary-foreground">
-                          {message.content}
-                        </div>
+editingId === message.id ? (
+                          <EditBubble
+                            content={editingContent}
+                            onChange={setEditingContent}
+                            onSave={() => handleSaveEdit(message.id)}
+                            onCancel={handleCancelEdit}
+                          />
+                        ) : (
+                          <div className="relative max-w-[95%] sm:max-w-[85%]">
+                            <div className="whitespace-pre-wrap break-words rounded-2xl bg-primary px-4 py-2.5 text-[14px] leading-7 text-primary-foreground">
+                              {message.content}
+                            </div>
+                            <MessageActions
+                              role="user"
+                              onEdit={() => handleStartEdit(message.id, message.content)}
+                              onDelete={() => handleDelete(message.id)}
+                            />
+                          </div>
+                        )
                       ) : (
-                        <div className="max-w-[85%] prose prose-sm dark:prose-invert max-w-none text-[14px] leading-7 text-foreground">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            components={markdownComponents}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
+                        <div className="relative max-w-[95%] sm:max-w-[85%]">
+                          <div className="prose prose-sm dark:prose-invert max-w-none text-[14px] leading-7 text-foreground">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={markdownComponents}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
+                          </div>
+                          <MessageActions
+                            role="assistant"
+                            onRegenerate={() => handleRegenerate(message.id)}
+                            onDelete={() => handleDelete(message.id)}
+                          />
                         </div>
                       )}
                     </div>
@@ -320,6 +435,125 @@ function ApprovalCards({ data }: { data: unknown[] }) {
   );
 }
 
+/* ─── Message Actions ─── */
+
+function MessageActions({
+  role,
+  onEdit,
+  onDelete,
+  onRegenerate,
+}: {
+  role: "user" | "assistant";
+  onEdit?: () => void;
+  onDelete: () => void;
+  onRegenerate?: () => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "absolute -top-3 flex items-center gap-0.5 rounded-lg border border-border bg-card p-0.5 shadow-sm opacity-0 transition-opacity group-hover/msg:opacity-100",
+        role === "user" ? "right-0" : "left-0"
+      )}
+    >
+      {role === "user" && onEdit && (
+        <button
+          type="button"
+          onClick={onEdit}
+          className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          title="Edit"
+        >
+          <Pencil size={13} />
+        </button>
+      )}
+      {role === "assistant" && onRegenerate && (
+        <button
+          type="button"
+          onClick={onRegenerate}
+          className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          title="Regenerate"
+        >
+          <RefreshCw size={13} />
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={onDelete}
+        className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+        title="Delete"
+      >
+        <Trash2 size={13} />
+      </button>
+    </div>
+  );
+}
+
+/* ─── Edit Bubble ─── */
+
+function EditBubble({
+  content,
+  onChange,
+  onSave,
+  onCancel,
+}: {
+  content: string;
+  onChange: (value: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
+  const editRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = editRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 300) + "px";
+      el.focus();
+    }
+  }, [content]);
+
+  return (
+    <div className="max-w-[85%] w-full">
+      <textarea
+        ref={editRef}
+        value={content}
+        onChange={(e) => {
+          onChange(e.target.value);
+          const el = e.target;
+          el.style.height = "auto";
+          el.style.height = Math.min(el.scrollHeight, 300) + "px";
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            onSave();
+          }
+          if (e.key === "Escape") {
+            onCancel();
+          }
+        }}
+        className="block w-full resize-none rounded-2xl border border-border bg-card px-4 py-2.5 text-[14px] leading-7 text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        rows={1}
+      />
+      <div className="mt-2 flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-lg px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-muted"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={onSave}
+          className="rounded-lg bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Input Area ─── */
 
 import { forwardRef } from "react";
@@ -354,7 +588,7 @@ const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
     const isSlashMode = slashQuery !== null && filteredSkills.length > 0;
 
     return (
-      <div className="shrink-0 px-6 pb-6">
+      <div className="shrink-0 px-3 pb-4 sm:px-6 sm:pb-6">
         <form onSubmit={onSubmit} className="relative mx-auto max-w-[680px]">
           {/* Slash command popup */}
           {isSlashMode && (
