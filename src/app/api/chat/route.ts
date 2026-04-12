@@ -74,7 +74,9 @@ export async function POST(req: Request) {
   // throw at construction time when the key is missing, so without this
   // check the failure only surfaces ~10s later after internal retries.
   const config = getConfig();
-  const option = MODEL_OPTIONS.find((m) => m.id === (modelId ?? "claude-sonnet"));
+  // Use the user's selected model, or fall back to config default, or first available
+  const resolvedModelId = modelId ?? config.defaultModel ?? MODEL_OPTIONS[0]?.id ?? "claude-sonnet";
+  const option = MODEL_OPTIONS.find((m) => m.id === resolvedModelId);
   if (!option) {
     return new Response(
       JSON.stringify({ error: `Unknown model: ${modelId}` }),

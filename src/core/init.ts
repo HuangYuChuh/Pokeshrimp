@@ -163,11 +163,22 @@ function buildMiddlewares(): Middleware[] {
         const openaiKey = cfg.apiKeys?.openai || process.env.OPENAI_API_KEY;
         if (!anthropicKey && !openaiKey) return undefined;
         try {
-          // Prefer the cheap/fast Haiku tier for summarization.
-          return getModel("claude-haiku", {
-            anthropic: cfg.apiKeys?.anthropic,
-            openai: cfg.apiKeys?.openai,
-          });
+          // Use whichever provider has a key configured.
+          // Prefer a cheap model: Haiku if Anthropic key exists,
+          // otherwise fall back to the cheapest OpenAI option.
+          if (anthropicKey) {
+            return getModel("claude-haiku", {
+              anthropic: cfg.apiKeys?.anthropic,
+              openai: cfg.apiKeys?.openai,
+            });
+          }
+          if (openaiKey) {
+            return getModel("gpt-4o", {
+              anthropic: cfg.apiKeys?.anthropic,
+              openai: cfg.apiKeys?.openai,
+            });
+          }
+          return undefined;
         } catch {
           return undefined;
         }
