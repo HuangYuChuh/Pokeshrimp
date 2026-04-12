@@ -1,5 +1,6 @@
 import type { CoreMessage } from "ai";
 import type { ToolResult } from "@/core/tool/types";
+import { classifyCommand } from "@/core/permission/checker";
 
 // ─── Middleware Interface ────────────────────────────────────
 //
@@ -153,13 +154,19 @@ export function createSkillInjectionMiddleware(
 
 /**
  * Per docs/01 §3.3: shell command risk analysis + tiered approval.
- * deny patterns win over allow patterns. Unmatched commands fall
- * through to allow (the `ask` path lives in the permission module
- * and will be wired to a user prompt in a later phase).
+ * Delegates pattern matching to the permission module so there is a
+ * single source of truth for command policy.
+ *
+ * Behavior:
+ *   - "deny" → block the call with the policy reason
+ *   - "allow" → pass through silently
+ *   - "ask" → currently passes through (the user-prompt UI is a
+ *     future phase). Logged so we can wire it later.
  */
 export function createCommandApprovalMiddleware(config: {
   alwaysAllow: string[];
   alwaysDeny: string[];
+  alwaysAsk?: string[];
 }): Middleware {
   return {
     name: "CommandApproval",
@@ -167,17 +174,21 @@ export function createCommandApprovalMiddleware(config: {
       if (toolName !== "run_command") return { action: "continue" };
       const cmd = (input as { command?: string })?.command ?? "";
 
-      for (const pattern of config.alwaysDeny) {
-        if (matchGlob(cmd, pattern)) {
-          return {
-            action: "deny",
-            reason: `Command blocked by policy: ${pattern}`,
-          };
-        }
+      const decision = classifyCommand(cmd, {
+        alwaysAllow: config.alwaysAllow,
+        alwaysDeny: config.alwaysDeny,
+        alwaysAsk: config.alwaysAsk ?? [],
+      });
+
+      if (decision === "deny") {
+        return {
+          action: "deny",
+          reason: `Command blocked by policy: ${cmd}`,
+        };
       }
-      for (const pattern of config.alwaysAllow) {
-        if (matchGlob(cmd, pattern)) return { action: "continue" };
-      }
+      // "ask" path is not yet wired to a user-facing prompt. We let
+      // it through for now and rely on alwaysDeny to catch dangerous
+      // commands. To be revisited when the approval UI lands.
       return { action: "continue" };
     },
   };
@@ -292,15 +303,6 @@ function estimateChars(m: CoreMessage): number {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
-
-function matchGlob(str: string, pattern: string): boolean {
-  const regex = new RegExp(
-    "^" +
-      pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*") +
-      "$",
-  );
-  return regex.test(str);
-}
 
 function stableStringify(v: unknown): string {
   if (v === null || typeof v !== "object") return JSON.stringify(v) ?? "null";

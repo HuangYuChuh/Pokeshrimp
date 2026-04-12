@@ -1,2 +1,11 @@
-export type { PermissionRule, PermissionConfig } from "@/core/permission/types";
-export { parsePattern, matchPattern, checkPermission } from "@/core/permission/checker";
+export type {
+  PermissionRule,
+  PermissionConfig,
+  PermissionBehavior,
+  PermissionResult,
+} from "./types";
+export {
+  matchCommandPattern,
+  classifyCommand,
+  type CommandDecision,
+} from "./checker";

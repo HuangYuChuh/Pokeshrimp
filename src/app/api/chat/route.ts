@@ -41,7 +41,13 @@ export async function POST(req: Request) {
   }
 
   const runtime = getRuntime();
-  const context: ToolContext = { sessionId: sid, cwd: process.cwd() };
+  const context: ToolContext = {
+    sessionId: sid,
+    cwd: process.cwd(),
+    // Forward client-cancellation through to long-running tools
+    // (e.g. run_command) so they can abort early.
+    signal: req.signal,
+  };
 
   // Stream every iteration's data into a single client-facing stream.
   // The runtime owns the loop; createDataStreamResponse owns the protocol.

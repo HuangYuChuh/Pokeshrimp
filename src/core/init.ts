@@ -71,6 +71,7 @@ function buildMiddlewares(): Middleware[] {
     createCommandApprovalMiddleware({
       alwaysAllow: config.permissions?.alwaysAllow ?? [],
       alwaysDeny: config.permissions?.alwaysDeny ?? [],
+      alwaysAsk: config.permissions?.alwaysAsk ?? [],
     }),
     createLoopDetectionMiddleware(3),
     createContextCompactionMiddleware({
