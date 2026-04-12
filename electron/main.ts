@@ -3,6 +3,7 @@ import { spawn, ChildProcess } from "child_process";
 import path from "path";
 import http from "http";
 import { openExternalAuth } from "./browser-auth";
+import { startOpenAIOAuth } from "./oauth";
 
 let mainWindow: BrowserWindow | null = null;
 let nextServer: ChildProcess | null = null;
@@ -126,6 +127,7 @@ app.whenReady().then(async () => {
   ipcMain.handle("auth:open-browser", (_event, url: string) =>
     openExternalAuth(url)
   );
+  ipcMain.handle("auth:openai-oauth", () => startOpenAIOAuth());
 
   await startNextServer();
   createWindow();

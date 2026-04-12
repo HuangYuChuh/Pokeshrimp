@@ -24,6 +24,10 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const [defaultModel, setDefaultModel] = useState("claude-sonnet");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
+  const isElectron = typeof window !== "undefined" && !!window.pokeshrimp?.auth;
 
   useEffect(() => {
     if (!open) return;
@@ -60,6 +64,37 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
       setSaving(false);
     }
   }, [defaultModel, anthropicKey, openaiKey]);
+
+  const handleOpenAIOAuth = useCallback(async () => {
+    if (!window.pokeshrimp?.auth) return;
+    setOauthLoading(true);
+    setOauthError(null);
+    try {
+      const { accessToken } = await window.pokeshrimp.auth.openaiOAuth!();
+      setOpenaiKey(accessToken);
+      // Auto-save the token
+      await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          defaultModel,
+          apiKeys: {
+            anthropic: anthropicKey.includes("****") ? undefined : anthropicKey,
+            openai: accessToken,
+          },
+        }),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "OAuth failed";
+      if (!message.includes("User closed")) {
+        setOauthError(message);
+      }
+    } finally {
+      setOauthLoading(false);
+    }
+  }, [defaultModel, anthropicKey]);
 
   if (!open) return null;
 
@@ -117,16 +152,32 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
               </Field>
 
               <Field label="OpenAI API Key" hint="Required for GPT models" getKeyUrl="https://platform.openai.com/api-keys">
-                <input
-                  type="password"
-                  value={openaiKey}
-                  onChange={(e) => setOpenaiKey(e.target.value)}
-                  placeholder="sk-..."
-                  onFocus={(e) => {
-                    if (e.target.value.includes("****")) setOpenaiKey("");
-                  }}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    value={openaiKey}
+                    onChange={(e) => setOpenaiKey(e.target.value)}
+                    placeholder="sk-..."
+                    onFocus={(e) => {
+                      if (e.target.value.includes("****")) setOpenaiKey("");
+                    }}
+                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
+                  />
+                  {isElectron && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 text-[12px]"
+                      disabled={oauthLoading}
+                      onClick={handleOpenAIOAuth}
+                    >
+                      {oauthLoading ? "Logging in..." : "Login with OpenAI"}
+                    </Button>
+                  )}
+                </div>
+                {oauthError && (
+                  <p className="mt-1 text-[11px] text-red-500">{oauthError}</p>
+                )}
                 <EnvKeyHint envAvailable={settings.envKeys?.openai} hasConfigKey={!!settings.apiKeys?.openai} envVarName="OPENAI_API_KEY" />
               </Field>
 
