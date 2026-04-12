@@ -2,7 +2,7 @@
 
 import { createInterface } from "readline";
 import { getModel } from "@/core/ai/provider";
-import { SYSTEM_PROMPT } from "@/core/ai/streaming";
+import { SYSTEM_PROMPT } from "@/core/ai/system-prompt";
 import { getConfig } from "@/core/config/loader";
 import { getRuntime } from "@/core/init";
 import type { CoreMessage } from "ai";
