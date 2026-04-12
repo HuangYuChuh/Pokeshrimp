@@ -8,7 +8,7 @@ import { ChevronDown as ChevronDownIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowUp, ChevronDown } from "lucide-react";
-import { MODEL_OPTIONS } from "./model-options";
+import { MODEL_OPTIONS } from "@/core/ai/provider";
 import { ApprovalCard, parseApprovalEvents } from "@/components/approval-card";
 import {
   DropdownMenu,
