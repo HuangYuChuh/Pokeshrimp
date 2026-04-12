@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { X } from "lucide-react";
 import { ToolStatusList } from "@/components/tool-status";
 
@@ -34,30 +35,42 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
 
   // Load theme from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem("pokeshrimp-theme") as "dark" | "light" | "system" | null;
+    const stored = localStorage.getItem("pokeshrimp-theme") as
+      | "dark"
+      | "light"
+      | "system"
+      | null;
     if (stored) setThemeState(stored);
   }, []);
 
-  const handleThemeChange = useCallback((value: "dark" | "light" | "system") => {
-    setThemeState(value);
-    localStorage.setItem("pokeshrimp-theme", value);
-    const root = document.documentElement;
-    if (value === "system") {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      root.classList.toggle("dark", prefersDark);
-    } else {
-      root.classList.toggle("dark", value === "dark");
-    }
-  }, []);
+  const handleThemeChange = useCallback(
+    (value: "dark" | "light" | "system") => {
+      setThemeState(value);
+      localStorage.setItem("pokeshrimp-theme", value);
+      const root = document.documentElement;
+      if (value === "system") {
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        root.classList.toggle("dark", prefersDark);
+      } else {
+        root.classList.toggle("dark", value === "dark");
+      }
+    },
+    [],
+  );
 
   // Check if a stored OAuth token exists and is valid
   useEffect(() => {
     if (!open || !isElectron) return;
-    window.pokeshrimp?.auth?.getValidToken?.().then((token) => {
-      setOauthConnected(!!token);
-    }).catch(() => {
-      setOauthConnected(false);
-    });
+    window.pokeshrimp?.auth
+      ?.getValidToken?.()
+      .then((token) => {
+        setOauthConnected(!!token);
+      })
+      .catch(() => {
+        setOauthConnected(false);
+      });
   }, [open, isElectron]);
 
   useEffect(() => {
@@ -72,6 +85,16 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
       })
       .catch(() => {});
   }, [open]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -137,15 +160,25 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="flex w-[480px] max-h-[80vh] flex-col overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="flex max-h-[80vh] w-[480px] flex-col overflow-hidden rounded-2xl border border-border bg-card">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4">
+        <div className="flex items-center justify-between px-6 pb-4 pt-5">
           <div>
-            <h2 className="text-[15px] font-semibold">Settings</h2>
-            <p className="mt-1 text-[12px] text-muted-foreground">API keys and model preferences</p>
+            <h2 className="text-[15px] font-semibold text-foreground">
+              Settings
+            </h2>
+            <p className="mt-1 text-[12px] text-muted-foreground">
+              API keys and model preferences
+            </p>
           </div>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onClose}>
-            <X size={14} />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={onClose}
+          >
+            <X size={15} strokeWidth={1.5} />
           </Button>
         </div>
 
@@ -154,25 +187,21 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
           {!settings ? (
-            <p className="text-[13px] text-muted-foreground">Loading...</p>
+            <div className="space-y-5">
+              <Skeleton className="h-[60px] w-full rounded-lg" />
+              <Skeleton className="h-[60px] w-full rounded-lg" />
+              <Skeleton className="h-[80px] w-full rounded-lg" />
+            </div>
           ) : (
             <div className="space-y-5">
-              <Field label="Default Model">
-                <select
-                  value={defaultModel}
-                  onChange={(e) => setDefaultModel(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-                >
-                  {MODEL_OPTIONS.map((m) => (
-                    <option key={m.id} value={m.id}>{m.label}</option>
-                  ))}
-                </select>
-              </Field>
-
               <Field label="Theme">
                 <select
                   value={theme}
-                  onChange={(e) => handleThemeChange(e.target.value as "dark" | "light" | "system")}
+                  onChange={(e) =>
+                    handleThemeChange(
+                      e.target.value as "dark" | "light" | "system",
+                    )
+                  }
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
                 >
                   <option value="dark">Dark</option>
@@ -181,7 +210,27 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                 </select>
               </Field>
 
-              <Field label="Anthropic API Key" hint="Required for Claude models" getKeyUrl="https://console.anthropic.com/settings/keys">
+              <Field label="Default Model">
+                <select
+                  value={defaultModel}
+                  onChange={(e) => setDefaultModel(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
+                >
+                  {MODEL_OPTIONS.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Separator />
+
+              <Field
+                label="Anthropic API Key"
+                hint="Required for Claude models"
+                getKeyUrl="https://console.anthropic.com/settings/keys"
+              >
                 <input
                   type="password"
                   value={anthropicKey}
@@ -192,10 +241,18 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                   }}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
                 />
-                <EnvKeyHint envAvailable={settings.envKeys?.anthropic} hasConfigKey={!!settings.apiKeys?.anthropic} envVarName="ANTHROPIC_API_KEY" />
+                <EnvKeyHint
+                  envAvailable={settings.envKeys?.anthropic}
+                  hasConfigKey={!!settings.apiKeys?.anthropic}
+                  envVarName="ANTHROPIC_API_KEY"
+                />
               </Field>
 
-              <Field label="OpenAI API Key" hint="Required for GPT models" getKeyUrl="https://platform.openai.com/api-keys">
+              <Field
+                label="OpenAI API Key"
+                hint="Required for GPT models"
+                getKeyUrl="https://platform.openai.com/api-keys"
+              >
                 <div className="flex gap-2">
                   <input
                     type="password"
@@ -209,6 +266,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                   />
                   {isElectron && (
                     <Button
+                      type="button"
                       variant="outline"
                       size="sm"
                       className="shrink-0 text-[12px]"
@@ -220,12 +278,20 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                   )}
                 </div>
                 {oauthConnected && !oauthError && (
-                  <p className="mt-1 text-[11px] text-emerald-500">OpenAI OAuth connected (token auto-refreshes)</p>
+                  <p className="mt-1 text-[11px] text-green-400">
+                    OpenAI OAuth connected (token auto-refreshes)
+                  </p>
                 )}
                 {oauthError && (
-                  <p className="mt-1 text-[11px] text-red-500">{oauthError}</p>
+                  <p className="mt-1 text-[11px] text-destructive">
+                    {oauthError}
+                  </p>
                 )}
-                <EnvKeyHint envAvailable={settings.envKeys?.openai} hasConfigKey={!!settings.apiKeys?.openai} envVarName="OPENAI_API_KEY" />
+                <EnvKeyHint
+                  envAvailable={settings.envKeys?.openai}
+                  hasConfigKey={!!settings.apiKeys?.openai}
+                  envVarName="OPENAI_API_KEY"
+                />
               </Field>
 
               <Separator />
@@ -245,8 +311,15 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
 
         {/* Footer */}
         <div className="flex justify-end gap-2 px-6 py-4">
-          <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
-          <Button size="sm" onClick={handleSave} disabled={saving}>
+          <Button type="button" variant="outline" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleSave}
+            disabled={saving}
+          >
             {saved ? "Saved!" : saving ? "Saving..." : "Save"}
           </Button>
         </div>
@@ -263,31 +336,61 @@ function openKeyUrl(url: string) {
   }
 }
 
-function Field({ label, hint, getKeyUrl, children }: { label: string; hint?: string; getKeyUrl?: string; children: React.ReactNode }) {
+function Field({
+  label,
+  hint,
+  getKeyUrl,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  getKeyUrl?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <label className="text-[13px] font-medium">{label}</label>
+        <label className="text-[13px] font-medium text-foreground">
+          {label}
+        </label>
         {getKeyUrl && (
           <button
             type="button"
             onClick={() => openKeyUrl(getKeyUrl)}
-            className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+            className="text-[12px] text-muted-foreground transition-colors hover:text-foreground"
           >
             Get key &rarr;
           </button>
         )}
       </div>
-      {hint && <p className="mb-2 text-[12px] text-muted-foreground">{hint}</p>}
+      {hint && (
+        <p className="mb-2 text-[12px] text-muted-foreground">{hint}</p>
+      )}
       {children}
     </div>
   );
 }
 
-function EnvKeyHint({ envAvailable, hasConfigKey, envVarName }: { envAvailable?: boolean; hasConfigKey: boolean; envVarName: string }) {
+function EnvKeyHint({
+  envAvailable,
+  hasConfigKey,
+  envVarName,
+}: {
+  envAvailable?: boolean;
+  hasConfigKey: boolean;
+  envVarName: string;
+}) {
   if (!envAvailable) return null;
   if (hasConfigKey) {
-    return <p className="mt-1.5 text-[11px] text-muted-foreground">Config key takes priority over env var</p>;
+    return (
+      <p className="mt-1.5 text-[11px] text-muted-foreground">
+        Config key takes priority over env var
+      </p>
+    );
   }
-  return <p className="mt-1.5 text-[11px] text-emerald-500">Using {envVarName} from environment</p>;
+  return (
+    <p className="mt-1.5 text-[11px] text-green-400">
+      Using {envVarName} from environment
+    </p>
+  );
 }

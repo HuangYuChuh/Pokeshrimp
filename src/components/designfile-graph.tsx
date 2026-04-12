@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { AssetStatus } from "@/core/designfile/types";
 
 // ─── Types ──────────────────────────────────────────────────
@@ -125,15 +126,17 @@ export function DesignfileGraph() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
-        Loading designfile...
+      <div className="flex h-full flex-col gap-3 p-4">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-4 w-48" />
+        <Skeleton className="mt-2 h-[200px] w-full rounded-lg" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
+      <div className="flex h-full items-center justify-center px-4 text-center text-[13px] text-muted-foreground">
         {error}
       </div>
     );
@@ -311,6 +314,7 @@ function AssetCard({
             "h-2 w-2 shrink-0 rounded-full",
             STATUS_COLOR[asset.status],
           )}
+          aria-hidden="true"
         />
         <span className="truncate text-[12px] text-foreground">
           {asset.name}
