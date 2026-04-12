@@ -18,7 +18,7 @@ const ChatRequestSchema = z.object({
     content: z.unknown(),
   }).passthrough()),
   modelId: z.string().optional(),
-  sessionId: z.string().optional(),
+  sessionId: z.string().nullable().optional(),
 });
 
 function missingApiKeyResponse(provider: string): Response {
