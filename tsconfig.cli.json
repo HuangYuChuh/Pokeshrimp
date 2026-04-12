@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "outDir": "dist-cli",
+    "rootDir": "src",
+    "noEmit": false,
+    "declaration": false,
+    "jsx": "react-jsx",
+    "plugins": [],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/cli/**/*", "src/core/**/*"],
+  "exclude": ["node_modules"]
+}
