@@ -72,6 +72,11 @@ export async function startOpenAIOAuth(): Promise<OAuthResult> {
   authURL.searchParams.set("code_challenge", challenge);
   authURL.searchParams.set("code_challenge_method", "S256");
   authURL.searchParams.set("state", state);
+  // These parameters are required for Codex API access (from OpenClaw).
+  // Without them, the token won't have api.responses.write scope.
+  authURL.searchParams.set("id_token_add_organizations", "true");
+  authURL.searchParams.set("codex_cli_simplified_flow", "true");
+  authURL.searchParams.set("originator", "pokeshrimp");
 
   return new Promise<OAuthResult>((resolve, reject) => {
     let settled = false;
