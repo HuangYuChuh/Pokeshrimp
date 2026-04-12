@@ -35,9 +35,11 @@ export interface AppState {
   currentSessionId: string | null;
   previewTab: PreviewTab;
   previewContent: PreviewContent;
+  previousPreview: PreviewContent | null;
   editorParams: string;
   outputFiles: OutputFile[];
   loading: boolean;
+  rerunRequested: boolean;
 }
 
 // --- Actions ---
@@ -51,7 +53,9 @@ export type AppAction =
   | { type: "SET_PREVIEW_CONTENT"; content: PreviewContent }
   | { type: "SET_EDITOR_PARAMS"; params: string }
   | { type: "SET_OUTPUT_FILES"; files: OutputFile[] }
-  | { type: "SET_LOADING"; loading: boolean };
+  | { type: "SET_LOADING"; loading: boolean }
+  | { type: "REQUEST_RERUN" }
+  | { type: "CLEAR_RERUN" };
 
 // --- Reducer ---
 
@@ -60,9 +64,11 @@ const initialState: AppState = {
   currentSessionId: null,
   previewTab: "preview",
   previewContent: { type: "none" },
+  previousPreview: null,
   editorParams: "{}",
   outputFiles: [],
   loading: false,
+  rerunRequested: false,
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -89,13 +95,25 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case "SET_PREVIEW_TAB":
       return { ...state, previewTab: action.tab };
     case "SET_PREVIEW_CONTENT":
-      return { ...state, previewContent: action.content };
+      return {
+        ...state,
+        previewContent: action.content,
+        previousPreview:
+          state.previewContent.type !== "none" &&
+          state.previewContent.url !== action.content.url
+            ? state.previewContent
+            : state.previousPreview,
+      };
     case "SET_EDITOR_PARAMS":
       return { ...state, editorParams: action.params };
     case "SET_OUTPUT_FILES":
       return { ...state, outputFiles: action.files };
     case "SET_LOADING":
       return { ...state, loading: action.loading };
+    case "REQUEST_RERUN":
+      return { ...state, rerunRequested: true };
+    case "CLEAR_RERUN":
+      return { ...state, rerunRequested: false };
     default:
       return state;
   }
