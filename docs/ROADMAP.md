@@ -27,8 +27,8 @@
 - [x] Browser-assisted API key setup for Anthropic
 - [x] API key preflight check (fail fast with 401 instead of 10s timeout)
 - [x] Command approval with 60s timeout auto-deny
-- [ ] Token refresh handling for OAuth sessions
-- [ ] Rate limiting on API routes
+- [x] Token refresh handling for OAuth sessions
+- [x] Rate limiting on API routes
 
 ## CLI
 
@@ -77,10 +77,10 @@
 - [x] Build state tracking (.visagent/.state.json)
 - [x] Version history with param diffing (.visagent/.history/)
 - [x] Three tools: read_designfile, rebuild_asset, mark_asset_built
-- [ ] Content-addressable file storage (copy generated files into history)
-- [ ] Visual dependency graph in the UI
-- [ ] `designfile diff` — visual diff between asset versions
-- [ ] Watch mode — auto-rebuild on upstream change
+- [x] Content-addressable file storage (copy generated files into history)
+- [x] Visual dependency graph in the UI
+- [x] `designfile diff` — visual diff between asset versions
+- [x] Watch mode — auto-rebuild on upstream change
 
 ## Testing & Quality
 
@@ -89,7 +89,7 @@
 - [x] **Add vitest to CI** (GitHub Actions)
 - [x] ESLint + Prettier configuration
 - [ ] E2E tests (Playwright or Cypress)
-- [ ] Test coverage reporting
+- [x] Test coverage reporting
 
 ## Infrastructure & Distribution
 
