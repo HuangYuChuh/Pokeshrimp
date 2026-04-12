@@ -23,6 +23,8 @@ import type { AssetVersion, StoredFile } from "./types";
  * files are referenced by path, not copied — the important thing
  * is the "source code" (params), not the binary output.
  */
+let globalSeq = 0;
+
 export class VersionHistory {
   private baseDir: string;
 
@@ -92,6 +94,7 @@ export class VersionHistory {
     const version: AssetVersion = {
       hash,
       timestamp: new Date().toISOString(),
+      seq: globalSeq++,
       skill: build.skill,
       params: build.params,
       command: build.command,
@@ -151,10 +154,15 @@ export class VersionHistory {
       return [];
     }
 
-    return versions.sort(
-      (a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-    );
+    return versions.sort((a, b) => {
+      const timeDiff =
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+      if (timeDiff !== 0) return timeDiff;
+      // Stable tiebreaker: monotonic sequence number (higher = newer)
+      const seqA = a.seq ?? 0;
+      const seqB = b.seq ?? 0;
+      return seqB - seqA;
+    });
   }
 
   /**
