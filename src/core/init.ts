@@ -25,7 +25,12 @@ import type { LanguageModel } from "ai";
 let registry: ToolRegistry | null = null;
 let runtime: AgentRuntime | null = null;
 let runtimePromise: Promise<AgentRuntime> | null = null;
-const mcpClientManager = new MCPClientManager();
+let mcpClientManager: MCPClientManager | null = null;
+
+function getMCPClientManager(): MCPClientManager {
+  if (!mcpClientManager) mcpClientManager = new MCPClientManager();
+  return mcpClientManager;
+}
 
 /**
  * Lazy singleton — the tool registry is process-wide. Per-request
@@ -52,7 +57,7 @@ async function connectMCPServers(
   for (const [name, serverConfig] of Object.entries(servers)) {
     if (serverConfig.enabled === false) continue;
     try {
-      await mcpClientManager.connectServer(name, {
+      await getMCPClientManager().connectServer(name, {
         command: serverConfig.command,
         args: serverConfig.args,
         env: serverConfig.env,
@@ -66,7 +71,7 @@ async function connectMCPServers(
   }
 
   try {
-    await registerMCPTools(mcpClientManager, reg);
+    await registerMCPTools(getMCPClientManager(), reg);
   } catch (err) {
     console.warn(
       "[MCP] Failed to register MCP tools:",
@@ -185,12 +190,12 @@ export async function initApp(): Promise<{
 
 /** Disconnect all MCP servers. Call on app shutdown. */
 export async function shutdown(): Promise<void> {
-  await mcpClientManager.disconnectAll();
+  if (mcpClientManager) await mcpClientManager.disconnectAll();
 }
 
 /** Reset the runtime/registry — useful for tests or after config reload. */
 export async function resetRuntime(): Promise<void> {
-  await mcpClientManager.disconnectAll();
+  if (mcpClientManager) await mcpClientManager.disconnectAll();
   registry = null;
   runtime = null;
   runtimePromise = null;
