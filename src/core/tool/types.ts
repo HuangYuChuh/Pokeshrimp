@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { LanguageModel } from "ai";
+import type { ApprovalChannel } from "@/core/permission/approval";
 
 export interface ToolContext {
   sessionId?: string;
@@ -11,6 +12,13 @@ export interface ToolContext {
    * call (e.g. spawn_agent) can reuse the same model as the parent.
    */
   model?: LanguageModel;
+  /**
+   * Channel for interactive command approval. Set by the API layer
+   * inside createDataStreamResponse's execute callback so the
+   * CommandApprovalMiddleware can prompt the user and await a decision.
+   * Absent in CLI mode or when the caller opts out of interactive approval.
+   */
+  approvalChannel?: ApprovalChannel;
 }
 
 export interface ToolResult {

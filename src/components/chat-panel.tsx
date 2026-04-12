@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { useRef, useEffect, useCallback, useState, type KeyboardEvent } from "react";
+import { useRef, useEffect, useCallback, useState, useMemo, type KeyboardEvent } from "react";
 import { useAppDispatch } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { ChevronDown as ChevronDownIcon } from "lucide-react";
@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowUp, ChevronDown } from "lucide-react";
 import { MODEL_OPTIONS } from "./model-options";
+import { ApprovalCard, parseApprovalEvents } from "@/components/approval-card";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -31,7 +32,7 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
 
   const skills = useSkills();
 
-  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, error } =
+  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, error, data } =
     useChat({
       api: "/api/chat",
       body: { modelId },
@@ -178,6 +179,8 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
                 </div>
               )}
 
+              <ApprovalCards data={data ?? []} />
+
               <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
@@ -217,6 +220,29 @@ function useSkills() {
       .catch(() => {});
   }, []);
   return skills;
+}
+
+/* ─── Approval Cards ─── */
+
+function ApprovalCards({ data }: { data: unknown[] }) {
+  const { requests, resolved } = useMemo(
+    () => parseApprovalEvents(data),
+    [data],
+  );
+
+  if (requests.size === 0) return null;
+
+  return (
+    <>
+      {[...requests.values()].map((req) => (
+        <ApprovalCard
+          key={req.id}
+          request={req}
+          resolved={resolved.get(req.id)}
+        />
+      ))}
+    </>
+  );
 }
 
 /* ─── Input Area ─── */

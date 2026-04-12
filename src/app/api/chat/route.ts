@@ -4,6 +4,7 @@ import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 import { createSession, addMessage, touchSession } from "@/lib/db";
 import { getRuntime } from "@/core/init";
 import { getConfig } from "@/core/config/loader";
+import { approvalBus } from "@/app/api/approval/channel";
 import type { ToolContext } from "@/core/tool/types";
 
 function missingApiKeyResponse(provider: string): Response {
@@ -86,11 +87,22 @@ export async function POST(req: Request) {
   return createDataStreamResponse({
     headers: { "X-Session-Id": sid },
     execute: async (dataStream) => {
+      // Wire the approval channel: when CommandApprovalMiddleware gets
+      // an "ask" decision, it calls channel.request() which writes an
+      // approval-request event into this data stream and blocks until
+      // the POST /api/approval endpoint resolves it.
+      const contextWithApproval: ToolContext = {
+        ...context,
+        approvalChannel: {
+          request: (req) => approvalBus.request(req, dataStream),
+        },
+      };
+
       const result = await runtime.run({
         model,
         systemPrompt: SYSTEM_PROMPT,
         messages,
-        context,
+        context: contextWithApproval,
         onIterationStream: (stream) => {
           stream.mergeIntoDataStream(dataStream);
         },
