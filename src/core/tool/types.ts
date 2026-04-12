@@ -49,19 +49,3 @@ export interface Tool {
   serverName?: string;
 }
 
-export interface ToolExecutionHooks {
-  onPreToolUse?(
-    toolName: string,
-    input: unknown,
-  ): Promise<{ allow: boolean; updatedInput?: unknown }>;
-  onPostToolUse?(
-    toolName: string,
-    input: unknown,
-    result: ToolResult,
-  ): Promise<void>;
-  onPostToolUseFailure?(
-    toolName: string,
-    input: unknown,
-    error: Error,
-  ): Promise<void>;
-}

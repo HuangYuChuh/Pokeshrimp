@@ -16,6 +16,7 @@ import {
   applyBeforeLLMMiddlewares,
   runMiddlewaresBefore,
   runMiddlewaresAfter,
+  runOnRunCompleteMiddlewares,
 } from "./middleware";
 
 // ─── Types ───────────────────────────────────────────────────
@@ -145,6 +146,12 @@ export class AgentRuntime {
       });
     }
 
+    await runOnRunCompleteMiddlewares(this.middlewares, {
+      sessionId: opts.context.sessionId,
+      iterations,
+      cwd: opts.context.cwd,
+    });
+
     return { text: lastText, iterations, messages };
   }
 
@@ -182,6 +189,7 @@ export class AgentRuntime {
             this.middlewares,
             t.name,
             input,
+            context,
           );
           if (!before.allowed) {
             return `Error: ${before.reason ?? "Denied by middleware"}`;
