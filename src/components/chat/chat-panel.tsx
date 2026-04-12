@@ -55,7 +55,7 @@ export function ChatPanel({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = inputRef ?? internalRef;
-  const { currentSessionId } = useAppState();
+  const { currentSessionId, rerunRequested } = useAppState();
   const dispatch = useAppDispatch();
 
   const currentModel = MODEL_OPTIONS.find((m) => m.id === modelId);
@@ -70,6 +70,7 @@ export function ChatPanel({
     handleSubmit,
     isLoading,
     error,
+    append,
     data,
     reload,
   } = useChat({
@@ -141,6 +142,15 @@ export function ChatPanel({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  /* ─── Re-run from preview panel ─── */
+
+  useEffect(() => {
+    if (rerunRequested) {
+      dispatch({ type: "CLEAR_RERUN" });
+      append({ role: "user", content: "Re-run the last command with the same parameters" });
+    }
+  }, [rerunRequested, dispatch, append]);
 
   /* ─── Textarea auto-resize ─── */
 

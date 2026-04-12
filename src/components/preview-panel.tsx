@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ZoomIn, ZoomOut, Maximize, Music } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize, Music, RefreshCw, Pencil, Columns } from "lucide-react";
 import { DesignfileGraph } from "@/components/designfile-graph";
 
 interface PreviewPanelProps {
@@ -15,7 +15,7 @@ interface PreviewPanelProps {
 }
 
 export function PreviewPanel({ open }: PreviewPanelProps) {
-  const { previewTab, previewContent, editorParams, outputFiles } =
+  const { previewTab, previewContent, previousPreview, editorParams, outputFiles } =
     useAppState();
   const dispatch = useAppDispatch();
 
@@ -56,7 +56,12 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
         </TabsList>
 
         <TabsContent value="preview" className="flex-1 overflow-hidden">
-          <PreviewContent content={previewContent} />
+          <PreviewContent
+            content={previewContent}
+            previousPreview={previousPreview}
+            onRerun={() => dispatch({ type: "REQUEST_RERUN" })}
+            onEditRerun={() => dispatch({ type: "SET_PREVIEW_TAB", tab: "editor" })}
+          />
         </TabsContent>
 
         <TabsContent value="editor" className="flex-1 overflow-hidden">
@@ -99,11 +104,18 @@ const ZOOM_STEP = 0.25;
 
 function PreviewContent({
   content,
+  previousPreview,
+  onRerun,
+  onEditRerun,
 }: {
   content: { type: string; url?: string; text?: string };
+  previousPreview: { type: string; url?: string; text?: string } | null;
+  onRerun: () => void;
+  onEditRerun: () => void;
 }) {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [comparing, setComparing] = useState(false);
   const isDragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const panStart = useRef({ x: 0, y: 0 });
@@ -216,6 +228,8 @@ function PreviewContent({
 
   // Image with zoom/pan
   if (content.type === "image" && content.url) {
+    const hasComparison = !!(previousPreview?.url && previousPreview.url !== content.url);
+
     return (
       <div className="flex h-full flex-col">
         {/* Zoom toolbar */}
@@ -247,35 +261,101 @@ function PreviewContent({
           >
             <Maximize size={15} strokeWidth={1.5} />
           </button>
+          {hasComparison && (
+            <>
+              <div className="mx-1 h-4 w-px bg-border" />
+              <button
+                type="button"
+                onClick={() => setComparing((v) => !v)}
+                className={cn(
+                  "rounded p-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  comparing
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+                title="Compare before/after"
+              >
+                <Columns size={15} strokeWidth={1.5} />
+              </button>
+            </>
+          )}
         </div>
 
-        {/* Image viewport */}
-        <div
-          ref={containerRef}
-          className="flex flex-1 items-center justify-center overflow-hidden"
-          style={{
-            cursor:
-              zoom > 1
-                ? isDragging.current
-                  ? "grabbing"
-                  : "grab"
-                : "default",
-          }}
-          onWheel={handleWheel}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-        >
-          <img
-            src={content.url}
-            alt="Preview"
-            draggable={false}
-            className="max-h-full max-w-full select-none object-contain"
+        {/* Compare view */}
+        {comparing && hasComparison ? (
+          <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1 items-center justify-center overflow-hidden border-r border-border p-2">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-[11px] font-medium text-muted-foreground">Before</span>
+                <img
+                  src={previousPreview!.url}
+                  alt="Before"
+                  draggable={false}
+                  className="max-h-full max-w-full select-none object-contain"
+                />
+              </div>
+            </div>
+            <div className="flex flex-1 items-center justify-center overflow-hidden p-2">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-[11px] font-medium text-muted-foreground">After</span>
+                <img
+                  src={content.url}
+                  alt="After"
+                  draggable={false}
+                  className="max-h-full max-w-full select-none object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Normal image viewport */
+          <div
+            ref={containerRef}
+            className="flex flex-1 items-center justify-center overflow-hidden"
             style={{
-              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-              transformOrigin: "center center",
+              cursor:
+                zoom > 1
+                  ? isDragging.current
+                    ? "grabbing"
+                    : "grab"
+                  : "default",
             }}
-          />
+            onWheel={handleWheel}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+          >
+            <img
+              src={content.url}
+              alt="Preview"
+              draggable={false}
+              className="max-h-full max-w-full select-none object-contain"
+              style={{
+                transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                transformOrigin: "center center",
+              }}
+            />
+          </div>
+        )}
+
+        {/* Re-run action bar */}
+        <div className="flex shrink-0 items-center justify-center gap-2 border-t border-border px-3 py-2">
+          <button
+            type="button"
+            onClick={onRerun}
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <RefreshCw size={15} strokeWidth={2} />
+            Re-run
+          </button>
+          <button
+            type="button"
+            onClick={onEditRerun}
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <Pencil size={15} strokeWidth={2} />
+            Edit & Re-run
+          </button>
         </div>
       </div>
     );
