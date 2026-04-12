@@ -14,6 +14,7 @@ interface SettingsDialogProps {
 interface SettingsData {
   defaultModel: string;
   apiKeys: { anthropic: string; openai: string };
+  envKeys?: { anthropic: boolean; openai: boolean };
 }
 
 export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
@@ -23,6 +24,10 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const [defaultModel, setDefaultModel] = useState("claude-sonnet");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
+  const isElectron = typeof window !== "undefined" && !!window.pokeshrimp?.auth;
 
   useEffect(() => {
     if (!open) return;
@@ -59,6 +64,37 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
       setSaving(false);
     }
   }, [defaultModel, anthropicKey, openaiKey]);
+
+  const handleOpenAIOAuth = useCallback(async () => {
+    if (!window.pokeshrimp?.auth) return;
+    setOauthLoading(true);
+    setOauthError(null);
+    try {
+      const { accessToken } = await window.pokeshrimp.auth.openaiOAuth!();
+      setOpenaiKey(accessToken);
+      // Auto-save the token
+      await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          defaultModel,
+          apiKeys: {
+            anthropic: anthropicKey.includes("****") ? undefined : anthropicKey,
+            openai: accessToken,
+          },
+        }),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "OAuth failed";
+      if (!message.includes("User closed")) {
+        setOauthError(message);
+      }
+    } finally {
+      setOauthLoading(false);
+    }
+  }, [defaultModel, anthropicKey]);
 
   if (!open) return null;
 
@@ -101,7 +137,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                 </select>
               </Field>
 
-              <Field label="Anthropic API Key" hint="Required for Claude models">
+              <Field label="Anthropic API Key" hint="Required for Claude models" getKeyUrl="https://console.anthropic.com/settings/keys">
                 <input
                   type="password"
                   value={anthropicKey}
@@ -112,19 +148,37 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                   }}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
                 />
+                <EnvKeyHint envAvailable={settings.envKeys?.anthropic} hasConfigKey={!!settings.apiKeys?.anthropic} envVarName="ANTHROPIC_API_KEY" />
               </Field>
 
-              <Field label="OpenAI API Key" hint="Required for GPT models">
-                <input
-                  type="password"
-                  value={openaiKey}
-                  onChange={(e) => setOpenaiKey(e.target.value)}
-                  placeholder="sk-..."
-                  onFocus={(e) => {
-                    if (e.target.value.includes("****")) setOpenaiKey("");
-                  }}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-                />
+              <Field label="OpenAI API Key" hint="Required for GPT models" getKeyUrl="https://platform.openai.com/api-keys">
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    value={openaiKey}
+                    onChange={(e) => setOpenaiKey(e.target.value)}
+                    placeholder="sk-..."
+                    onFocus={(e) => {
+                      if (e.target.value.includes("****")) setOpenaiKey("");
+                    }}
+                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
+                  />
+                  {isElectron && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 text-[12px]"
+                      disabled={oauthLoading}
+                      onClick={handleOpenAIOAuth}
+                    >
+                      {oauthLoading ? "Logging in..." : "Login with OpenAI"}
+                    </Button>
+                  )}
+                </div>
+                {oauthError && (
+                  <p className="mt-1 text-[11px] text-red-500">{oauthError}</p>
+                )}
+                <EnvKeyHint envAvailable={settings.envKeys?.openai} hasConfigKey={!!settings.apiKeys?.openai} envVarName="OPENAI_API_KEY" />
               </Field>
 
               <p className="text-[11px] text-muted-foreground/60">
@@ -148,12 +202,39 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   );
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function openKeyUrl(url: string) {
+  if (window.pokeshrimp?.auth?.openBrowser) {
+    window.pokeshrimp.auth.openBrowser(url);
+  } else {
+    window.open(url, "_blank");
+  }
+}
+
+function Field({ label, hint, getKeyUrl, children }: { label: string; hint?: string; getKeyUrl?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="mb-1.5 block text-[13px] font-medium">{label}</label>
+      <div className="mb-1.5 flex items-center justify-between">
+        <label className="text-[13px] font-medium">{label}</label>
+        {getKeyUrl && (
+          <button
+            type="button"
+            onClick={() => openKeyUrl(getKeyUrl)}
+            className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Get key &rarr;
+          </button>
+        )}
+      </div>
       {hint && <p className="mb-2 text-[12px] text-muted-foreground">{hint}</p>}
       {children}
     </div>
   );
+}
+
+function EnvKeyHint({ envAvailable, hasConfigKey, envVarName }: { envAvailable?: boolean; hasConfigKey: boolean; envVarName: string }) {
+  if (!envAvailable) return null;
+  if (hasConfigKey) {
+    return <p className="mt-1.5 text-[11px] text-muted-foreground">Config key takes priority over env var</p>;
+  }
+  return <p className="mt-1.5 text-[11px] text-emerald-500">Using {envVarName} from environment</p>;
 }
