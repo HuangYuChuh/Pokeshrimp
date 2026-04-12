@@ -1,9 +1,16 @@
 import { z } from "zod";
+import type { LanguageModel } from "ai";
 
 export interface ToolContext {
   sessionId?: string;
   cwd: string;
   signal?: AbortSignal;
+  /**
+   * The language model in use for the current run().
+   * Populated by AgentRuntime so tools that need to start an LLM
+   * call (e.g. spawn_agent) can reuse the same model as the parent.
+   */
+  model?: LanguageModel;
 }
 
 export interface ToolResult {
