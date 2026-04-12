@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/sidebar";
 import { ChatPanel } from "@/components/chat-panel";
 import { PreviewPanel } from "@/components/preview-panel";
 import { SettingsDialog } from "@/components/settings-dialog";
+import { SkillDropOverlay } from "@/components/skill-drop-overlay";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 const SIDEBAR_KEY = "pokeshrimp:sidebar-open";
@@ -95,9 +96,83 @@ function HomeInner() {
     isSettingsOpen: settingsOpen,
   });
 
+  // --- Drag-and-drop skill import ---
+  const [dragOver, setDragOver] = useState(false);
+  const [dropToast, setDropToast] = useState<{ message: string; isError: boolean } | null>(null);
+  const dragCounter = useRef(0);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current += 1;
+    if (e.dataTransfer.types.includes("Files")) {
+      setDragOver(true);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current -= 1;
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setDragOver(false);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const showToast = useCallback((message: string, isError: boolean) => {
+    setDropToast({ message, isError });
+    setTimeout(() => setDropToast(null), 3000);
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current = 0;
+    setDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const skillFiles = files.filter((f) => f.name.endsWith(".skill.md"));
+
+    if (skillFiles.length === 0) {
+      showToast("Only .skill.md files can be imported", true);
+      return;
+    }
+
+    for (const file of skillFiles) {
+      try {
+        const content = await file.text();
+        const res = await fetch("/api/skills/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: file.name, content }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.error || "Failed to import skill", true);
+        } else {
+          showToast(`Skill '${data.name}' installed`, false);
+        }
+      } catch {
+        showToast(`Failed to import ${file.name}`, true);
+      }
+    }
+  }, [showToast]);
+
   return (
     <>
-      <div className="flex h-screen w-screen overflow-hidden bg-background">
+      <div
+        className="flex h-screen w-screen overflow-hidden bg-background"
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         <Sidebar open={sidebarOpen} onToggle={toggleSidebar} onOpenSettings={() => setSettingsOpen(true)} />
         <ChatPanel
           modelId={modelId}
@@ -109,6 +184,18 @@ function HomeInner() {
           onTogglePreview={togglePreview}
         />
         <PreviewPanel open={previewOpen} onToggle={togglePreview} />
+        <SkillDropOverlay visible={dragOver} />
+        {dropToast && (
+          <div
+            className={`fixed bottom-6 left-1/2 z-[200] -translate-x-1/2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-lg transition-opacity duration-300 ${
+              dropToast.isError
+                ? "bg-destructive text-destructive-foreground"
+                : "bg-primary text-primary-foreground"
+            }`}
+          >
+            {dropToast.message}
+          </div>
+        )}
       </div>
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>

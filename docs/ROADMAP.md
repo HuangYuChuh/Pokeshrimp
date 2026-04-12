@@ -36,7 +36,7 @@
 - [x] Streaming text output in terminal
 - [x] CLI argument parsing (--model, --cwd, --config flags)
 - [x] Non-interactive mode (pipe input, get output)
-- [ ] `npx pokeshrimp init` project scaffolding
+- [x] `npx pokeshrimp init` project scaffolding
 
 ## Frontend / UI
 
@@ -53,12 +53,12 @@
 - [x] **Markdown rendering** in agent responses (code blocks, bold, lists, tables)
 - [x] Message edit / delete / regenerate
 - [x] Image preview zoom + side-by-side comparison
-- [ ] Video playback in preview panel
+- [x] Video playback in preview panel
 - [ ] Tool management UI (installed CLI status: available / needs login / not installed)
 - [ ] Drag-and-drop .skill.md import
 - [x] Responsive layout for smaller windows
 - [x] Keyboard shortcuts (new session, focus input, etc.)
-- [ ] File/image upload in chat input
+- [x] File/image upload in chat input
 - [ ] Designfile visual editor (dependency graph visualization)
 
 ## Skill Ecosystem

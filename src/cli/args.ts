@@ -22,6 +22,7 @@ export interface CliOptions {
 const HELP_TEXT = `
 Usage: pokeshrimp [options] [message]
        pokeshrimp init [project-name]
+       pokeshrimp create-skill [name]
 
 AI-powered image & video creative workstation CLI.
 
@@ -30,6 +31,7 @@ run it as a one-shot query. Otherwise start an interactive REPL.
 
 Commands:
   init [project-name]  Scaffold a new .visagent/ project directory
+  create-skill [name]  Create a .skill.md template in .visagent/skills/
 
 Options:
   -m, --model <id>     Model to use (default: from config or "claude-sonnet")
@@ -100,7 +102,7 @@ export function parseArgs(argv: string[]): CliOptions {
   }
 
   // Detect subcommands (first positional word)
-  const SUBCOMMANDS = ["init"];
+  const SUBCOMMANDS = ["init", "create-skill"];
   if (positional.length > 0 && SUBCOMMANDS.includes(positional[0]!)) {
     opts.subcommand = positional[0];
     // Remaining positional args become the message (e.g. project name)
