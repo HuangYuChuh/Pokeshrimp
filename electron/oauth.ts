@@ -15,11 +15,11 @@ import { saveTokens } from "./token-store";
  * pasting an API key in Settings.
  */
 
-const AUTH0_DOMAIN = "https://auth0.openai.com";
-const CLIENT_ID = "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh";
-const REDIRECT_URI = "http://localhost:3099/oauth/callback";
-const AUDIENCE = "https://api.openai.com/v1";
-const SCOPES = "openid email profile offline_access";
+// Correct values from OpenClaw's @mariozechner/pi-ai/oauth implementation
+const AUTH_DOMAIN = "https://auth.openai.com";
+const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
+const REDIRECT_URI = "http://localhost:1455/auth/callback";
+const SCOPES = "openid profile email offline_access";
 
 export interface OAuthResult {
   accessToken: string;
@@ -46,14 +46,13 @@ function generatePKCE(): { verifier: string; challenge: string } {
 export async function startOpenAIOAuth(): Promise<OAuthResult> {
   const { verifier, challenge } = generatePKCE();
 
-  const authURL = new URL(`${AUTH0_DOMAIN}/authorize`);
+  const authURL = new URL(`${AUTH_DOMAIN}/oauth/authorize`);
   authURL.searchParams.set("response_type", "code");
   authURL.searchParams.set("client_id", CLIENT_ID);
   authURL.searchParams.set("redirect_uri", REDIRECT_URI);
   authURL.searchParams.set("scope", SCOPES);
   authURL.searchParams.set("code_challenge", challenge);
   authURL.searchParams.set("code_challenge_method", "S256");
-  authURL.searchParams.set("audience", AUDIENCE);
 
   return new Promise<OAuthResult>((resolve, reject) => {
     const authWindow = new BrowserWindow({
@@ -146,10 +145,10 @@ async function exchangeCodeForToken(
   code: string,
   codeVerifier: string
 ): Promise<OAuthResult> {
-  const response = await fetch(`${AUTH0_DOMAIN}/oauth/token`, {
+  const response = await fetch(`${AUTH_DOMAIN}/oauth/token`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
       grant_type: "authorization_code",
       client_id: CLIENT_ID,
       code,

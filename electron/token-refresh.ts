@@ -1,7 +1,7 @@
 import { saveTokens, clearTokens, type TokenSet } from "./token-store";
 
-const AUTH0_DOMAIN = "https://auth0.openai.com";
-const CLIENT_ID = "pdlLIX2Y72MIl2rhLhTE9VV9bN905kBh";
+const AUTH_DOMAIN = "https://auth.openai.com";
+const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
 
 interface TokenResponse {
   access_token: string;
@@ -14,9 +14,9 @@ export async function refreshAccessToken(
   refreshToken: string
 ): Promise<TokenSet | null> {
   try {
-    const response = await fetch(`${AUTH0_DOMAIN}/oauth/token`, {
+    const response = await fetch(`${AUTH_DOMAIN}/oauth/token`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: JSON.stringify({
         grant_type: "refresh_token",
         client_id: CLIENT_ID,
