@@ -36,6 +36,8 @@ export interface AssetVersion {
   hash: string;
   /** ISO timestamp of this build. */
   timestamp: string;
+  /** Monotonic sequence for stable ordering when timestamps match. */
+  seq?: number;
   /** Skill slash command used. */
   skill: string;
   /** Parameters passed to the skill. */
