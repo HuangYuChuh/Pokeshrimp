@@ -9,6 +9,7 @@ import { getConfig } from "@/core/config/loader";
 import { getRuntime } from "@/core/init";
 import { parseArgs, getHelpText } from "./args";
 import { handleInit } from "./init";
+import { handleCreateSkill } from "./create-skill";
 import type { CoreMessage } from "ai";
 
 // ─── Parse CLI arguments ────────────────────────────────────
@@ -44,6 +45,11 @@ if (opts.cwd) {
 
 if (opts.subcommand === "init") {
   handleInit(opts.message, opts.cwd ? process.cwd() : undefined);
+  process.exit(0);
+}
+
+if (opts.subcommand === "create-skill") {
+  handleCreateSkill(opts.message, opts.cwd ? process.cwd() : undefined);
   process.exit(0);
 }
 
