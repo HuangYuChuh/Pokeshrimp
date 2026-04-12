@@ -111,6 +111,7 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
             <div className="mt-3">
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => handleDecision("allow-once")}
                   disabled={loading}
                   className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
@@ -118,6 +119,7 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
                   Allow Once
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleDecision("always-allow")}
                   disabled={loading}
                   className="rounded-md border border-border px-3 py-1.5 text-[12px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
@@ -125,6 +127,7 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
                   Always Allow
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleDecision("deny")}
                   disabled={loading}
                   className="rounded-md border border-destructive/30 px-3 py-1.5 text-[12px] font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
