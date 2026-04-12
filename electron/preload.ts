@@ -7,5 +7,7 @@ contextBridge.exposeInMainWorld("pokeshrimp", {
     openBrowser: (url: string) => ipcRenderer.invoke("auth:open-browser", url),
     openaiOAuth: (): Promise<{ accessToken: string }> =>
       ipcRenderer.invoke("auth:openai-oauth"),
+    getValidToken: (): Promise<string | null> =>
+      ipcRenderer.invoke("auth:get-valid-token"),
   },
 });

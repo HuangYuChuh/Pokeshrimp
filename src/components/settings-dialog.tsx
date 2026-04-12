@@ -27,6 +27,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const [saved, setSaved] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
+  const [oauthConnected, setOauthConnected] = useState(false);
   const [theme, setThemeState] = useState<"dark" | "light" | "system">("dark");
 
   const isElectron = typeof window !== "undefined" && !!window.pokeshrimp?.auth;
@@ -48,6 +49,16 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
       root.classList.toggle("dark", value === "dark");
     }
   }, []);
+
+  // Check if a stored OAuth token exists and is valid
+  useEffect(() => {
+    if (!open || !isElectron) return;
+    window.pokeshrimp?.auth?.getValidToken?.().then((token) => {
+      setOauthConnected(!!token);
+    }).catch(() => {
+      setOauthConnected(false);
+    });
+  }, [open, isElectron]);
 
   useEffect(() => {
     if (!open) return;
@@ -92,6 +103,7 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
     try {
       const { accessToken } = await window.pokeshrimp.auth.openaiOAuth!();
       setOpenaiKey(accessToken);
+      setOauthConnected(true);
       // Auto-save the token
       await fetch("/api/settings", {
         method: "PUT",
@@ -207,6 +219,9 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
                     </Button>
                   )}
                 </div>
+                {oauthConnected && !oauthError && (
+                  <p className="mt-1 text-[11px] text-emerald-500">OpenAI OAuth connected (token auto-refreshes)</p>
+                )}
                 {oauthError && (
                   <p className="mt-1 text-[11px] text-red-500">{oauthError}</p>
                 )}

@@ -4,6 +4,8 @@ import path from "path";
 import http from "http";
 import { openExternalAuth } from "./browser-auth";
 import { startOpenAIOAuth } from "./oauth";
+import { loadTokens } from "./token-store";
+import { refreshAccessToken } from "./token-refresh";
 
 let mainWindow: BrowserWindow | null = null;
 let nextServer: ChildProcess | null = null;
@@ -128,6 +130,20 @@ app.whenReady().then(async () => {
     openExternalAuth(url)
   );
   ipcMain.handle("auth:openai-oauth", () => startOpenAIOAuth());
+  ipcMain.handle("auth:get-valid-token", async () => {
+    const tokens = loadTokens("openai");
+    if (!tokens) return null;
+
+    // If token is still valid (with 5 min buffer), return it
+    const FIVE_MINUTES = 5 * 60 * 1000;
+    if (tokens.expiresAt > Date.now() + FIVE_MINUTES) {
+      return tokens.accessToken;
+    }
+
+    // Token expired or expiring soon — try to refresh
+    const refreshed = await refreshAccessToken(tokens.refreshToken);
+    return refreshed?.accessToken ?? null;
+  });
 
   await startNextServer();
   createWindow();

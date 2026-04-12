@@ -1,5 +1,6 @@
 import { BrowserWindow } from "electron";
 import crypto from "crypto";
+import { saveTokens } from "./token-store";
 
 /**
  * OpenAI OAuth 2.0 PKCE flow via Electron BrowserWindow.
@@ -20,6 +21,12 @@ const REDIRECT_URI = "http://localhost:3099/oauth/callback";
 const AUDIENCE = "https://api.openai.com/v1";
 const SCOPES = "openid email profile offline_access";
 
+export interface OAuthResult {
+  accessToken: string;
+  refreshToken: string | null;
+  expiresAt: number;
+}
+
 function base64URLEncode(buffer: Buffer): string {
   return buffer
     .toString("base64")
@@ -36,7 +43,7 @@ function generatePKCE(): { verifier: string; challenge: string } {
   return { verifier, challenge };
 }
 
-export async function startOpenAIOAuth(): Promise<{ accessToken: string }> {
+export async function startOpenAIOAuth(): Promise<OAuthResult> {
   const { verifier, challenge } = generatePKCE();
 
   const authURL = new URL(`${AUTH0_DOMAIN}/authorize`);
@@ -48,7 +55,7 @@ export async function startOpenAIOAuth(): Promise<{ accessToken: string }> {
   authURL.searchParams.set("code_challenge_method", "S256");
   authURL.searchParams.set("audience", AUDIENCE);
 
-  return new Promise<{ accessToken: string }>((resolve, reject) => {
+  return new Promise<OAuthResult>((resolve, reject) => {
     const authWindow = new BrowserWindow({
       width: 600,
       height: 700,
@@ -64,7 +71,7 @@ export async function startOpenAIOAuth(): Promise<{ accessToken: string }> {
 
     function settle(
       fn: typeof resolve | typeof reject,
-      value: { accessToken: string } | Error
+      value: OAuthResult | Error
     ) {
       if (settled) return;
       settled = true;
@@ -110,7 +117,17 @@ export async function startOpenAIOAuth(): Promise<{ accessToken: string }> {
       }
 
       exchangeCodeForToken(code, verifier)
-        .then((accessToken) => settle(resolve, { accessToken }))
+        .then((result) => {
+          // Persist tokens to secure file store
+          if (result.refreshToken) {
+            saveTokens("openai", {
+              accessToken: result.accessToken,
+              refreshToken: result.refreshToken,
+              expiresAt: result.expiresAt,
+            });
+          }
+          settle(resolve, result);
+        })
         .catch((err) => settle(reject, err));
     }
 
@@ -118,10 +135,17 @@ export async function startOpenAIOAuth(): Promise<{ accessToken: string }> {
   });
 }
 
+interface TokenExchangeResponse {
+  access_token: string;
+  refresh_token?: string;
+  expires_in: number;
+  token_type: string;
+}
+
 async function exchangeCodeForToken(
   code: string,
   codeVerifier: string
-): Promise<string> {
+): Promise<OAuthResult> {
   const response = await fetch(`${AUTH0_DOMAIN}/oauth/token`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -139,10 +163,14 @@ async function exchangeCodeForToken(
     throw new Error(`Token exchange failed (${response.status}): ${text}`);
   }
 
-  const data = (await response.json()) as { access_token?: string };
+  const data = (await response.json()) as TokenExchangeResponse;
   if (!data.access_token) {
     throw new Error("No access_token in token response");
   }
 
-  return data.access_token;
+  return {
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token ?? null,
+    expiresAt: Date.now() + (data.expires_in ?? 3600) * 1000,
+  };
 }
