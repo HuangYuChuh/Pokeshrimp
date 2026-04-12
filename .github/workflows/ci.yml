@@ -28,8 +28,8 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
-      - name: Run tests
-        run: npx vitest run
+      - name: Run tests with coverage
+        run: npx vitest run --coverage
 
       - name: Lint commit message
         if: github.event_name == 'pull_request'
