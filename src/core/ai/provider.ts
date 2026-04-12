@@ -4,6 +4,9 @@ import type { LanguageModel } from "ai";
 
 export type ModelProvider = "anthropic" | "openai";
 
+/** How the user authenticated with OpenAI. */
+export type OpenAIAuthMode = "api-key" | "oauth";
+
 export interface ModelOption {
   id: string;
   label: string;
@@ -76,9 +79,22 @@ export const MODEL_OPTIONS: ModelOption[] = [
   },
 ];
 
+/**
+ * Create a LanguageModel for the given model ID.
+ *
+ * For OpenAI, the auth mode matters:
+ *   - "api-key" (sk-xxx): uses Chat Completions API (/v1/chat/completions)
+ *   - "oauth" (OAuth token): uses Responses API (/v1/responses)
+ *     The OAuth token from "Login with OpenAI" is a Codex subscription
+ *     token that only works with the Responses API, not Chat Completions.
+ */
 export function getModel(
   modelId?: string,
-  apiKeys?: { anthropic?: string; openai?: string },
+  apiKeys?: {
+    anthropic?: string;
+    openai?: string;
+    openaiAuthMode?: OpenAIAuthMode;
+  },
 ): LanguageModel {
   const selected = modelId || "claude-sonnet";
   const option = MODEL_OPTIONS.find((m) => m.id === selected);
@@ -95,12 +111,32 @@ export function getModel(
       return anthropic(option.modelId);
     }
     case "openai": {
-      const openai = createOpenAI({
-        apiKey: apiKeys?.openai || process.env.OPENAI_API_KEY,
-      });
+      const key = apiKeys?.openai || process.env.OPENAI_API_KEY || "";
+      const authMode = apiKeys?.openaiAuthMode ?? detectAuthMode(key);
+
+      const openai = createOpenAI({ apiKey: key });
+
+      if (authMode === "oauth") {
+        // OAuth tokens (from "Login with OpenAI") work with the
+        // Responses API (/v1/responses), not Chat Completions.
+        return openai.responses(option.modelId);
+      }
+      // Standard API keys (sk-xxx) use Chat Completions.
       return openai(option.modelId);
     }
     default:
       throw new Error(`Unknown provider: ${(option as ModelOption).provider}`);
   }
+}
+
+/**
+ * Detect whether a key is an API key (sk-xxx) or an OAuth token.
+ * OAuth tokens are JWTs (eyJ...) or opaque tokens from auth.openai.com.
+ * API keys start with "sk-".
+ */
+function detectAuthMode(key: string): OpenAIAuthMode {
+  if (!key) return "api-key";
+  if (key.startsWith("sk-")) return "api-key";
+  // OAuth tokens are typically JWTs or long opaque strings
+  return "oauth";
 }
