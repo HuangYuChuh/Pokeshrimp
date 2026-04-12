@@ -1,24 +1,39 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { MODEL_OPTIONS } from "@/core/ai/provider";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { X } from "lucide-react";
-import { ToolStatusList } from "@/components/tool-status";
 import {
-  McpServersSection,
-  HooksSection,
-  PermissionsSection,
+  X,
+  KeyRound,
+  Brain,
+  Puzzle,
+  Wrench,
+  Zap,
+  Palette,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
   type McpServerConfig,
   type HookEntryConfig,
   type PermissionConfig,
 } from "@/components/settings-sections";
+import { AccountsTab } from "@/components/settings/accounts-tab";
+import { ModelsTab } from "@/components/settings/models-tab";
+import { SkillsTab } from "@/components/settings/skills-tab";
+import { ToolsTab } from "@/components/settings/tools-tab";
+import { AutomationTab } from "@/components/settings/automation-tab";
+import { AppearanceTab } from "@/components/settings/appearance-tab";
+
+/* ---------------------------------------------------------------------------
+ * Types
+ * --------------------------------------------------------------------------- */
 
 interface SettingsDialogProps {
   open: boolean;
   onClose: () => void;
+  initialTab?: SettingsTabId;
 }
 
 interface SettingsData {
@@ -31,15 +46,41 @@ interface SettingsData {
   conventionHooks?: string[];
 }
 
-export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
+/* ---------------------------------------------------------------------------
+ * Navigation config
+ * --------------------------------------------------------------------------- */
+
+type SettingsTabId =
+  | "accounts"
+  | "models"
+  | "skills"
+  | "tools"
+  | "automation"
+  | "appearance";
+
+const NAV_ITEMS: { id: SettingsTabId; label: string; icon: typeof KeyRound }[] = [
+  { id: "accounts", label: "Accounts", icon: KeyRound },
+  { id: "models", label: "Models", icon: Brain },
+  { id: "skills", label: "Skills", icon: Puzzle },
+  { id: "tools", label: "Tools & Integrations", icon: Wrench },
+  { id: "automation", label: "Automation", icon: Zap },
+  { id: "appearance", label: "Appearance", icon: Palette },
+];
+
+/* ---------------------------------------------------------------------------
+ * Component
+ * --------------------------------------------------------------------------- */
+
+export type { SettingsTabId };
+
+export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProps) {
+  const [activeTab, setActiveTab] = useState<SettingsTabId>(initialTab ?? "accounts");
   const [settings, setSettings] = useState<SettingsData | null>(null);
   const [anthropicKey, setAnthropicKey] = useState("");
   const [openaiKey, setOpenaiKey] = useState("");
   const [defaultModel, setDefaultModel] = useState("claude-sonnet");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState(false);
-  const [oauthError, setOauthError] = useState<string | null>(null);
   const [oauthConnected, setOauthConnected] = useState(false);
   const [theme, setThemeState] = useState<"dark" | "light" | "system">("dark");
   const [mcpServers, setMcpServers] = useState<Record<string, McpServerConfig>>({});
@@ -52,6 +93,13 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const [conventionHooks, setConventionHooks] = useState<string[]>([]);
 
   const isElectron = typeof window !== "undefined" && !!window.pokeshrimp?.auth;
+
+  // Reset active tab when initialTab changes or dialog opens
+  useEffect(() => {
+    if (open && initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [open, initialTab]);
 
   // Load theme from localStorage on mount
   useEffect(() => {
@@ -148,15 +196,8 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
     }
   }, [defaultModel, anthropicKey, openaiKey, mcpServers, hooks, permissions]);
 
-  const handleOpenAIOAuth = useCallback(async () => {
-    if (!window.pokeshrimp?.auth) return;
-    setOauthLoading(true);
-    setOauthError(null);
-    try {
-      const { accessToken } = await window.pokeshrimp.auth.openaiOAuth!();
-      setOpenaiKey(accessToken);
-      setOauthConnected(true);
-      // Auto-save the token
+  const handleOauthAutoSave = useCallback(
+    async (openaiToken: string) => {
       await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -164,21 +205,15 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
           defaultModel,
           apiKeys: {
             anthropic: anthropicKey.includes("****") ? undefined : anthropicKey,
-            openai: accessToken,
+            openai: openaiToken,
           },
         }),
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "OAuth failed";
-      if (!message.includes("User closed")) {
-        setOauthError(message);
-      }
-    } finally {
-      setOauthLoading(false);
-    }
-  }, [defaultModel, anthropicKey]);
+    },
+    [defaultModel, anthropicKey],
+  );
 
   if (!open) return null;
 
@@ -189,16 +224,13 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="flex max-h-[80vh] w-[480px] flex-col overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="flex max-h-[80vh] w-[720px] flex-col overflow-hidden rounded-2xl border border-border bg-card">
         {/* Header */}
         <div className="flex items-center justify-between px-6 pb-4 pt-5">
           <div>
             <h2 className="text-[15px] font-semibold text-foreground">
               Settings
             </h2>
-            <p className="mt-1 text-[12px] text-muted-foreground">
-              API keys and model preferences
-            </p>
           </div>
           <Button
             type="button"
@@ -213,231 +245,116 @@ export function SettingsDialog({ open, onClose }: SettingsDialogProps) {
 
         <Separator />
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-5">
-          {!settings ? (
-            <div className="space-y-5">
-              <Skeleton className="h-[60px] w-full rounded-lg" />
-              <Skeleton className="h-[60px] w-full rounded-lg" />
-              <Skeleton className="h-[80px] w-full rounded-lg" />
+        {/* Body: sidebar + content */}
+        <div className="flex min-h-0 flex-1">
+          {/* Sidebar */}
+          <nav className="w-[180px] shrink-0 border-r border-border py-3">
+            <div className="space-y-0.5 px-3">
+              {NAV_ITEMS.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveTab(item.id)}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors",
+                      isActive
+                        ? "bg-muted text-foreground font-medium"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                    )}
+                  >
+                    <Icon size={15} strokeWidth={1.5} />
+                    {item.label}
+                  </button>
+                );
+              })}
             </div>
-          ) : (
-            <div className="space-y-5">
-              <Field label="Theme">
-                <select
-                  value={theme}
-                  onChange={(e) =>
-                    handleThemeChange(
-                      e.target.value as "dark" | "light" | "system",
-                    )
-                  }
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="dark">Dark</option>
-                  <option value="light">Light</option>
-                  <option value="system">System</option>
-                </select>
-              </Field>
+          </nav>
 
-              <Field label="Default Model">
-                <select
-                  value={defaultModel}
-                  onChange={(e) => setDefaultModel(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-                >
-                  {MODEL_OPTIONS.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-
-              <Separator />
-
-              <Field
-                label="Anthropic API Key"
-                hint="Required for Claude models"
-                getKeyUrl="https://console.anthropic.com/settings/keys"
-              >
-                <input
-                  type="password"
-                  value={anthropicKey}
-                  onChange={(e) => setAnthropicKey(e.target.value)}
-                  placeholder="sk-ant-..."
-                  onFocus={(e) => {
-                    if (e.target.value.includes("****")) setAnthropicKey("");
-                  }}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-                />
-                <EnvKeyHint
-                  envAvailable={settings.envKeys?.anthropic}
-                  hasConfigKey={!!settings.apiKeys?.anthropic}
-                  envVarName="ANTHROPIC_API_KEY"
-                />
-              </Field>
-
-              <Field
-                label="OpenAI API Key"
-                hint="Required for GPT models"
-                getKeyUrl="https://platform.openai.com/api-keys"
-              >
-                <div className="flex gap-2">
-                  <input
-                    type="password"
-                    value={openaiKey}
-                    onChange={(e) => setOpenaiKey(e.target.value)}
-                    placeholder="sk-..."
-                    onFocus={(e) => {
-                      if (e.target.value.includes("****")) setOpenaiKey("");
-                    }}
-                    className="flex-1 rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
+          {/* Content area */}
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+            {!settings ? (
+              <div className="space-y-5">
+                <Skeleton className="h-[60px] w-full rounded-lg" />
+                <Skeleton className="h-[60px] w-full rounded-lg" />
+                <Skeleton className="h-[80px] w-full rounded-lg" />
+              </div>
+            ) : (
+              <>
+                {activeTab === "accounts" && (
+                  <AccountsTab
+                    anthropicKey={anthropicKey}
+                    openaiKey={openaiKey}
+                    onAnthropicKeyChange={setAnthropicKey}
+                    onOpenaiKeyChange={setOpenaiKey}
+                    envKeys={settings.envKeys}
+                    apiKeys={settings.apiKeys}
+                    defaultModel={defaultModel}
+                    oauthConnected={oauthConnected}
+                    onOauthConnected={setOauthConnected}
+                    onAutoSave={handleOauthAutoSave}
                   />
-                  {isElectron && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 text-[12px]"
-                      disabled={oauthLoading}
-                      onClick={handleOpenAIOAuth}
-                    >
-                      {oauthLoading ? "Logging in..." : "Login with OpenAI"}
-                    </Button>
-                  )}
-                </div>
-                {oauthConnected && !oauthError && (
-                  <p className="mt-1 text-[11px] text-green-400">
-                    OpenAI OAuth connected (token auto-refreshes)
-                  </p>
                 )}
-                {oauthError && (
-                  <p className="mt-1 text-[11px] text-destructive">
-                    {oauthError}
-                  </p>
+                {activeTab === "models" && (
+                  <ModelsTab
+                    defaultModel={defaultModel}
+                    onDefaultModelChange={setDefaultModel}
+                  />
                 )}
-                <EnvKeyHint
-                  envAvailable={settings.envKeys?.openai}
-                  hasConfigKey={!!settings.apiKeys?.openai}
-                  envVarName="OPENAI_API_KEY"
-                />
-              </Field>
-
-              <Separator />
-
-              <Field label="CLI Tools">
-                <ToolStatusList open={open} />
-              </Field>
-
-              <Separator />
-
-              <McpServersSection
-                servers={mcpServers}
-                onChange={setMcpServers}
-              />
-
-              <HooksSection
-                hooks={hooks}
-                conventionHooks={conventionHooks}
-                onChange={setHooks}
-              />
-
-              <PermissionsSection
-                permissions={permissions}
-                onChange={setPermissions}
-              />
-
-              <p className="text-[11px] text-muted-foreground/60">
-                Saved to ~/.visagent/config.json
-              </p>
-            </div>
-          )}
+                {activeTab === "skills" && (
+                  <SkillsTab active={activeTab === "skills"} />
+                )}
+                {activeTab === "tools" && (
+                  <ToolsTab
+                    active={activeTab === "tools"}
+                    mcpServers={mcpServers}
+                    onMcpServersChange={setMcpServers}
+                  />
+                )}
+                {activeTab === "automation" && (
+                  <AutomationTab
+                    hooks={hooks}
+                    conventionHooks={conventionHooks}
+                    onHooksChange={setHooks}
+                    permissions={permissions}
+                    onPermissionsChange={setPermissions}
+                  />
+                )}
+                {activeTab === "appearance" && (
+                  <AppearanceTab
+                    theme={theme}
+                    onThemeChange={handleThemeChange}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </div>
 
         <Separator />
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 px-6 py-4">
-          <Button type="button" variant="outline" size="sm" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saved ? "Saved!" : saving ? "Saving..." : "Save"}
-          </Button>
+        <div className="flex items-center justify-between px-6 py-4">
+          <p className="text-[11px] text-muted-foreground/60">
+            Saved to ~/.visagent/config.json
+          </p>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saved ? "Saved!" : saving ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function openKeyUrl(url: string) {
-  if (window.pokeshrimp?.auth?.openBrowser) {
-    window.pokeshrimp.auth.openBrowser(url);
-  } else {
-    window.open(url, "_blank");
-  }
-}
-
-function Field({
-  label,
-  hint,
-  getKeyUrl,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  getKeyUrl?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <div className="mb-1.5 flex items-center justify-between">
-        <label className="text-[13px] font-medium text-foreground">
-          {label}
-        </label>
-        {getKeyUrl && (
-          <button
-            type="button"
-            onClick={() => openKeyUrl(getKeyUrl)}
-            className="text-[12px] text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Get key &rarr;
-          </button>
-        )}
-      </div>
-      {hint && (
-        <p className="mb-2 text-[12px] text-muted-foreground">{hint}</p>
-      )}
-      {children}
-    </div>
-  );
-}
-
-function EnvKeyHint({
-  envAvailable,
-  hasConfigKey,
-  envVarName,
-}: {
-  envAvailable?: boolean;
-  hasConfigKey: boolean;
-  envVarName: string;
-}) {
-  if (!envAvailable) return null;
-  if (hasConfigKey) {
-    return (
-      <p className="mt-1.5 text-[11px] text-muted-foreground">
-        Config key takes priority over env var
-      </p>
-    );
-  }
-  return (
-    <p className="mt-1.5 text-[11px] text-green-400">
-      Using {envVarName} from environment
-    </p>
   );
 }
