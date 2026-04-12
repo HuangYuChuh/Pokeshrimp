@@ -2,12 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppState, useAppDispatch, type PreviewTab } from "@/lib/store";
+import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ZoomIn, ZoomOut, Maximize } from "lucide-react";
 
-export function PreviewPanel() {
+interface PreviewPanelProps {
+  open: boolean;
+  onToggle: () => void;
+}
+
+export function PreviewPanel({ open }: PreviewPanelProps) {
   const { previewTab, previewContent, editorParams, outputFiles } =
     useAppState();
   const dispatch = useAppDispatch();
@@ -27,7 +33,10 @@ export function PreviewPanel() {
   );
 
   return (
-    <aside className="flex h-screen w-[380px] min-w-[380px] flex-col border-l border-border bg-sidebar">
+    <aside className={cn(
+      "flex h-screen shrink-0 flex-col border-l border-border bg-sidebar overflow-hidden transition-[width] duration-200 ease-in-out",
+      open ? "w-[380px]" : "w-0 border-l-0"
+    )}>
       {/* Navbar spacer */}
       <div className="drag h-12 shrink-0" />
 

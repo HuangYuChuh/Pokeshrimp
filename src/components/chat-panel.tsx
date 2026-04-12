@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { useRef, useEffect, useCallback, useState, useMemo, type KeyboardEvent } from "react";
 import { useAppState, useAppDispatch, type OutputFile } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { ChevronDown as ChevronDownIcon, Pencil, Trash2, RefreshCw } from "lucide-react";
+import { ChevronDown as ChevronDownIcon, Pencil, Trash2, RefreshCw, PanelLeft, PanelRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowUp, ChevronDown } from "lucide-react";
@@ -51,9 +51,13 @@ interface ChatPanelProps {
   modelId: string;
   onModelChange: (id: string) => void;
   inputRef?: React.RefObject<HTMLTextAreaElement | null>;
+  sidebarOpen: boolean;
+  previewOpen: boolean;
+  onToggleSidebar: () => void;
+  onTogglePreview: () => void;
 }
 
-export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) {
+export function ChatPanel({ modelId, onModelChange, inputRef, sidebarOpen, previewOpen, onToggleSidebar, onTogglePreview }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = inputRef ?? internalRef;
@@ -230,8 +234,31 @@ export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) 
 
   return (
     <div className="flex min-w-0 flex-1 flex-col bg-background">
-      {/* Drag region */}
-      <div className="drag h-13 shrink-0" />
+      {/* Drag region with toggle buttons */}
+      <div className="drag flex h-13 shrink-0 items-center justify-between px-3">
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          className={cn(
+            "nodrag flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+            sidebarOpen && "invisible"
+          )}
+          title="Toggle sidebar"
+        >
+          <PanelLeft size={16} strokeWidth={1.5} />
+        </button>
+        <button
+          type="button"
+          onClick={onTogglePreview}
+          className={cn(
+            "nodrag flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+            previewOpen && "invisible"
+          )}
+          title="Toggle preview"
+        >
+          <PanelRight size={16} strokeWidth={1.5} />
+        </button>
+      </div>
 
       {/* Content area */}
       {isEmpty ? (
@@ -265,7 +292,7 @@ export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) 
         /* Conversation state: messages + bottom input */
         <>
           <ScrollArea className="flex-1">
-            <div className="selectable mx-auto max-w-[680px] px-6 pt-4 pb-6">
+            <div className="selectable mx-auto max-w-[680px] px-3 pt-4 pb-6 sm:px-6">
               {messages.map((message) => (
                 <div key={message.id} className="group/msg relative mb-6">
                   {message.content && (
@@ -276,7 +303,7 @@ export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) 
                       )}
                     >
                       {message.role === "user" ? (
-                        editingId === message.id ? (
+editingId === message.id ? (
                           <EditBubble
                             content={editingContent}
                             onChange={setEditingContent}
@@ -284,7 +311,7 @@ export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) 
                             onCancel={handleCancelEdit}
                           />
                         ) : (
-                          <div className="relative max-w-[85%]">
+                          <div className="relative max-w-[95%] sm:max-w-[85%]">
                             <div className="whitespace-pre-wrap break-words rounded-2xl bg-primary px-4 py-2.5 text-[14px] leading-7 text-primary-foreground">
                               {message.content}
                             </div>
@@ -296,7 +323,7 @@ export function ChatPanel({ modelId, onModelChange, inputRef }: ChatPanelProps) 
                           </div>
                         )
                       ) : (
-                        <div className="relative max-w-[85%]">
+                        <div className="relative max-w-[95%] sm:max-w-[85%]">
                           <div className="prose prose-sm dark:prose-invert max-w-none text-[14px] leading-7 text-foreground">
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm]}
@@ -561,7 +588,7 @@ const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
     const isSlashMode = slashQuery !== null && filteredSkills.length > 0;
 
     return (
-      <div className="shrink-0 px-6 pb-6">
+      <div className="shrink-0 px-3 pb-4 sm:px-6 sm:pb-6">
         <form onSubmit={onSubmit} className="relative mx-auto max-w-[680px]">
           {/* Slash command popup */}
           {isSlashMode && (

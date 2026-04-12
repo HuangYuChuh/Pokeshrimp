@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { Plus, Settings, X } from "lucide-react";
+import { PanelLeft, Plus, Settings, X } from "lucide-react";
 import { useAppState, useAppDispatch } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SidebarProps {
+  open: boolean;
+  onToggle: () => void;
   onOpenSettings?: () => void;
 }
 
-export function Sidebar({ onOpenSettings }: SidebarProps) {
+export function Sidebar({ open, onToggle, onOpenSettings }: SidebarProps) {
   const { sessions, currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
@@ -58,9 +60,23 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
   );
 
   return (
-    <aside className="drag flex h-full w-[260px] shrink-0 flex-col bg-sidebar">
-      {/* macOS traffic light space */}
-      <div className="h-13 shrink-0" />
+    <aside
+      className={cn(
+        "drag flex h-full shrink-0 flex-col bg-sidebar overflow-hidden transition-[width] duration-200 ease-in-out",
+        open ? "w-[260px]" : "w-0"
+      )}
+    >
+      {/* macOS traffic light space + sidebar toggle */}
+      <div className="flex h-13 shrink-0 items-end justify-end px-3 pb-1">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="nodrag flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+          title="Close sidebar"
+        >
+          <PanelLeft size={16} strokeWidth={1.5} />
+        </button>
+      </div>
 
       {/* New task */}
       <div className="px-3 pb-4">
@@ -71,13 +87,13 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
           onClick={handleNewTask}
         >
           <Plus size={15} strokeWidth={1.5} />
-          New task
+          <span className="truncate">New task</span>
         </Button>
       </div>
 
       {/* Recents label */}
       <div className="px-5 pb-2">
-        <span className="text-[11px] font-medium tracking-wide text-muted-foreground/60">
+        <span className="text-[11px] font-medium tracking-wide text-muted-foreground/60 whitespace-nowrap">
           Recents
         </span>
       </div>
@@ -123,7 +139,7 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
             onClick={onOpenSettings}
           >
             <Settings size={15} strokeWidth={1.5} />
-            Settings
+            <span className="truncate">Settings</span>
           </Button>
         </div>
       )}
