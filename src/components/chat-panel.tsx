@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { useRef, useEffect, useCallback, useState, useMemo, type KeyboardEvent } from "react";
-import { useAppDispatch } from "@/lib/store";
+import { useAppState, useAppDispatch, type OutputFile } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { ChevronDown as ChevronDownIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +26,7 @@ interface ChatPanelProps {
 export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
   const currentModel = MODEL_OPTIONS.find((m) => m.id === modelId);
@@ -35,15 +36,26 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
   const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, error, data } =
     useChat({
       api: "/api/chat",
-      body: { modelId },
+      body: { modelId, sessionId: currentSessionId },
+      onResponse(response) {
+        const sid = response.headers.get("X-Session-Id");
+        if (sid && sid !== currentSessionId) {
+          dispatch({ type: "SET_CURRENT_SESSION", id: sid });
+        }
+      },
       onFinish(message) {
         if (message.parts) {
+          const collectedFiles: OutputFile[] = [];
+
           for (const part of message.parts) {
             if (
               part.type === "tool-invocation" &&
               part.toolInvocation.state === "result"
             ) {
-              const result = part.toolInvocation.result;
+              const inv = part.toolInvocation;
+
+              // --- Preview (existing) ---
+              const result = inv.result;
               if (result && typeof result === "object" && result.imageUrl) {
                 dispatch({
                   type: "SET_PREVIEW_CONTENT",
@@ -51,7 +63,35 @@ export function ChatPanel({ modelId, onModelChange }: ChatPanelProps) {
                 });
                 dispatch({ type: "SET_PREVIEW_TAB", tab: "preview" });
               }
+
+              // --- Editor: show tool args ---
+              if (inv.args && typeof inv.args === "object") {
+                const args = inv.args as Record<string, unknown>;
+                const editorText =
+                  inv.toolName === "run_command" && typeof args.command === "string"
+                    ? args.command
+                    : JSON.stringify(args, null, 2);
+                dispatch({ type: "SET_EDITOR_PARAMS", params: editorText });
+              }
+
+              // --- Output: detect file paths in result ---
+              const resultStr = typeof result === "string" ? result : JSON.stringify(result ?? "");
+              const fileMatches = resultStr.match(
+                /(?:^|[\s"'=])(\/?(?:[\w./-]+\/)?[\w.-]+\.(?:png|jpe?g|gif|webp|svg|bmp|tiff?|mp4|mov|avi|mkv|webm))\b/gi
+              );
+              if (fileMatches) {
+                for (const raw of fileMatches) {
+                  const fp = raw.trim().replace(/^["'=]/, "");
+                  const name = fp.split("/").pop() ?? fp;
+                  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+                  collectedFiles.push({ name, path: fp, type: ext });
+                }
+              }
             }
+          }
+
+          if (collectedFiles.length > 0) {
+            dispatch({ type: "SET_OUTPUT_FILES", files: collectedFiles });
           }
         }
       },
