@@ -28,6 +28,9 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
+      - name: Run tests
+        run: npx vitest run
+
       - name: Lint commit message
         if: github.event_name == 'pull_request'
         uses: wagoid/commitlint-github-action@v6
