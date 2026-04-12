@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ZoomIn, ZoomOut, Maximize, Music } from "lucide-react";
+import { DesignfileGraph } from "@/components/designfile-graph";
 
 interface PreviewPanelProps {
   open: boolean;
@@ -49,6 +50,7 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
           <TabsTrigger value="preview">Preview</TabsTrigger>
           <TabsTrigger value="editor">Editor</TabsTrigger>
           <TabsTrigger value="output">Output</TabsTrigger>
+          <TabsTrigger value="designfile">Designfile</TabsTrigger>
         </TabsList>
 
         <TabsContent value="preview" className="flex-1 overflow-auto">
@@ -61,6 +63,10 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
 
         <TabsContent value="output" className="flex-1 overflow-auto">
           <OutputContent files={outputFiles} />
+        </TabsContent>
+
+        <TabsContent value="designfile" className="flex-1 overflow-auto">
+          <DesignfileGraph />
         </TabsContent>
       </Tabs>
     </aside>
