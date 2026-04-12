@@ -16,7 +16,7 @@ export interface Session {
   createdAt: string;
 }
 
-export type PreviewTab = "preview" | "editor" | "output";
+export type PreviewTab = "preview" | "editor" | "output" | "designfile";
 
 export interface PreviewContent {
   type: "image" | "video" | "audio" | "text" | "none";
