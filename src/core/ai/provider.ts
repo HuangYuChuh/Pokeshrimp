@@ -114,21 +114,9 @@ export function getModel(
       const key = apiKeys?.openai || process.env.OPENAI_API_KEY || "";
       const authMode = apiKeys?.openaiAuthMode ?? detectAuthMode(key);
 
-      if (authMode === "oauth") {
-        // OAuth tokens are ChatGPT session tokens (not API platform keys).
-        // They only work against chatgpt.com/backend-api, NOT api.openai.com.
-        // The User-Agent header is required — chatgpt.com is behind Cloudflare
-        // which blocks requests without a recognized agent string.
-        // Verified from OpenClaw source: provider-attribution.ts + openai-codex-catalog.ts
-        const codex = createOpenAI({
-          apiKey: key,
-          baseURL: "https://chatgpt.com/backend-api",
-          headers: { "User-Agent": "openclaw/1.0.0" },
-        });
-        return codex.responses(option.modelId);
-      }
-
-      // Standard API keys (sk-xxx) use the normal OpenAI API.
+      // Both OAuth tokens and API keys work with api.openai.com.
+      // OAuth tokens from auth.openai.com are accepted as Bearer tokens
+      // for Chat Completions (verified via curl test).
       const openai = createOpenAI({ apiKey: key });
       return openai(option.modelId);
     }
