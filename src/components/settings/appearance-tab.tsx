@@ -29,13 +29,13 @@ export function AppearanceTab({ theme, onThemeChange }: AppearanceTabProps) {
           onSelectionChange={(key) => {
             if (key) onThemeChange(String(key) as "dark" | "light" | "system");
           }}
-          className="w-full"
+          fullWidth
         >
-          <Select.Trigger className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground">
+          <Select.Trigger>
             <Select.Value />
             <Select.Indicator />
           </Select.Trigger>
-          <Select.Popover className="rounded-lg border border-border bg-card shadow-lg">
+          <Select.Popover>
             <ListBox>
               {THEME_OPTIONS.map((opt) => (
                 <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>

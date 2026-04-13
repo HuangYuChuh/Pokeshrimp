@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Chip, Accordion, Input, Select, ListBox, Switch } from "@heroui/react";
+import { Button, Chip, Accordion, Input, Select, ListBox, Switch, Card } from "@heroui/react";
 import {
   Plus,
   Trash2,
@@ -92,130 +92,133 @@ export function McpServersSection({
     <Accordion>
       <Accordion.Item id="mcp-servers">
         <Accordion.Heading>
-          <Accordion.Trigger className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/50">
+          <Accordion.Trigger>
             <Accordion.Indicator />
             <Server size={14} strokeWidth={1.5} />
             MCP Servers
           </Accordion.Trigger>
         </Accordion.Heading>
         <Accordion.Panel>
-          <Accordion.Body className="mt-2 space-y-3 pl-1">
+          <Accordion.Body className="mt-2 space-y-3">
             {entries.length === 0 && !adding && (
               <p className="text-[12px] text-muted-foreground">
                 No MCP servers configured.
               </p>
             )}
             {entries.map(([name, server]) => (
-              <div
-                key={name}
-                className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
-              >
-                <span
-                  className={cn(
-                    "h-2 w-2 shrink-0 rounded-full",
-                    server.enabled ? "bg-green-400" : "bg-muted-foreground/40",
-                  )}
-                />
-                <div className="min-w-0 flex-1">
-                  <span className="text-[13px] font-medium">{name}</span>
-                  <p className="truncate text-[12px] font-mono text-muted-foreground">
-                    {server.command} {server.args.join(" ")}
-                  </p>
-                </div>
-                <Switch
-                  size="sm"
-                  isSelected={server.enabled}
-                  onChange={() => handleToggle(name)}
-                >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch>
-                <Button
-                  isIconOnly
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 min-w-0 shrink-0 text-destructive hover:text-destructive"
-                  onPress={() => handleRemove(name)}
-                >
-                  <Trash2 size={13} strokeWidth={1.5} />
-                </Button>
-              </div>
+              <Card key={name}>
+                <Card.Content className="flex items-center gap-2 px-3 py-2">
+                  <span
+                    className={cn(
+                      "h-2 w-2 shrink-0 rounded-full",
+                      server.enabled ? "bg-green-400" : "bg-muted-foreground/40",
+                    )}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[13px] font-medium">{name}</span>
+                    <p className="truncate text-[12px] font-mono text-muted-foreground">
+                      {server.command} {server.args.join(" ")}
+                    </p>
+                  </div>
+                  <Switch
+                    size="sm"
+                    isSelected={server.enabled}
+                    onChange={() => handleToggle(name)}
+                  >
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch>
+                  <Button
+                    isIconOnly
+                    variant="danger-soft"
+                    size="sm"
+                    onPress={() => handleRemove(name)}
+                  >
+                    <Trash2 size={13} strokeWidth={1.5} />
+                  </Button>
+                </Card.Content>
+              </Card>
             ))}
 
             {adding && (
-              <div className="space-y-2 rounded-lg border border-border bg-background p-3">
-                <Input
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Server name"
-                  className="text-[13px]"
-                />
-                <Input
-                  value={newServer.command}
-                  onChange={(e) =>
-                    setNewServer({ ...newServer, command: e.target.value })
-                  }
-                  placeholder="Command (e.g. npx -y @modelcontextprotocol/server)"
-                  className="font-mono text-[13px]"
-                />
-                <Input
-                  value={newServer.args.join(" ")}
-                  onChange={(e) =>
-                    setNewServer({
-                      ...newServer,
-                      args: e.target.value ? e.target.value.split(" ") : [],
-                    })
-                  }
-                  placeholder="Args (space separated)"
-                  className="font-mono text-[13px]"
-                />
-                <Input
-                  value={Object.entries(newServer.env)
-                    .map(([k, v]) => `${k}=${v}`)
-                    .join(" ")}
-                  onChange={(e) => {
-                    const env: Record<string, string> = {};
-                    e.target.value
-                      .split(" ")
-                      .filter(Boolean)
-                      .forEach((pair) => {
-                        const idx = pair.indexOf("=");
-                        if (idx > 0) env[pair.slice(0, idx)] = pair.slice(idx + 1);
-                      });
-                    setNewServer({ ...newServer, env });
-                  }}
-                  placeholder="Env vars (KEY=VALUE KEY2=VALUE2)"
-                  className="font-mono text-[13px]"
-                />
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onPress={() => {
-                      setAdding(false);
-                      setNewName("");
-                      setNewServer({ ...EMPTY_SERVER });
+              <Card>
+                <Card.Content className="space-y-2 p-3">
+                  <Input
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="Server name"
+                    fullWidth
+                  />
+                  <Input
+                    value={newServer.command}
+                    onChange={(e) =>
+                      setNewServer({ ...newServer, command: e.target.value })
+                    }
+                    placeholder="Command (e.g. npx -y @modelcontextprotocol/server)"
+                    fullWidth
+                    className="font-mono"
+                  />
+                  <Input
+                    value={newServer.args.join(" ")}
+                    onChange={(e) =>
+                      setNewServer({
+                        ...newServer,
+                        args: e.target.value ? e.target.value.split(" ") : [],
+                      })
+                    }
+                    placeholder="Args (space separated)"
+                    fullWidth
+                    className="font-mono"
+                  />
+                  <Input
+                    value={Object.entries(newServer.env)
+                      .map(([k, v]) => `${k}=${v}`)
+                      .join(" ")}
+                    onChange={(e) => {
+                      const env: Record<string, string> = {};
+                      e.target.value
+                        .split(" ")
+                        .filter(Boolean)
+                        .forEach((pair) => {
+                          const idx = pair.indexOf("=");
+                          if (idx > 0) env[pair.slice(0, idx)] = pair.slice(idx + 1);
+                        });
+                      setNewServer({ ...newServer, env });
                     }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onPress={handleAdd}
-                    isDisabled={!newName.trim() || !newServer.command.trim()}
-                  >
-                    Add
-                  </Button>
-                </div>
-              </div>
+                    placeholder="Env vars (KEY=VALUE KEY2=VALUE2)"
+                    fullWidth
+                    className="font-mono"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onPress={() => {
+                        setAdding(false);
+                        setNewName("");
+                        setNewServer({ ...EMPTY_SERVER });
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onPress={handleAdd}
+                      isDisabled={!newName.trim() || !newServer.command.trim()}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                </Card.Content>
+              </Card>
             )}
 
             {!adding && (
               <Button
                 variant="outline"
                 size="sm"
-                className="text-[12px]"
                 onPress={() => setAdding(true)}
               >
                 <Plus size={13} strokeWidth={2} className="mr-1" />
@@ -296,14 +299,14 @@ export function HooksSection({
     <Accordion>
       <Accordion.Item id="hooks">
         <Accordion.Heading>
-          <Accordion.Trigger className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/50">
+          <Accordion.Trigger>
             <Accordion.Indicator />
             <Webhook size={14} strokeWidth={1.5} />
             Hooks
           </Accordion.Trigger>
         </Accordion.Heading>
         <Accordion.Panel>
-          <Accordion.Body className="mt-2 space-y-3 pl-1">
+          <Accordion.Body className="mt-2 space-y-3">
             {allEvents.size === 0 && !adding && (
               <p className="text-[12px] text-muted-foreground">
                 No hooks configured.
@@ -312,126 +315,126 @@ export function HooksSection({
 
             {/* Convention hooks */}
             {conventionHooks.map((event) => (
-              <div
-                key={`conv-${event}`}
-                className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-medium">{event}</span>
-                    <Chip size="sm" variant="soft" className="text-[10px]">
-                      convention
-                    </Chip>
+              <Card key={`conv-${event}`}>
+                <Card.Content className="flex items-center gap-2 px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-medium">{event}</span>
+                      <Chip size="sm" variant="soft" className="text-[10px]">
+                        convention
+                      </Chip>
+                    </div>
+                    <p className="text-[12px] font-mono text-muted-foreground">
+                      .visagent/hooks/{event}
+                    </p>
                   </div>
-                  <p className="text-[12px] font-mono text-muted-foreground">
-                    .visagent/hooks/{event}
-                  </p>
-                </div>
-              </div>
+                </Card.Content>
+              </Card>
             ))}
 
             {/* Config hooks */}
             {Object.entries(hooks).map(([event, entries]) =>
               entries.map((entry, i) => (
-                <div
-                  key={`${event}-${i}`}
-                  className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-medium">{event}</span>
+                <Card key={`${event}-${i}`}>
+                  <Card.Content className="flex items-center gap-2 px-3 py-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-medium">{event}</span>
+                      </div>
+                      <p className="truncate text-[12px] font-mono text-muted-foreground">
+                        {entry.command}
+                      </p>
+                      <div className="mt-0.5 flex gap-3 text-[11px] text-muted-foreground">
+                        <span>timeout: {entry.timeout}ms</span>
+                        {entry.matcher && <span>matcher: {entry.matcher}</span>}
+                      </div>
                     </div>
-                    <p className="truncate text-[12px] font-mono text-muted-foreground">
-                      {entry.command}
-                    </p>
-                    <div className="mt-0.5 flex gap-3 text-[11px] text-muted-foreground">
-                      <span>timeout: {entry.timeout}ms</span>
-                      {entry.matcher && <span>matcher: {entry.matcher}</span>}
-                    </div>
-                  </div>
-                  <Button
-                    isIconOnly
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 min-w-0 shrink-0 text-destructive hover:text-destructive"
-                    onPress={() => handleRemove(event, i)}
-                  >
-                    <Trash2 size={13} strokeWidth={1.5} />
-                  </Button>
-                </div>
+                    <Button
+                      isIconOnly
+                      variant="danger-soft"
+                      size="sm"
+                      onPress={() => handleRemove(event, i)}
+                    >
+                      <Trash2 size={13} strokeWidth={1.5} />
+                    </Button>
+                  </Card.Content>
+                </Card>
               )),
             )}
 
             {adding && (
-              <div className="space-y-2 rounded-lg border border-border bg-background p-3">
-                <Select
-                  selectedKey={newEvent}
-                  onSelectionChange={(key) => {
-                    if (key) setNewEvent(String(key));
-                  }}
-                  className="w-full"
-                >
-                  <Select.Trigger className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-[13px] text-foreground">
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover className="rounded-lg border border-border bg-card shadow-lg">
-                    <ListBox>
-                      {HOOK_EVENTS.map((ev) => (
-                        <ListBox.Item key={ev} id={ev} textValue={ev}>
-                          {ev}
-                        </ListBox.Item>
-                      ))}
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
-                <Input
-                  value={newCommand}
-                  onChange={(e) => setNewCommand(e.target.value)}
-                  placeholder="Command (e.g. ./scripts/validate.sh)"
-                  className="font-mono text-[13px]"
-                />
-                <div className="flex gap-2">
-                  <Input
-                    value={newTimeout}
-                    onChange={(e) => setNewTimeout(e.target.value)}
-                    placeholder="Timeout (ms)"
-                    className="w-1/2 text-[13px]"
-                  />
-                  <Input
-                    value={newMatcher}
-                    onChange={(e) => setNewMatcher(e.target.value)}
-                    placeholder="Matcher (optional)"
-                    className="w-1/2 text-[13px]"
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onPress={() => {
-                      setAdding(false);
-                      setNewCommand("");
+              <Card>
+                <Card.Content className="space-y-2 p-3">
+                  <Select
+                    selectedKey={newEvent}
+                    onSelectionChange={(key) => {
+                      if (key) setNewEvent(String(key));
                     }}
+                    fullWidth
                   >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onPress={handleAdd}
-                    isDisabled={!newCommand.trim()}
-                  >
-                    Add
-                  </Button>
-                </div>
-              </div>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {HOOK_EVENTS.map((ev) => (
+                          <ListBox.Item key={ev} id={ev} textValue={ev}>
+                            {ev}
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                  <Input
+                    value={newCommand}
+                    onChange={(e) => setNewCommand(e.target.value)}
+                    placeholder="Command (e.g. ./scripts/validate.sh)"
+                    fullWidth
+                    className="font-mono"
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      value={newTimeout}
+                      onChange={(e) => setNewTimeout(e.target.value)}
+                      placeholder="Timeout (ms)"
+                      className="w-1/2"
+                    />
+                    <Input
+                      value={newMatcher}
+                      onChange={(e) => setNewMatcher(e.target.value)}
+                      placeholder="Matcher (optional)"
+                      className="w-1/2"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onPress={() => {
+                        setAdding(false);
+                        setNewCommand("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onPress={handleAdd}
+                      isDisabled={!newCommand.trim()}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                </Card.Content>
+              </Card>
             )}
 
             {!adding && (
               <Button
                 variant="outline"
                 size="sm"
-                className="text-[12px]"
                 onPress={() => setAdding(true)}
               >
                 <Plus size={13} strokeWidth={2} className="mr-1" />
@@ -489,19 +492,21 @@ function PatternList({
       </label>
       <div className="flex flex-wrap gap-1.5">
         {patterns.map((p, i) => (
-          <span
+          <Chip
             key={`${p}-${i}`}
-            className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 font-mono text-[12px] text-foreground"
+            size="sm"
+            variant="soft"
+            className="font-mono"
           >
             {p}
             <button
               type="button"
-              className="ml-0.5 text-muted-foreground transition-colors hover:text-destructive"
+              className="ml-1 text-muted-foreground transition-colors hover:text-destructive"
               onClick={() => handleRemove(i)}
             >
               <X size={11} strokeWidth={2} />
             </button>
-          </span>
+          </Chip>
         ))}
       </div>
       <div className="mt-1.5 flex gap-2">
@@ -510,7 +515,8 @@ function PatternList({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="comfyui-cli *"
-          className="flex-1 font-mono text-[13px]"
+          fullWidth
+          className="font-mono"
         />
         <Button
           variant="outline"
@@ -536,14 +542,14 @@ export function PermissionsSection({
     <Accordion>
       <Accordion.Item id="permissions">
         <Accordion.Heading>
-          <Accordion.Trigger className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/50">
+          <Accordion.Trigger>
             <Accordion.Indicator />
             <Shield size={14} strokeWidth={1.5} />
             Permissions
           </Accordion.Trigger>
         </Accordion.Heading>
         <Accordion.Panel>
-          <Accordion.Body className="mt-2 space-y-4 pl-1">
+          <Accordion.Body className="mt-2 space-y-4">
             <PatternList
               label="Always Allow"
               patterns={permissions.alwaysAllow}

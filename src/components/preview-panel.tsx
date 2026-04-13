@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppState, useAppDispatch, type PreviewTab } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { Tabs, TextArea } from "@heroui/react";
+import { Tabs, TextArea, Button, Chip } from "@heroui/react";
 import { ZoomIn, ZoomOut, Maximize, Music, RefreshCw, Pencil, Columns } from "lucide-react";
 import { DesignfileGraph } from "@/components/designfile-graph";
 
@@ -232,49 +232,44 @@ function PreviewContent({
       <div className="flex h-full flex-col">
         {/* Zoom toolbar */}
         <div className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-1.5">
-          <button
-            type="button"
-            onClick={handleZoomOut}
-            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            title="Zoom out"
+          <Button
+            isIconOnly
+            variant="ghost"
+            size="sm"
+            onPress={handleZoomOut}
           >
             <ZoomOut size={15} strokeWidth={1.5} />
-          </button>
+          </Button>
           <span className="min-w-[3.5rem] text-center text-[12px] tabular-nums text-muted-foreground">
             {Math.round(zoom * 100)}%
           </span>
-          <button
-            type="button"
-            onClick={handleZoomIn}
-            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            title="Zoom in"
+          <Button
+            isIconOnly
+            variant="ghost"
+            size="sm"
+            onPress={handleZoomIn}
           >
             <ZoomIn size={15} strokeWidth={1.5} />
-          </button>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            title="Reset zoom"
+          </Button>
+          <Button
+            isIconOnly
+            variant="ghost"
+            size="sm"
+            onPress={handleReset}
           >
             <Maximize size={15} strokeWidth={1.5} />
-          </button>
+          </Button>
           {hasComparison && (
             <>
               <div className="mx-1 h-4 w-px bg-border" />
-              <button
-                type="button"
-                onClick={() => setComparing((v) => !v)}
-                className={cn(
-                  "rounded p-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                  comparing
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-                title="Compare before/after"
+              <Button
+                isIconOnly
+                variant={comparing ? "secondary" : "ghost"}
+                size="sm"
+                onPress={() => setComparing((v) => !v)}
               >
                 <Columns size={15} strokeWidth={1.5} />
-              </button>
+              </Button>
             </>
           )}
         </div>
@@ -338,22 +333,14 @@ function PreviewContent({
 
         {/* Re-run action bar */}
         <div className="flex shrink-0 items-center justify-center gap-2 border-t border-border px-3 py-2">
-          <button
-            type="button"
-            onClick={onRerun}
-            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <RefreshCw size={15} strokeWidth={2} />
+          <Button variant="ghost" size="sm" onPress={onRerun}>
+            <RefreshCw size={15} strokeWidth={2} className="mr-1.5" />
             Re-run
-          </button>
-          <button
-            type="button"
-            onClick={onEditRerun}
-            className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            <Pencil size={15} strokeWidth={2} />
+          </Button>
+          <Button variant="ghost" size="sm" onPress={onEditRerun}>
+            <Pencil size={15} strokeWidth={2} className="mr-1.5" />
             Edit & Re-run
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -396,6 +383,7 @@ function EditorContent({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         spellCheck={false}
+        fullWidth
         className="selectable flex-1 resize-none font-mono text-xs"
         placeholder='{ "prompt": "..." }'
       />
@@ -419,20 +407,21 @@ function OutputContent({
   }
   return (
     <div className="h-full overflow-y-auto">
-      <div className="p-4">
+      <div className="space-y-1 p-4">
         {files.map((file, i) => (
-          <button
+          <Button
             key={i}
-            type="button"
-            className="mb-0.5 flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition-colors hover:bg-muted focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            variant="ghost"
+            fullWidth
+            className="justify-start gap-2.5"
           >
-            <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+            <Chip size="sm" variant="soft" className="font-mono">
               {file.type}
-            </span>
+            </Chip>
             <span className="flex-1 truncate text-[13px] text-foreground">
               {file.name}
             </span>
-          </button>
+          </Button>
         ))}
       </div>
     </div>
