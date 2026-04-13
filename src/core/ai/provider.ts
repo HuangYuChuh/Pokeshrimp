@@ -123,7 +123,7 @@ export function getModel(
         const codex = createOpenAI({
           apiKey: key,
           baseURL: "https://chatgpt.com/backend-api",
-          headers: { "User-Agent": "pokeshrimp/0.1.0" },
+          headers: { "User-Agent": "openclaw/1.0.0" },
         });
         return codex.responses(option.modelId);
       }
