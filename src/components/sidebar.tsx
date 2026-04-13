@@ -61,8 +61,7 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
   );
 
   const handleDeleteSession = useCallback(
-    (e: React.MouseEvent, id: string) => {
-      e.stopPropagation();
+    (id: string) => {
       fetch(`/api/sessions/${id}`, { method: "DELETE" }).catch(() => {});
       dispatch({ type: "REMOVE_SESSION", id });
     },
@@ -85,10 +84,10 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
       {/* New task button */}
       <div className="px-3 pb-4">
         <Button
-          type="button"
           variant="ghost"
           size="sm"
-          className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
+          fullWidth
+          className="nodrag justify-start"
           onPress={handleNewTask}
         >
           <Plus size={15} strokeWidth={1.5} />
@@ -106,49 +105,44 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
       {/* Session list */}
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         <div className="flex flex-col gap-px px-3">
-          {sessions.map((session) => (
-            <div
-              key={session.id}
-              className={cn(
-                "nodrag group relative flex items-center rounded-lg transition-colors",
-                session.id === currentSessionId
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => handleSelectSession(session.id)}
-                className="w-full truncate px-3 py-1.5 text-left text-[13px]"
-              >
-                {session.title}
-              </button>
-              <button
-                type="button"
-                onClick={(e) => handleDeleteSession(e, session.id)}
-                className={cn(
-                  "absolute right-1.5 hidden h-5 w-5 shrink-0 items-center justify-center rounded",
-                  "text-muted-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-destructive",
-                  "group-hover:flex",
-                )}
-              >
-                <X size={12} strokeWidth={1.5} />
-              </button>
-            </div>
-          ))}
+          {sessions.map((session) => {
+            const isActive = session.id === currentSessionId;
+            return (
+              <div key={session.id} className="nodrag group relative">
+                <Button
+                  variant={isActive ? "secondary" : "ghost"}
+                  size="sm"
+                  fullWidth
+                  className="justify-start"
+                  onPress={() => handleSelectSession(session.id)}
+                >
+                  <span className="truncate">{session.title}</span>
+                </Button>
+                <Button
+                  isIconOnly
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-1 top-1/2 hidden -translate-y-1/2 group-hover:flex"
+                  onPress={() => handleDeleteSession(session.id)}
+                >
+                  <X size={12} strokeWidth={1.5} />
+                </Button>
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Bottom actions with separator */}
       {(onOpenSettings || onOpenSkills) && (
         <div className="shrink-0 px-3 py-3">
-          <Separator className="mb-3 bg-border" />
+          <Separator className="mb-3" />
           {onOpenSkills && (
             <Button
-              type="button"
               variant="ghost"
               size="sm"
-              className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
+              fullWidth
+              className="nodrag justify-start"
               onPress={onOpenSkills}
             >
               <Puzzle size={15} strokeWidth={1.5} />
@@ -157,10 +151,10 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
           )}
           {onOpenSettings && (
             <Button
-              type="button"
               variant="ghost"
               size="sm"
-              className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
+              fullWidth
+              className="nodrag justify-start"
               onPress={onOpenSettings}
             >
               <Settings size={15} strokeWidth={1.5} />

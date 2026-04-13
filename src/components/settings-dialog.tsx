@@ -9,7 +9,6 @@ import {
   useOverlayState,
 } from "@heroui/react";
 import {
-  X,
   KeyRound,
   Brain,
   Puzzle,
@@ -17,7 +16,6 @@ import {
   Zap,
   Palette,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
   type McpServerConfig,
   type HookEntryConfig,
@@ -224,13 +222,9 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
       <Modal.Container size="lg" className="nodrag max-h-[80vh] w-[720px]">
         <Modal.Dialog className="flex max-h-[80vh] flex-col overflow-hidden rounded-2xl border border-border bg-card">
           {/* Header */}
-          <Modal.Header className="flex items-center justify-between px-6 pb-4 pt-5">
-            <Modal.Heading className="text-[15px] font-semibold text-foreground">
-              Settings
-            </Modal.Heading>
-            <Modal.CloseTrigger className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-              <X size={15} strokeWidth={1.5} />
-            </Modal.CloseTrigger>
+          <Modal.Header>
+            <Modal.Heading>Settings</Modal.Heading>
+            <Modal.CloseTrigger />
           </Modal.Header>
 
           <Separator />
@@ -239,25 +233,22 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
           <div className="flex min-h-0 flex-1">
             {/* Sidebar */}
             <nav className="w-[180px] shrink-0 border-r border-border py-3">
-              <div className="space-y-0.5 px-3">
+              <div className="flex flex-col gap-0.5 px-3">
                 {NAV_ITEMS.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
                   return (
-                    <button
+                    <Button
                       key={item.id}
-                      type="button"
-                      onClick={() => setActiveTab(item.id)}
-                      className={cn(
-                        "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors",
-                        isActive
-                          ? "bg-muted text-foreground font-medium"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                      )}
+                      variant={isActive ? "secondary" : "ghost"}
+                      size="sm"
+                      fullWidth
+                      onPress={() => setActiveTab(item.id)}
+                      className="justify-start gap-2"
                     >
                       <Icon size={15} strokeWidth={1.5} />
                       {item.label}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -326,7 +317,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
           <Separator />
 
           {/* Footer */}
-          <Modal.Footer className="flex items-center justify-between px-6 py-4">
+          <Modal.Footer className="flex items-center justify-between">
             <p className="text-[11px] text-muted-foreground/60">
               Saved to ~/.visagent/config.json
             </p>
@@ -339,6 +330,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
                 Cancel
               </Button>
               <Button
+                variant="primary"
                 size="sm"
                 onPress={handleSave}
                 isDisabled={saving}

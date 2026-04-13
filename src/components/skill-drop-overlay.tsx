@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Chip } from "@heroui/react";
 import { FileDown } from "lucide-react";
 
 /* ---------------------------------------------------------------------------
@@ -23,7 +24,7 @@ export function SkillDropOverlay({ visible }: SkillDropOverlayProps) {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[100] flex items-center justify-center bg-black/60 transition-opacity duration-200",
+        "fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm bg-black/60 transition-opacity duration-200",
         visible
           ? "pointer-events-auto opacity-100"
           : "pointer-events-none opacity-0",
@@ -33,9 +34,9 @@ export function SkillDropOverlay({ visible }: SkillDropOverlayProps) {
         <FileDown size={48} strokeWidth={1.2} className="text-foreground" />
         <p className="text-[15px] font-semibold text-foreground">
           Drop{" "}
-          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[13px]">
+          <Chip size="sm" variant="tertiary">
             .skill.md
-          </code>{" "}
+          </Chip>{" "}
           to install
         </p>
       </div>

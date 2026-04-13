@@ -4,7 +4,7 @@ import { forwardRef, useState, useRef, useCallback, type KeyboardEvent } from "r
 import { cn } from "@/lib/utils";
 import { ArrowUp, Paperclip, X, FileIcon, Slash } from "lucide-react";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
-import { Button, Select, ListBox } from "@heroui/react";
+import { Button, Card, Select, ListBox, TextArea } from "@heroui/react";
 
 /* --- Skill type --- */
 
@@ -195,7 +195,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
         <form onSubmit={handleFormSubmit} className="relative mx-auto max-w-[680px]">
           {/* Slash command popup */}
           {isSlashMode && (
-            <div className="absolute bottom-full left-0 mb-2 w-full rounded-xl border border-border bg-popover p-1 shadow-lg">
+            <Card className="absolute bottom-full left-0 z-10 mb-2 w-full p-1">
               {filteredSkills.map((skill) => (
                 <button
                   key={skill.command}
@@ -216,128 +216,134 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
                   </div>
                 </button>
               ))}
-            </div>
+            </Card>
           )}
 
-          <div
+          <Card
             className={cn(
-              "overflow-hidden rounded-2xl border bg-card shadow-sm transition-colors",
-              isDragOver ? "border-primary bg-primary/5" : "border-border"
+              "overflow-hidden transition-colors",
+              isDragOver && "border-primary bg-primary/5"
             )}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            {/* Attachment previews */}
-            {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-2 px-4 pt-3">
-                {attachments.map((att) => (
-                  <div
-                    key={att.id}
-                    className="group/att relative flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-2.5 py-1.5"
-                  >
-                    {att.previewUrl ? (
-                      <img
-                        src={att.previewUrl}
-                        alt={att.name}
-                        className="h-10 w-10 rounded object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-muted">
-                        <FileIcon
-                          size={16}
-                          className="text-muted-foreground"
-                        />
-                      </div>
-                    )}
-                    <div className="min-w-0 max-w-[120px]">
-                      <div className="truncate text-[12px] font-medium text-foreground">
-                        {att.name}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {formatFileSize(att.size)}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeAttachment(att.id)}
-                      className="nodrag absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-background opacity-0 transition-opacity group-hover/att:opacity-100"
+            <Card.Content className="p-0">
+              {/* Attachment previews */}
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 px-4 pt-3">
+                  {attachments.map((att) => (
+                    <div
+                      key={att.id}
+                      className="group/att relative flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-2.5 py-1.5"
                     >
-                      <X size={10} strokeWidth={2.5} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                      {att.previewUrl ? (
+                        <img
+                          src={att.previewUrl}
+                          alt={att.name}
+                          className="h-10 w-10 rounded object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded bg-muted">
+                          <FileIcon
+                            size={16}
+                            className="text-muted-foreground"
+                          />
+                        </div>
+                      )}
+                      <div className="min-w-0 max-w-[120px]">
+                        <div className="truncate text-[12px] font-medium text-foreground">
+                          {att.name}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground">
+                          {formatFileSize(att.size)}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(att.id)}
+                        className="nodrag absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-background opacity-0 transition-opacity group-hover/att:opacity-100"
+                      >
+                        <X size={10} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-            <textarea
-              ref={ref}
-              value={input}
-              onChange={onChange}
-              onKeyDown={handleKeyDownWithAttachments}
-              placeholder="Describe what you want to create, type / for skills..."
-              rows={1}
-              disabled={isLoading}
-              className="selectable nodrag block w-full resize-none bg-transparent px-4 pb-2 pt-4 text-[14px] leading-6 text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:opacity-50"
-            />
-            <div className="flex items-center justify-between px-3 pb-2.5">
-              <div className="flex items-center">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept={ACCEPTED_TYPES}
-                  onChange={handleFileInputChange}
-                  className="hidden"
-                />
-                <Button
-                  isIconOnly
-                  variant="ghost"
-                  size="sm"
-                  onPress={() => fileInputRef.current?.click()}
-                  isDisabled={isLoading}
-                  className="nodrag h-7 w-7 min-w-0 text-muted-foreground hover:text-foreground"
-                  aria-label="Attach files"
-                >
-                  <Paperclip size={15} strokeWidth={1.5} />
-                </Button>
+              <TextArea
+                ref={ref}
+                value={input}
+                onChange={onChange}
+                onKeyDown={handleKeyDownWithAttachments}
+                placeholder="Describe what you want to create, type / for skills..."
+                rows={1}
+                disabled={isLoading}
+                variant="secondary"
+                className="selectable nodrag block w-full resize-none border-none px-4 pb-2 pt-4 text-[14px] leading-6 shadow-none focus:outline-none disabled:opacity-50"
+              />
+
+              <div className="flex items-center justify-between px-3 pb-2.5">
+                <div className="flex items-center">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept={ACCEPTED_TYPES}
+                    onChange={handleFileInputChange}
+                    className="hidden"
+                  />
+                  <Button
+                    isIconOnly
+                    variant="ghost"
+                    size="sm"
+                    onPress={() => fileInputRef.current?.click()}
+                    isDisabled={isLoading}
+                    className="nodrag h-7 w-7 min-w-0"
+                    aria-label="Attach files"
+                  >
+                    <Paperclip size={15} strokeWidth={1.5} />
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Select
+                    aria-label="Model selection"
+                    selectedKey={modelId}
+                    onSelectionChange={(key) => {
+                      if (key) onModelChange(String(key));
+                    }}
+                    className="nodrag w-auto min-w-0"
+                  >
+                    <Select.Trigger className="flex h-7 items-center gap-1 rounded-lg border-none bg-transparent px-2 text-[12px] text-muted-foreground shadow-none transition-colors hover:bg-muted hover:text-foreground">
+                      <Select.Value>{modelLabel}</Select.Value>
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox className="text-[13px]">
+                        {MODEL_OPTIONS.map((m) => (
+                          <ListBox.Item key={m.id} id={m.id}>
+                            {m.label}
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                  <Button
+                    isIconOnly
+                    variant="primary"
+                    size="sm"
+                    type="submit"
+                    isDisabled={
+                      (!input.trim() && attachments.length === 0) || isLoading
+                    }
+                    className="nodrag h-7 w-7 min-w-0"
+                  >
+                    <ArrowUp size={15} strokeWidth={2} />
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Select
-                  aria-label="Model selection"
-                  selectedKey={modelId}
-                  onSelectionChange={(key) => {
-                    if (key) onModelChange(String(key));
-                  }}
-                  className="nodrag w-auto min-w-0"
-                >
-                  <Select.Trigger className="flex h-7 items-center gap-1 rounded-lg border-none bg-transparent px-2 text-[12px] text-muted-foreground shadow-none transition-colors hover:bg-muted hover:text-foreground">
-                    <Select.Value>{modelLabel}</Select.Value>
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox className="text-[13px]">
-                      {MODEL_OPTIONS.map((m) => (
-                        <ListBox.Item key={m.id} id={m.id}>
-                          {m.label}
-                        </ListBox.Item>
-                      ))}
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
-                <Button
-                  isIconOnly
-                  type="submit"
-                  isDisabled={
-                    (!input.trim() && attachments.length === 0) || isLoading
-                  }
-                  className="nodrag h-7 w-7 min-w-0 rounded-lg bg-primary text-primary-foreground disabled:opacity-20"
-                >
-                  <ArrowUp size={15} strokeWidth={2} />
-                </Button>
-              </div>
-            </div>
-          </div>
+            </Card.Content>
+          </Card>
         </form>
       </div>
     );

@@ -76,7 +76,8 @@ export function AccountsTab({
           onFocus={(e) => {
             if ((e.target as HTMLInputElement).value.includes("****")) onAnthropicKeyChange("");
           }}
-          className="font-mono text-[13px]"
+          fullWidth
+          className="font-mono"
         />
         <EnvKeyHint
           envAvailable={envKeys?.anthropic}
@@ -99,13 +100,14 @@ export function AccountsTab({
             onFocus={(e) => {
               if ((e.target as HTMLInputElement).value.includes("****")) onOpenaiKeyChange("");
             }}
-            className="flex-1 font-mono text-[13px]"
+            fullWidth
+            className="font-mono"
           />
           {isElectron && (
             <Button
               variant="outline"
               size="sm"
-              className="shrink-0 text-[12px]"
+              className="shrink-0"
               isDisabled={oauthLoading}
               onPress={handleOpenAIOAuth}
             >
@@ -151,13 +153,13 @@ function Field({
           {label}
         </label>
         {getKeyUrl && (
-          <button
-            type="button"
-            onClick={() => openKeyUrl(getKeyUrl)}
-            className="text-[12px] text-muted-foreground transition-colors hover:text-foreground"
+          <Button
+            variant="ghost"
+            size="sm"
+            onPress={() => openKeyUrl(getKeyUrl)}
           >
             Get key &rarr;
-          </button>
+          </Button>
         )}
       </div>
       {hint && (

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@heroui/react";
+import { Skeleton, Card } from "@heroui/react";
 
 interface ToolStatus {
   name: string;
@@ -54,36 +54,35 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
   return (
     <div className="space-y-2">
       {tools.map((tool) => (
-        <div
-          key={tool.name}
-          className="flex items-start gap-2.5 rounded-lg border border-border bg-background px-3 py-2"
-        >
-          <span
-            className={cn(
-              "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-              tool.status === "available" ? "bg-green-400" : "bg-red-500",
-            )}
-            aria-hidden="true"
-          />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[13px] font-medium">{tool.name}</span>
-              <span
-                className={cn(
-                  "text-[11px]",
-                  tool.status === "available"
-                    ? "text-green-400"
-                    : "text-red-500",
-                )}
-              >
-                {tool.status === "available" ? "Available" : "Not installed"}
-              </span>
+        <Card key={tool.name}>
+          <Card.Content className="flex items-start gap-2.5 px-3 py-2">
+            <span
+              className={cn(
+                "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                tool.status === "available" ? "bg-green-400" : "bg-red-500",
+              )}
+              aria-hidden="true"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] font-medium">{tool.name}</span>
+                <span
+                  className={cn(
+                    "text-[11px]",
+                    tool.status === "available"
+                      ? "text-green-400"
+                      : "text-red-500",
+                  )}
+                >
+                  {tool.status === "available" ? "Available" : "Not installed"}
+                </span>
+              </div>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">
+                Used by: {tool.skills.join(", ")}
+              </p>
             </div>
-            <p className="mt-0.5 text-[12px] text-muted-foreground">
-              Used by: {tool.skills.join(", ")}
-            </p>
-          </div>
-        </div>
+          </Card.Content>
+        </Card>
       ))}
     </div>
   );

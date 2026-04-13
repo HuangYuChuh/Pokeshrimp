@@ -8,6 +8,7 @@ import { PreviewPanel } from "@/components/preview-panel";
 import { SettingsDialog, type SettingsTabId } from "@/components/settings-dialog";
 import { SkillDropOverlay } from "@/components/skill-drop-overlay";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { Chip } from "@heroui/react";
 import { cn } from "@/lib/utils";
 
 /* ---------------------------------------------------------------------------
@@ -255,15 +256,14 @@ function HomeInner() {
 
         {/* Drop result toast */}
         {dropToast && (
-          <div
-            className={cn(
-              "fixed bottom-6 left-1/2 z-[200] -translate-x-1/2 rounded-lg px-4 py-2.5 text-[13px] font-medium shadow-lg transition-opacity duration-300",
-              dropToast.isError
-                ? "bg-destructive text-destructive-foreground"
-                : "bg-primary text-primary-foreground",
-            )}
-          >
-            {dropToast.message}
+          <div className="fixed bottom-6 left-1/2 z-[200] -translate-x-1/2">
+            <Chip
+              size="lg"
+              color={dropToast.isError ? "danger" : "success"}
+              variant="primary"
+            >
+              {dropToast.message}
+            </Chip>
           </div>
         )}
       </div>

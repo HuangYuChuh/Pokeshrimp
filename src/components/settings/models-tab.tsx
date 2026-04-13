@@ -24,13 +24,13 @@ export function ModelsTab({ defaultModel, onDefaultModelChange }: ModelsTabProps
           onSelectionChange={(key) => {
             if (key) onDefaultModelChange(String(key));
           }}
-          className="w-full"
+          fullWidth
         >
-          <Select.Trigger className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground">
+          <Select.Trigger>
             <Select.Value />
             <Select.Indicator />
           </Select.Trigger>
-          <Select.Popover className="rounded-lg border border-border bg-card shadow-lg">
+          <Select.Popover>
             <ListBox>
               {MODEL_OPTIONS.map((m) => (
                 <ListBox.Item key={m.id} id={m.id} textValue={m.label}>

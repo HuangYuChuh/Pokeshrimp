@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Button, Skeleton, Chip } from "@heroui/react";
+import { Button, Skeleton, Chip, Card } from "@heroui/react";
 import {
   ChevronDown,
   ChevronRight,
@@ -162,10 +162,9 @@ export function SkillsTab({ active }: SkillsTabProps) {
         <Button
           variant="outline"
           size="sm"
-          className="gap-1.5 text-[12px]"
           onPress={handleImport}
         >
-          <Upload size={13} strokeWidth={1.5} />
+          <Upload size={13} strokeWidth={1.5} className="mr-1.5" />
           Import
         </Button>
       </div>
@@ -205,16 +204,18 @@ export function SkillsTab({ active }: SkillsTabProps) {
 
       {/* Toast */}
       {toast && (
-        <div
-          className={cn(
-            "rounded-lg px-3 py-2 text-[13px] font-medium",
-            toast.isError
-              ? "bg-destructive/10 text-destructive"
-              : "bg-primary/10 text-foreground",
-          )}
-        >
-          {toast.message}
-        </div>
+        <Card>
+          <Card.Content
+            className={cn(
+              "px-3 py-2 text-[13px] font-medium",
+              toast.isError
+                ? "text-destructive"
+                : "text-foreground",
+            )}
+          >
+            {toast.message}
+          </Card.Content>
+        </Card>
       )}
     </div>
   );
@@ -246,139 +247,140 @@ function SkillCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card">
-      <div className="flex items-center gap-2 px-3 py-2.5">
-        <button
-          type="button"
-          onClick={onToggle}
-          className="flex flex-1 items-center gap-2 text-left"
-        >
-          {expanded ? (
-            <ChevronDown
+    <Card>
+      <Card.Content className="p-0">
+        <div className="flex items-center gap-2 px-3 py-2.5">
+          <button
+            type="button"
+            onClick={onToggle}
+            className="flex flex-1 items-center gap-2 text-left"
+          >
+            {expanded ? (
+              <ChevronDown
+                size={14}
+                strokeWidth={1.5}
+                className="shrink-0 text-muted-foreground"
+              />
+            ) : (
+              <ChevronRight
+                size={14}
+                strokeWidth={1.5}
+                className="shrink-0 text-muted-foreground"
+              />
+            )}
+            <Puzzle
               size={14}
               strokeWidth={1.5}
               className="shrink-0 text-muted-foreground"
             />
-          ) : (
-            <ChevronRight
-              size={14}
-              strokeWidth={1.5}
-              className="shrink-0 text-muted-foreground"
-            />
-          )}
-          <Puzzle
-            size={14}
-            strokeWidth={1.5}
-            className="shrink-0 text-muted-foreground"
-          />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="truncate text-[13px] font-medium text-foreground">
-                {skill.name}
-              </span>
-              <Chip size="sm" variant="soft" className="text-[11px]">
-                /{skill.command}
-              </Chip>
-            </div>
-            {skill.description && (
-              <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
-                {skill.description}
-              </p>
-            )}
-          </div>
-        </button>
-
-        <div className="flex shrink-0 items-center gap-1.5">
-          <ScopeBadge scope={skill.scope} />
-          {skill.scope === "project" && (
-            <Button
-              isIconOnly
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 min-w-0 text-muted-foreground hover:text-destructive"
-              onPress={(e) => {
-                onDelete();
-              }}
-              isDisabled={deleting}
-            >
-              <Trash2 size={13} strokeWidth={1.5} />
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {expanded && (
-        <div className="border-t border-border px-3 py-3">
-          <div className="space-y-3">
-            {skill.requiredTools.length > 0 && (
-              <DetailSection label="Required CLI tools">
-                <div className="flex flex-wrap gap-1.5">
-                  {skill.requiredTools.map((tool) => (
-                    <Chip key={tool} size="sm" variant="soft" className="font-mono text-[12px]">
-                      {tool}
-                    </Chip>
-                  ))}
-                </div>
-              </DetailSection>
-            )}
-
-            {skill.inputParams.length > 0 && (
-              <DetailSection label="Input parameters">
-                <div className="space-y-1.5">
-                  {skill.inputParams.map((param) => (
-                    <div key={param.name} className="text-[12px]">
-                      <span className="font-mono font-medium text-foreground">
-                        {param.name}
-                      </span>
-                      <span className="ml-1.5 text-muted-foreground">
-                        ({param.type})
-                      </span>
-                      {param.description && (
-                        <span className="ml-1.5 text-muted-foreground">
-                          — {param.description}
-                        </span>
-                      )}
-                      {param.default !== undefined && (
-                        <span className="ml-1.5 text-muted-foreground/60">
-                          default: {param.default}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </DetailSection>
-            )}
-
-            {skill.outputs.length > 0 && (
-              <DetailSection label="Outputs">
-                <div className="space-y-1">
-                  {skill.outputs.map((output, i) => (
-                    <div key={i} className="text-[12px]">
-                      <span className="font-mono font-medium text-foreground">
-                        {output.type}
-                      </span>
-                      {output.description && (
-                        <span className="ml-1.5 text-muted-foreground">
-                          — {output.description}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </DetailSection>
-            )}
-
-            {skill.requiredTools.length === 0 &&
-              skill.inputParams.length === 0 &&
-              skill.outputs.length === 0 && (
-                <p className="text-[12px] text-muted-foreground">
-                  No additional details available for this skill.
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="truncate text-[13px] font-medium text-foreground">
+                  {skill.name}
+                </span>
+                <Chip size="sm" variant="soft">
+                  /{skill.command}
+                </Chip>
+              </div>
+              {skill.description && (
+                <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                  {skill.description}
                 </p>
               )}
+            </div>
+          </button>
+
+          <div className="flex shrink-0 items-center gap-1.5">
+            <ScopeBadge scope={skill.scope} />
+            {skill.scope === "project" && (
+              <Button
+                isIconOnly
+                variant="danger-soft"
+                size="sm"
+                onPress={() => {
+                  onDelete();
+                }}
+                isDisabled={deleting}
+              >
+                <Trash2 size={13} strokeWidth={1.5} />
+              </Button>
+            )}
           </div>
         </div>
-      )}
-    </div>
+
+        {expanded && (
+          <div className="border-t border-border px-3 py-3">
+            <div className="space-y-3">
+              {skill.requiredTools.length > 0 && (
+                <DetailSection label="Required CLI tools">
+                  <div className="flex flex-wrap gap-1.5">
+                    {skill.requiredTools.map((tool) => (
+                      <Chip key={tool} size="sm" variant="soft" className="font-mono">
+                        {tool}
+                      </Chip>
+                    ))}
+                  </div>
+                </DetailSection>
+              )}
+
+              {skill.inputParams.length > 0 && (
+                <DetailSection label="Input parameters">
+                  <div className="space-y-1.5">
+                    {skill.inputParams.map((param) => (
+                      <div key={param.name} className="text-[12px]">
+                        <span className="font-mono font-medium text-foreground">
+                          {param.name}
+                        </span>
+                        <span className="ml-1.5 text-muted-foreground">
+                          ({param.type})
+                        </span>
+                        {param.description && (
+                          <span className="ml-1.5 text-muted-foreground">
+                            — {param.description}
+                          </span>
+                        )}
+                        {param.default !== undefined && (
+                          <span className="ml-1.5 text-muted-foreground/60">
+                            default: {param.default}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </DetailSection>
+              )}
+
+              {skill.outputs.length > 0 && (
+                <DetailSection label="Outputs">
+                  <div className="space-y-1">
+                    {skill.outputs.map((output, i) => (
+                      <div key={i} className="text-[12px]">
+                        <span className="font-mono font-medium text-foreground">
+                          {output.type}
+                        </span>
+                        {output.description && (
+                          <span className="ml-1.5 text-muted-foreground">
+                            — {output.description}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </DetailSection>
+              )}
+
+              {skill.requiredTools.length === 0 &&
+                skill.inputParams.length === 0 &&
+                skill.outputs.length === 0 && (
+                  <p className="text-[12px] text-muted-foreground">
+                    No additional details available for this skill.
+                  </p>
+                )}
+            </div>
+          </div>
+        )}
+      </Card.Content>
+    </Card>
   );
 }
 
@@ -388,7 +390,7 @@ function SkillCard({
 
 function ScopeBadge({ scope }: { scope: "global" | "project" }) {
   return (
-    <Chip size="sm" variant="soft" className="text-[11px]">
+    <Chip size="sm" variant="soft">
       <span className="flex items-center gap-1">
         {scope === "global" ? (
           <Globe size={10} strokeWidth={1.5} />
