@@ -4,9 +4,7 @@ import { useEffect, useCallback } from "react";
 import { Plus, Puzzle, Settings, X } from "lucide-react";
 import { useAppState, useAppDispatch } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { Button, Separator } from "@heroui/react";
 
 /* ---------------------------------------------------------------------------
  * Types
@@ -91,7 +89,7 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
           variant="ghost"
           size="sm"
           className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
-          onClick={handleNewTask}
+          onPress={handleNewTask}
         >
           <Plus size={15} strokeWidth={1.5} />
           <span className="truncate">New task</span>
@@ -106,7 +104,7 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
       </div>
 
       {/* Session list */}
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
         <div className="flex flex-col gap-px px-3">
           {sessions.map((session) => (
             <div
@@ -139,7 +137,7 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Bottom actions with separator */}
       {(onOpenSettings || onOpenSkills) && (
@@ -151,7 +149,7 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
               variant="ghost"
               size="sm"
               className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
-              onClick={onOpenSkills}
+              onPress={onOpenSkills}
             >
               <Puzzle size={15} strokeWidth={1.5} />
               <span className="truncate">Skills</span>
@@ -163,7 +161,7 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
               variant="ghost"
               size="sm"
               className="nodrag h-8 w-full justify-start gap-2 text-[13px] text-muted-foreground hover:text-foreground"
-              onClick={onOpenSettings}
+              onPress={onOpenSettings}
             >
               <Settings size={15} strokeWidth={1.5} />
               <span className="truncate">Settings</span>
