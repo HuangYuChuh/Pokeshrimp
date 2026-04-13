@@ -2,11 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@heroui/react";
 import type { AssetStatus } from "@/core/designfile/types";
 
-// ─── Types ──────────────────────────────────────────────────
+// --- Types ---
 
 interface AssetOverview {
   name: string;
@@ -27,7 +26,7 @@ interface DesignfileOverview {
   cycle: string | null;
 }
 
-// ─── Layout constants ───────────────────────────────────────
+// --- Layout constants ---
 
 const CARD_W = 140;
 const CARD_H = 44;
@@ -36,7 +35,7 @@ const GAP_Y = 56;
 const PAD_X = 24;
 const PAD_Y = 16;
 
-// ─── Depth computation ──────────────────────────────────────
+// --- Depth computation ---
 
 function computeDepths(assets: AssetOverview[]): Map<string, number> {
   const depMap = new Map<string, string[]>();
@@ -64,7 +63,7 @@ function computeDepths(assets: AssetOverview[]): Map<string, number> {
   return depths;
 }
 
-// ─── Status colors ──────────────────────────────────────────
+// --- Status colors ---
 
 const STATUS_COLOR: Record<AssetStatus, string> = {
   clean: "bg-green-400",
@@ -78,7 +77,7 @@ const STATUS_LABEL: Record<AssetStatus, string> = {
   "never-built": "Never built",
 };
 
-// ─── Component ──────────────────────────────────────────────
+// --- Component ---
 
 export function DesignfileGraph() {
   const [data, setData] = useState<DesignfileOverview | null>(null);
@@ -145,7 +144,7 @@ export function DesignfileGraph() {
   if (!data) return null;
 
   return (
-    <ScrollArea className="h-full">
+    <div className="h-full overflow-y-auto">
       <div className="p-4">
         <h2 className="mb-1 text-[15px] font-semibold text-foreground">
           {data.brand}
@@ -162,11 +161,11 @@ export function DesignfileGraph() {
         )}
         <GraphSVG assets={data.assets} />
       </div>
-    </ScrollArea>
+    </div>
   );
 }
 
-// ─── SVG Graph ──────────────────────────────────────────────
+// --- SVG Graph ---
 
 function GraphSVG({ assets }: { assets: AssetOverview[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -288,7 +287,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
   );
 }
 
-// ─── Asset Card (SVG foreignObject) ─────────────────────────
+// --- Asset Card (SVG foreignObject) ---
 
 function AssetCard({
   asset,

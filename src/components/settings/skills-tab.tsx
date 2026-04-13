@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button, Skeleton, Chip } from "@heroui/react";
 import {
   ChevronDown,
   ChevronRight,
@@ -161,11 +160,10 @@ export function SkillsTab({ active }: SkillsTabProps) {
       <div className="flex items-center justify-between">
         <h3 className="text-[15px] font-semibold">Skills</h3>
         <Button
-          type="button"
           variant="outline"
           size="sm"
           className="gap-1.5 text-[12px]"
-          onClick={handleImport}
+          onPress={handleImport}
         >
           <Upload size={13} strokeWidth={1.5} />
           Import
@@ -278,9 +276,9 @@ function SkillCard({
               <span className="truncate text-[13px] font-medium text-foreground">
                 {skill.name}
               </span>
-              <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+              <Chip size="sm" variant="soft" className="text-[11px]">
                 /{skill.command}
-              </span>
+              </Chip>
             </div>
             {skill.description && (
               <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
@@ -294,15 +292,14 @@ function SkillCard({
           <ScopeBadge scope={skill.scope} />
           {skill.scope === "project" && (
             <Button
-              type="button"
+              isIconOnly
               variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-muted-foreground hover:text-destructive"
-              onClick={(e) => {
-                e.stopPropagation();
+              size="sm"
+              className="h-6 w-6 min-w-0 text-muted-foreground hover:text-destructive"
+              onPress={(e) => {
                 onDelete();
               }}
-              disabled={deleting}
+              isDisabled={deleting}
             >
               <Trash2 size={13} strokeWidth={1.5} />
             </Button>
@@ -317,12 +314,9 @@ function SkillCard({
               <DetailSection label="Required CLI tools">
                 <div className="flex flex-wrap gap-1.5">
                   {skill.requiredTools.map((tool) => (
-                    <span
-                      key={tool}
-                      className="rounded bg-muted px-2 py-0.5 font-mono text-[12px] text-muted-foreground"
-                    >
+                    <Chip key={tool} size="sm" variant="soft" className="font-mono text-[12px]">
                       {tool}
-                    </span>
+                    </Chip>
                   ))}
                 </div>
               </DetailSection>
@@ -394,19 +388,16 @@ function SkillCard({
 
 function ScopeBadge({ scope }: { scope: "global" | "project" }) {
   return (
-    <span
-      className={cn(
-        "flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium",
-        "bg-muted text-muted-foreground",
-      )}
-    >
-      {scope === "global" ? (
-        <Globe size={10} strokeWidth={1.5} />
-      ) : (
-        <FolderOpen size={10} strokeWidth={1.5} />
-      )}
-      {scope}
-    </span>
+    <Chip size="sm" variant="soft" className="text-[11px]">
+      <span className="flex items-center gap-1">
+        {scope === "global" ? (
+          <Globe size={10} strokeWidth={1.5} />
+        ) : (
+          <FolderOpen size={10} strokeWidth={1.5} />
+        )}
+        {scope}
+      </span>
+    </Chip>
   );
 }
 

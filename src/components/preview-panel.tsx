@@ -3,9 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppState, useAppDispatch, type PreviewTab } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TextArea } from "@heroui/react";
 import { ZoomIn, ZoomOut, Maximize, Music, RefreshCw, Pencil, Columns } from "lucide-react";
 import { DesignfileGraph } from "@/components/designfile-graph";
 
@@ -20,8 +18,8 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
   const dispatch = useAppDispatch();
 
   const handleTabChange = useCallback(
-    (value: unknown) => {
-      dispatch({ type: "SET_PREVIEW_TAB", tab: value as PreviewTab });
+    (key: React.Key) => {
+      dispatch({ type: "SET_PREVIEW_TAB", tab: key as PreviewTab });
     },
     [dispatch],
   );
@@ -44,43 +42,43 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
       <div className="drag h-13 shrink-0" />
 
       <Tabs
-        value={previewTab}
-        onValueChange={handleTabChange}
+        selectedKey={previewTab}
+        onSelectionChange={handleTabChange}
         className="flex flex-1 flex-col overflow-hidden"
       >
-        <TabsList className="mx-4 shrink-0">
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-          <TabsTrigger value="editor">Editor</TabsTrigger>
-          <TabsTrigger value="output">Output</TabsTrigger>
-          <TabsTrigger value="designfile">Designfile</TabsTrigger>
-        </TabsList>
+        <Tabs.List className="mx-4 shrink-0">
+          <Tabs.Tab id="preview">Preview</Tabs.Tab>
+          <Tabs.Tab id="editor">Editor</Tabs.Tab>
+          <Tabs.Tab id="output">Output</Tabs.Tab>
+          <Tabs.Tab id="designfile">Designfile</Tabs.Tab>
+        </Tabs.List>
 
-        <TabsContent value="preview" className="flex-1 overflow-hidden">
+        <Tabs.Panel id="preview" className="flex-1 overflow-hidden">
           <PreviewContent
             content={previewContent}
             previousPreview={previousPreview}
             onRerun={() => dispatch({ type: "REQUEST_RERUN" })}
             onEditRerun={() => dispatch({ type: "SET_PREVIEW_TAB", tab: "editor" })}
           />
-        </TabsContent>
+        </Tabs.Panel>
 
-        <TabsContent value="editor" className="flex-1 overflow-hidden">
+        <Tabs.Panel id="editor" className="flex-1 overflow-hidden">
           <EditorContent value={editorParams} onChange={handleEditorChange} />
-        </TabsContent>
+        </Tabs.Panel>
 
-        <TabsContent value="output" className="flex-1 overflow-hidden">
+        <Tabs.Panel id="output" className="flex-1 overflow-hidden">
           <OutputContent files={outputFiles} />
-        </TabsContent>
+        </Tabs.Panel>
 
-        <TabsContent value="designfile" className="flex-1 overflow-hidden">
+        <Tabs.Panel id="designfile" className="flex-1 overflow-hidden">
           <DesignfileGraph />
-        </TabsContent>
+        </Tabs.Panel>
       </Tabs>
     </aside>
   );
 }
 
-// ─── Media type detection ───────────────────────────────────
+// --- Media type detection ---
 
 const VIDEO_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
 const AUDIO_EXTENSIONS = ["mp3", "wav", "flac", "ogg"];
@@ -94,13 +92,13 @@ function getMediaType(url: string): "image" | "video" | "audio" | "unknown" {
   return "unknown";
 }
 
-// ─── Zoom constants ─────────────────────────────────────────
+// --- Zoom constants ---
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
 const ZOOM_STEP = 0.25;
 
-// ─── Preview tab content ────────────────────────────────────
+// --- Preview tab content ---
 
 function PreviewContent({
   content,
@@ -364,11 +362,11 @@ function PreviewContent({
   // Text
   if (content.type === "text" && content.text) {
     return (
-      <ScrollArea className="h-full">
+      <div className="h-full overflow-y-auto">
         <div className="selectable whitespace-pre-wrap p-5 text-[14px] leading-7 text-foreground">
           {content.text}
         </div>
-      </ScrollArea>
+      </div>
     );
   }
 
@@ -380,7 +378,7 @@ function PreviewContent({
   );
 }
 
-// ─── Editor tab content ─────────────────────────────────────
+// --- Editor tab content ---
 
 function EditorContent({
   value,
@@ -394,7 +392,7 @@ function EditorContent({
       <label className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
         Parameters
       </label>
-      <Textarea
+      <TextArea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         spellCheck={false}
@@ -405,7 +403,7 @@ function EditorContent({
   );
 }
 
-// ─── Output tab content ─────────────────────────────────────
+// --- Output tab content ---
 
 function OutputContent({
   files,
@@ -420,7 +418,7 @@ function OutputContent({
     );
   }
   return (
-    <ScrollArea className="h-full">
+    <div className="h-full overflow-y-auto">
       <div className="p-4">
         {files.map((file, i) => (
           <button
@@ -437,6 +435,6 @@ function OutputContent({
           </button>
         ))}
       </div>
-    </ScrollArea>
+    </div>
   );
 }

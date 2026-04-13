@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button, Chip, Accordion, Input, Select, ListBox, Switch } from "@heroui/react";
 import {
-  ChevronRight,
   Plus,
   Trash2,
   X,
@@ -13,43 +11,6 @@ import {
   Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// ---------------------------------------------------------------------------
-// Collapsible Section wrapper
-// ---------------------------------------------------------------------------
-
-function CollapsibleSection({
-  title,
-  icon: Icon,
-  children,
-}: {
-  title: string;
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div>
-      <button
-        type="button"
-        className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/50"
-        onClick={() => setOpen(!open)}
-      >
-        <ChevronRight
-          size={14}
-          strokeWidth={2}
-          className={cn(
-            "shrink-0 transition-transform",
-            open && "rotate-90",
-          )}
-        />
-        <Icon size={14} strokeWidth={1.5} />
-        {title}
-      </button>
-      {open && <div className="mt-2 space-y-3 pl-1">{children}</div>}
-    </div>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Types matching config schema
@@ -128,139 +89,143 @@ export function McpServersSection({
   }
 
   return (
-    <CollapsibleSection title="MCP Servers" icon={Server}>
-      {entries.length === 0 && !adding && (
-        <p className="text-[12px] text-muted-foreground">
-          No MCP servers configured.
-        </p>
-      )}
-      {entries.map(([name, server]) => (
-        <div
-          key={name}
-          className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
-        >
-          <span
-            className={cn(
-              "h-2 w-2 shrink-0 rounded-full",
-              server.enabled ? "bg-green-400" : "bg-muted-foreground/40",
+    <Accordion>
+      <Accordion.Item id="mcp-servers">
+        <Accordion.Heading>
+          <Accordion.Trigger className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/50">
+            <Accordion.Indicator />
+            <Server size={14} strokeWidth={1.5} />
+            MCP Servers
+          </Accordion.Trigger>
+        </Accordion.Heading>
+        <Accordion.Panel>
+          <Accordion.Body className="mt-2 space-y-3 pl-1">
+            {entries.length === 0 && !adding && (
+              <p className="text-[12px] text-muted-foreground">
+                No MCP servers configured.
+              </p>
             )}
-          />
-          <div className="min-w-0 flex-1">
-            <span className="text-[13px] font-medium">{name}</span>
-            <p className="truncate text-[12px] font-mono text-muted-foreground">
-              {server.command} {server.args.join(" ")}
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 shrink-0"
-            onClick={() => handleToggle(name)}
-          >
-            <span className="text-[11px]">
-              {server.enabled ? "On" : "Off"}
-            </span>
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 shrink-0 text-destructive hover:text-destructive"
-            onClick={() => handleRemove(name)}
-          >
-            <Trash2 size={13} strokeWidth={1.5} />
-          </Button>
-        </div>
-      ))}
+            {entries.map(([name, server]) => (
+              <div
+                key={name}
+                className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
+              >
+                <span
+                  className={cn(
+                    "h-2 w-2 shrink-0 rounded-full",
+                    server.enabled ? "bg-green-400" : "bg-muted-foreground/40",
+                  )}
+                />
+                <div className="min-w-0 flex-1">
+                  <span className="text-[13px] font-medium">{name}</span>
+                  <p className="truncate text-[12px] font-mono text-muted-foreground">
+                    {server.command} {server.args.join(" ")}
+                  </p>
+                </div>
+                <Switch
+                  size="sm"
+                  isSelected={server.enabled}
+                  onChange={() => handleToggle(name)}
+                >
+                  <Switch.Control>
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch>
+                <Button
+                  isIconOnly
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 min-w-0 shrink-0 text-destructive hover:text-destructive"
+                  onPress={() => handleRemove(name)}
+                >
+                  <Trash2 size={13} strokeWidth={1.5} />
+                </Button>
+              </div>
+            ))}
 
-      {adding && (
-        <div className="space-y-2 rounded-lg border border-border bg-background p-3">
-          <input
-            type="text"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Server name"
-            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-          />
-          <input
-            type="text"
-            value={newServer.command}
-            onChange={(e) =>
-              setNewServer({ ...newServer, command: e.target.value })
-            }
-            placeholder="Command (e.g. npx -y @modelcontextprotocol/server)"
-            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-          />
-          <input
-            type="text"
-            value={newServer.args.join(" ")}
-            onChange={(e) =>
-              setNewServer({
-                ...newServer,
-                args: e.target.value ? e.target.value.split(" ") : [],
-              })
-            }
-            placeholder="Args (space separated)"
-            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-          />
-          <input
-            type="text"
-            value={Object.entries(newServer.env)
-              .map(([k, v]) => `${k}=${v}`)
-              .join(" ")}
-            onChange={(e) => {
-              const env: Record<string, string> = {};
-              e.target.value
-                .split(" ")
-                .filter(Boolean)
-                .forEach((pair) => {
-                  const idx = pair.indexOf("=");
-                  if (idx > 0) env[pair.slice(0, idx)] = pair.slice(idx + 1);
-                });
-              setNewServer({ ...newServer, env });
-            }}
-            placeholder="Env vars (KEY=VALUE KEY2=VALUE2)"
-            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-          />
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setAdding(false);
-                setNewName("");
-                setNewServer({ ...EMPTY_SERVER });
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleAdd}
-              disabled={!newName.trim() || !newServer.command.trim()}
-            >
-              Add
-            </Button>
-          </div>
-        </div>
-      )}
+            {adding && (
+              <div className="space-y-2 rounded-lg border border-border bg-background p-3">
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Server name"
+                  className="text-[13px]"
+                />
+                <Input
+                  value={newServer.command}
+                  onChange={(e) =>
+                    setNewServer({ ...newServer, command: e.target.value })
+                  }
+                  placeholder="Command (e.g. npx -y @modelcontextprotocol/server)"
+                  className="font-mono text-[13px]"
+                />
+                <Input
+                  value={newServer.args.join(" ")}
+                  onChange={(e) =>
+                    setNewServer({
+                      ...newServer,
+                      args: e.target.value ? e.target.value.split(" ") : [],
+                    })
+                  }
+                  placeholder="Args (space separated)"
+                  className="font-mono text-[13px]"
+                />
+                <Input
+                  value={Object.entries(newServer.env)
+                    .map(([k, v]) => `${k}=${v}`)
+                    .join(" ")}
+                  onChange={(e) => {
+                    const env: Record<string, string> = {};
+                    e.target.value
+                      .split(" ")
+                      .filter(Boolean)
+                      .forEach((pair) => {
+                        const idx = pair.indexOf("=");
+                        if (idx > 0) env[pair.slice(0, idx)] = pair.slice(idx + 1);
+                      });
+                    setNewServer({ ...newServer, env });
+                  }}
+                  placeholder="Env vars (KEY=VALUE KEY2=VALUE2)"
+                  className="font-mono text-[13px]"
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onPress={() => {
+                      setAdding(false);
+                      setNewName("");
+                      setNewServer({ ...EMPTY_SERVER });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onPress={handleAdd}
+                    isDisabled={!newName.trim() || !newServer.command.trim()}
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
+            )}
 
-      {!adding && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="text-[12px]"
-          onClick={() => setAdding(true)}
-        >
-          <Plus size={13} strokeWidth={2} className="mr-1" />
-          Add Server
-        </Button>
-      )}
-    </CollapsibleSection>
+            {!adding && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-[12px]"
+                onPress={() => setAdding(true)}
+              >
+                <Plus size={13} strokeWidth={2} className="mr-1" />
+                Add Server
+              </Button>
+            )}
+          </Accordion.Body>
+        </Accordion.Panel>
+      </Accordion.Item>
+    </Accordion>
   );
 }
 
@@ -328,142 +293,159 @@ export function HooksSection({
   ]);
 
   return (
-    <CollapsibleSection title="Hooks" icon={Webhook}>
-      {allEvents.size === 0 && !adding && (
-        <p className="text-[12px] text-muted-foreground">
-          No hooks configured.
-        </p>
-      )}
-
-      {/* Convention hooks */}
-      {conventionHooks.map((event) => (
-        <div
-          key={`conv-${event}`}
-          className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
-        >
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[13px] font-medium">{event}</span>
-              <Badge variant="secondary" className="text-[10px]">
-                convention
-              </Badge>
-            </div>
-            <p className="text-[12px] font-mono text-muted-foreground">
-              .visagent/hooks/{event}
-            </p>
-          </div>
-        </div>
-      ))}
-
-      {/* Config hooks */}
-      {Object.entries(hooks).map(([event, entries]) =>
-        entries.map((entry, i) => (
-          <div
-            key={`${event}-${i}`}
-            className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[13px] font-medium">{event}</span>
-              </div>
-              <p className="truncate text-[12px] font-mono text-muted-foreground">
-                {entry.command}
+    <Accordion>
+      <Accordion.Item id="hooks">
+        <Accordion.Heading>
+          <Accordion.Trigger className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/50">
+            <Accordion.Indicator />
+            <Webhook size={14} strokeWidth={1.5} />
+            Hooks
+          </Accordion.Trigger>
+        </Accordion.Heading>
+        <Accordion.Panel>
+          <Accordion.Body className="mt-2 space-y-3 pl-1">
+            {allEvents.size === 0 && !adding && (
+              <p className="text-[12px] text-muted-foreground">
+                No hooks configured.
               </p>
-              <div className="mt-0.5 flex gap-3 text-[11px] text-muted-foreground">
-                <span>timeout: {entry.timeout}ms</span>
-                {entry.matcher && <span>matcher: {entry.matcher}</span>}
+            )}
+
+            {/* Convention hooks */}
+            {conventionHooks.map((event) => (
+              <div
+                key={`conv-${event}`}
+                className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-medium">{event}</span>
+                    <Chip size="sm" variant="soft" className="text-[10px]">
+                      convention
+                    </Chip>
+                  </div>
+                  <p className="text-[12px] font-mono text-muted-foreground">
+                    .visagent/hooks/{event}
+                  </p>
+                </div>
               </div>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 shrink-0 text-destructive hover:text-destructive"
-              onClick={() => handleRemove(event, i)}
-            >
-              <Trash2 size={13} strokeWidth={1.5} />
-            </Button>
-          </div>
-        )),
-      )}
-
-      {adding && (
-        <div className="space-y-2 rounded-lg border border-border bg-background p-3">
-          <select
-            value={newEvent}
-            onChange={(e) => setNewEvent(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-          >
-            {HOOK_EVENTS.map((ev) => (
-              <option key={ev} value={ev}>
-                {ev}
-              </option>
             ))}
-          </select>
-          <input
-            type="text"
-            value={newCommand}
-            onChange={(e) => setNewCommand(e.target.value)}
-            placeholder="Command (e.g. ./scripts/validate.sh)"
-            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-          />
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newTimeout}
-              onChange={(e) => setNewTimeout(e.target.value)}
-              placeholder="Timeout (ms)"
-              className="w-1/2 rounded-lg border border-border bg-background px-3 py-1.5 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-            />
-            <input
-              type="text"
-              value={newMatcher}
-              onChange={(e) => setNewMatcher(e.target.value)}
-              placeholder="Matcher (optional)"
-              className="w-1/2 rounded-lg border border-border bg-background px-3 py-1.5 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setAdding(false);
-                setNewCommand("");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleAdd}
-              disabled={!newCommand.trim()}
-            >
-              Add
-            </Button>
-          </div>
-        </div>
-      )}
 
-      {!adding && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="text-[12px]"
-          onClick={() => setAdding(true)}
-        >
-          <Plus size={13} strokeWidth={2} className="mr-1" />
-          Add Hook
-        </Button>
-      )}
+            {/* Config hooks */}
+            {Object.entries(hooks).map(([event, entries]) =>
+              entries.map((entry, i) => (
+                <div
+                  key={`${event}-${i}`}
+                  className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-medium">{event}</span>
+                    </div>
+                    <p className="truncate text-[12px] font-mono text-muted-foreground">
+                      {entry.command}
+                    </p>
+                    <div className="mt-0.5 flex gap-3 text-[11px] text-muted-foreground">
+                      <span>timeout: {entry.timeout}ms</span>
+                      {entry.matcher && <span>matcher: {entry.matcher}</span>}
+                    </div>
+                  </div>
+                  <Button
+                    isIconOnly
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 min-w-0 shrink-0 text-destructive hover:text-destructive"
+                    onPress={() => handleRemove(event, i)}
+                  >
+                    <Trash2 size={13} strokeWidth={1.5} />
+                  </Button>
+                </div>
+              )),
+            )}
 
-      <p className="text-[11px] text-muted-foreground">
-        See docs/hook-events.md for event reference.
-      </p>
-    </CollapsibleSection>
+            {adding && (
+              <div className="space-y-2 rounded-lg border border-border bg-background p-3">
+                <Select
+                  selectedKey={newEvent}
+                  onSelectionChange={(key) => {
+                    if (key) setNewEvent(String(key));
+                  }}
+                  className="w-full"
+                >
+                  <Select.Trigger className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-[13px] text-foreground">
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover className="rounded-lg border border-border bg-card shadow-lg">
+                    <ListBox>
+                      {HOOK_EVENTS.map((ev) => (
+                        <ListBox.Item key={ev} id={ev} textValue={ev}>
+                          {ev}
+                        </ListBox.Item>
+                      ))}
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
+                <Input
+                  value={newCommand}
+                  onChange={(e) => setNewCommand(e.target.value)}
+                  placeholder="Command (e.g. ./scripts/validate.sh)"
+                  className="font-mono text-[13px]"
+                />
+                <div className="flex gap-2">
+                  <Input
+                    value={newTimeout}
+                    onChange={(e) => setNewTimeout(e.target.value)}
+                    placeholder="Timeout (ms)"
+                    className="w-1/2 text-[13px]"
+                  />
+                  <Input
+                    value={newMatcher}
+                    onChange={(e) => setNewMatcher(e.target.value)}
+                    placeholder="Matcher (optional)"
+                    className="w-1/2 text-[13px]"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onPress={() => {
+                      setAdding(false);
+                      setNewCommand("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onPress={handleAdd}
+                    isDisabled={!newCommand.trim()}
+                  >
+                    Add
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {!adding && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-[12px]"
+                onPress={() => setAdding(true)}
+              >
+                <Plus size={13} strokeWidth={2} className="mr-1" />
+                Add Hook
+              </Button>
+            )}
+
+            <p className="text-[11px] text-muted-foreground">
+              See docs/hook-events.md for event reference.
+            </p>
+          </Accordion.Body>
+        </Accordion.Panel>
+      </Accordion.Item>
+    </Accordion>
   );
 }
 
@@ -523,20 +505,18 @@ function PatternList({
         ))}
       </div>
       <div className="mt-1.5 flex gap-2">
-        <input
-          type="text"
+        <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="comfyui-cli *"
-          className="flex-1 rounded-lg border border-border bg-background px-3 py-1.5 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
+          className="flex-1 font-mono text-[13px]"
         />
         <Button
-          type="button"
           variant="outline"
           size="sm"
-          onClick={handleAdd}
-          disabled={!input.trim()}
+          onPress={handleAdd}
+          isDisabled={!input.trim()}
         >
           Add
         </Button>
@@ -553,30 +533,41 @@ export function PermissionsSection({
   onChange: (permissions: PermissionConfig) => void;
 }) {
   return (
-    <CollapsibleSection title="Permissions" icon={Shield}>
-      <div className="space-y-4">
-        <PatternList
-          label="Always Allow"
-          patterns={permissions.alwaysAllow}
-          onChange={(alwaysAllow) =>
-            onChange({ ...permissions, alwaysAllow })
-          }
-        />
-        <PatternList
-          label="Always Deny"
-          patterns={permissions.alwaysDeny}
-          onChange={(alwaysDeny) =>
-            onChange({ ...permissions, alwaysDeny })
-          }
-        />
-        <PatternList
-          label="Always Ask"
-          patterns={permissions.alwaysAsk}
-          onChange={(alwaysAsk) =>
-            onChange({ ...permissions, alwaysAsk })
-          }
-        />
-      </div>
-    </CollapsibleSection>
+    <Accordion>
+      <Accordion.Item id="permissions">
+        <Accordion.Heading>
+          <Accordion.Trigger className="flex w-full items-center gap-2 rounded-lg px-1 py-1.5 text-[13px] font-medium text-foreground transition-colors hover:bg-muted/50">
+            <Accordion.Indicator />
+            <Shield size={14} strokeWidth={1.5} />
+            Permissions
+          </Accordion.Trigger>
+        </Accordion.Heading>
+        <Accordion.Panel>
+          <Accordion.Body className="mt-2 space-y-4 pl-1">
+            <PatternList
+              label="Always Allow"
+              patterns={permissions.alwaysAllow}
+              onChange={(alwaysAllow) =>
+                onChange({ ...permissions, alwaysAllow })
+              }
+            />
+            <PatternList
+              label="Always Deny"
+              patterns={permissions.alwaysDeny}
+              onChange={(alwaysDeny) =>
+                onChange({ ...permissions, alwaysDeny })
+              }
+            />
+            <PatternList
+              label="Always Ask"
+              patterns={permissions.alwaysAsk}
+              onChange={(alwaysAsk) =>
+                onChange({ ...permissions, alwaysAsk })
+              }
+            />
+          </Accordion.Body>
+        </Accordion.Panel>
+      </Accordion.Item>
+    </Accordion>
   );
 }

@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Modal,
+  Button,
+  Separator,
+  Skeleton,
+  useOverlayState,
+} from "@heroui/react";
 import {
   X,
   KeyRound,
@@ -92,6 +96,13 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
   });
   const [conventionHooks, setConventionHooks] = useState<string[]>([]);
 
+  const state = useOverlayState({
+    isOpen: open,
+    onOpenChange: (isOpen) => {
+      if (!isOpen) onClose();
+    },
+  });
+
   const isElectron = typeof window !== "undefined" && !!window.pokeshrimp?.auth;
 
   // Reset active tab when initialTab changes or dialog opens
@@ -160,16 +171,6 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
       .catch(() => {});
   }, [open]);
 
-  // Close on Escape key
-  useEffect(() => {
-    if (!open) return;
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
-
   const handleSave = useCallback(async () => {
     setSaving(true);
     try {
@@ -218,143 +219,136 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
   if (!open) return null;
 
   return (
-    <div
-      className="nodrag fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="flex max-h-[80vh] w-[720px] flex-col overflow-hidden rounded-2xl border border-border bg-card">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pb-4 pt-5">
-          <div>
-            <h2 className="text-[15px] font-semibold text-foreground">
+    <Modal state={state}>
+      <Modal.Backdrop isDismissable />
+      <Modal.Container size="lg" className="nodrag max-h-[80vh] w-[720px]">
+        <Modal.Dialog className="flex max-h-[80vh] flex-col overflow-hidden rounded-2xl border border-border bg-card">
+          {/* Header */}
+          <Modal.Header className="flex items-center justify-between px-6 pb-4 pt-5">
+            <Modal.Heading className="text-[15px] font-semibold text-foreground">
               Settings
-            </h2>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={onClose}
-          >
-            <X size={15} strokeWidth={1.5} />
-          </Button>
-        </div>
+            </Modal.Heading>
+            <Modal.CloseTrigger className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+              <X size={15} strokeWidth={1.5} />
+            </Modal.CloseTrigger>
+          </Modal.Header>
 
-        <Separator />
+          <Separator />
 
-        {/* Body: sidebar + content */}
-        <div className="flex min-h-0 flex-1">
-          {/* Sidebar */}
-          <nav className="w-[180px] shrink-0 border-r border-border py-3">
-            <div className="space-y-0.5 px-3">
-              {NAV_ITEMS.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setActiveTab(item.id)}
-                    className={cn(
-                      "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors",
-                      isActive
-                        ? "bg-muted text-foreground font-medium"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-                    )}
-                  >
-                    <Icon size={15} strokeWidth={1.5} />
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
-
-          {/* Content area */}
-          <div className="flex-1 overflow-y-auto px-6 py-5">
-            {!settings ? (
-              <div className="space-y-5">
-                <Skeleton className="h-[60px] w-full rounded-lg" />
-                <Skeleton className="h-[60px] w-full rounded-lg" />
-                <Skeleton className="h-[80px] w-full rounded-lg" />
+          {/* Body: sidebar + content */}
+          <div className="flex min-h-0 flex-1">
+            {/* Sidebar */}
+            <nav className="w-[180px] shrink-0 border-r border-border py-3">
+              <div className="space-y-0.5 px-3">
+                {NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setActiveTab(item.id)}
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors",
+                        isActive
+                          ? "bg-muted text-foreground font-medium"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                      )}
+                    >
+                      <Icon size={15} strokeWidth={1.5} />
+                      {item.label}
+                    </button>
+                  );
+                })}
               </div>
-            ) : (
-              <>
-                {activeTab === "accounts" && (
-                  <AccountsTab
-                    anthropicKey={anthropicKey}
-                    openaiKey={openaiKey}
-                    onAnthropicKeyChange={setAnthropicKey}
-                    onOpenaiKeyChange={setOpenaiKey}
-                    envKeys={settings.envKeys}
-                    apiKeys={settings.apiKeys}
-                    defaultModel={defaultModel}
-                    oauthConnected={oauthConnected}
-                    onOauthConnected={setOauthConnected}
-                    onAutoSave={handleOauthAutoSave}
-                  />
-                )}
-                {activeTab === "models" && (
-                  <ModelsTab
-                    defaultModel={defaultModel}
-                    onDefaultModelChange={setDefaultModel}
-                  />
-                )}
-                {activeTab === "skills" && (
-                  <SkillsTab active={activeTab === "skills"} />
-                )}
-                {activeTab === "tools" && (
-                  <ToolsTab
-                    active={activeTab === "tools"}
-                    mcpServers={mcpServers}
-                    onMcpServersChange={setMcpServers}
-                  />
-                )}
-                {activeTab === "automation" && (
-                  <AutomationTab
-                    hooks={hooks}
-                    conventionHooks={conventionHooks}
-                    onHooksChange={setHooks}
-                    permissions={permissions}
-                    onPermissionsChange={setPermissions}
-                  />
-                )}
-                {activeTab === "appearance" && (
-                  <AppearanceTab
-                    theme={theme}
-                    onThemeChange={handleThemeChange}
-                  />
-                )}
-              </>
-            )}
-          </div>
-        </div>
+            </nav>
 
-        <Separator />
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4">
-          <p className="text-[11px] text-muted-foreground/60">
-            Saved to ~/.visagent/config.json
-          </p>
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saved ? "Saved!" : saving ? "Saving..." : "Save"}
-            </Button>
+            {/* Content area */}
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+              {!settings ? (
+                <div className="space-y-5">
+                  <Skeleton className="h-[60px] w-full rounded-lg" />
+                  <Skeleton className="h-[60px] w-full rounded-lg" />
+                  <Skeleton className="h-[80px] w-full rounded-lg" />
+                </div>
+              ) : (
+                <>
+                  {activeTab === "accounts" && (
+                    <AccountsTab
+                      anthropicKey={anthropicKey}
+                      openaiKey={openaiKey}
+                      onAnthropicKeyChange={setAnthropicKey}
+                      onOpenaiKeyChange={setOpenaiKey}
+                      envKeys={settings.envKeys}
+                      apiKeys={settings.apiKeys}
+                      defaultModel={defaultModel}
+                      oauthConnected={oauthConnected}
+                      onOauthConnected={setOauthConnected}
+                      onAutoSave={handleOauthAutoSave}
+                    />
+                  )}
+                  {activeTab === "models" && (
+                    <ModelsTab
+                      defaultModel={defaultModel}
+                      onDefaultModelChange={setDefaultModel}
+                    />
+                  )}
+                  {activeTab === "skills" && (
+                    <SkillsTab active={activeTab === "skills"} />
+                  )}
+                  {activeTab === "tools" && (
+                    <ToolsTab
+                      active={activeTab === "tools"}
+                      mcpServers={mcpServers}
+                      onMcpServersChange={setMcpServers}
+                    />
+                  )}
+                  {activeTab === "automation" && (
+                    <AutomationTab
+                      hooks={hooks}
+                      conventionHooks={conventionHooks}
+                      onHooksChange={setHooks}
+                      permissions={permissions}
+                      onPermissionsChange={setPermissions}
+                    />
+                  )}
+                  {activeTab === "appearance" && (
+                    <AppearanceTab
+                      theme={theme}
+                      onThemeChange={handleThemeChange}
+                    />
+                  )}
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
+
+          <Separator />
+
+          {/* Footer */}
+          <Modal.Footer className="flex items-center justify-between px-6 py-4">
+            <p className="text-[11px] text-muted-foreground/60">
+              Saved to ~/.visagent/config.json
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onPress={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onPress={handleSave}
+                isDisabled={saving}
+              >
+                {saved ? "Saved!" : saving ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          </Modal.Footer>
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal>
   );
 }

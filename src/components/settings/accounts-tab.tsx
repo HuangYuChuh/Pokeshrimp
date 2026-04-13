@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useCallback } from "react";
+import { Button, Input } from "@heroui/react";
 
 interface AccountsTabProps {
   anthropicKey: string;
@@ -68,15 +68,15 @@ export function AccountsTab({
         hint="Required for Claude models"
         getKeyUrl="https://console.anthropic.com/settings/keys"
       >
-        <input
+        <Input
           type="password"
           value={anthropicKey}
           onChange={(e) => onAnthropicKeyChange(e.target.value)}
           placeholder="sk-ant-..."
           onFocus={(e) => {
-            if (e.target.value.includes("****")) onAnthropicKeyChange("");
+            if ((e.target as HTMLInputElement).value.includes("****")) onAnthropicKeyChange("");
           }}
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
+          className="font-mono text-[13px]"
         />
         <EnvKeyHint
           envAvailable={envKeys?.anthropic}
@@ -91,24 +91,23 @@ export function AccountsTab({
         getKeyUrl="https://platform.openai.com/api-keys"
       >
         <div className="flex gap-2">
-          <input
+          <Input
             type="password"
             value={openaiKey}
             onChange={(e) => onOpenaiKeyChange(e.target.value)}
             placeholder="sk-..."
             onFocus={(e) => {
-              if (e.target.value.includes("****")) onOpenaiKeyChange("");
+              if ((e.target as HTMLInputElement).value.includes("****")) onOpenaiKeyChange("");
             }}
-            className="flex-1 rounded-lg border border-border bg-background px-3 py-2 font-mono text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
+            className="flex-1 font-mono text-[13px]"
           />
           {isElectron && (
             <Button
-              type="button"
               variant="outline"
               size="sm"
               className="shrink-0 text-[12px]"
-              disabled={oauthLoading}
-              onClick={handleOpenAIOAuth}
+              isDisabled={oauthLoading}
+              onPress={handleOpenAIOAuth}
             >
               {oauthLoading ? "Logging in..." : "Login with OpenAI"}
             </Button>
