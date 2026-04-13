@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { Button } from "@heroui/react";
 
 interface EditBubbleProps {
   content: string;
@@ -45,20 +46,22 @@ export function EditBubble({ content, onChange, onSave, onCancel }: EditBubblePr
         rows={1}
       />
       <div className="mt-2 flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-lg px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-muted"
+        <Button
+          variant="ghost"
+          size="sm"
+          onPress={onCancel}
+          className="text-[12px] font-medium text-muted-foreground"
         >
           Cancel
-        </button>
-        <button
-          type="button"
-          onClick={onSave}
-          className="rounded-lg bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          onPress={onSave}
+          className="bg-primary text-[12px] font-medium text-primary-foreground"
         >
           Save
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -2,17 +2,11 @@
 
 import { forwardRef, useState, useRef, useCallback, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils";
-import { ArrowUp, ChevronDown, Paperclip, X, FileIcon, Slash } from "lucide-react";
+import { ArrowUp, Paperclip, X, FileIcon, Slash } from "lucide-react";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-} from "@/components/ui/dropdown-menu";
+import { Button, Select, ListBox } from "@heroui/react";
 
-/* ─── Skill type ─── */
+/* --- Skill type --- */
 
 export interface SkillInfo {
   name: string;
@@ -20,7 +14,7 @@ export interface SkillInfo {
   description: string;
 }
 
-/* ─── Attachment helpers ─── */
+/* --- Attachment helpers --- */
 
 interface LocalAttachment {
   id: string;
@@ -57,7 +51,7 @@ function createLocalAttachment(file: File): LocalAttachment {
 const ACCEPTED_TYPES =
   "image/*,.pdf,.txt,.md,.json,.csv,.svg,.html,.css,.js,.ts,.tsx,.jsx,.yaml,.yml,.xml,.log,.sh,.py,.zip";
 
-/* ─── Props ─── */
+/* --- Props --- */
 
 interface InputAreaProps {
   input: string;
@@ -93,7 +87,6 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
   ) {
     const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
     const [isDragOver, setIsDragOver] = useState(false);
-    const [modelMenuOpen, setModelMenuOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Slash command popup
@@ -297,51 +290,51 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
                   onChange={handleFileInputChange}
                   className="hidden"
                 />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isLoading}
-                  className="nodrag flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
-                  title="Attach files"
+                <Button
+                  isIconOnly
+                  variant="ghost"
+                  size="sm"
+                  onPress={() => fileInputRef.current?.click()}
+                  isDisabled={isLoading}
+                  className="nodrag h-7 w-7 min-w-0 text-muted-foreground hover:text-foreground"
+                  aria-label="Attach files"
                 >
                   <Paperclip size={15} strokeWidth={1.5} />
-                </button>
+                </Button>
               </div>
               <div className="flex items-center gap-2">
-                <DropdownMenu open={modelMenuOpen} onOpenChange={setModelMenuOpen}>
-                  <DropdownMenuTrigger className="nodrag flex h-7 items-center gap-1 rounded-lg px-2 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none">
-                    {modelLabel}
-                    <ChevronDown size={12} />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" sideOffset={8}>
-                    <DropdownMenuRadioGroup
-                      value={modelId}
-                      onValueChange={(v) => {
-                        onModelChange(v);
-                        setModelMenuOpen(false);
-                      }}
-                    >
+                <Select
+                  aria-label="Model selection"
+                  selectedKey={modelId}
+                  onSelectionChange={(key) => {
+                    if (key) onModelChange(String(key));
+                  }}
+                  className="nodrag w-auto min-w-0"
+                >
+                  <Select.Trigger className="flex h-7 items-center gap-1 rounded-lg border-none bg-transparent px-2 text-[12px] text-muted-foreground shadow-none transition-colors hover:bg-muted hover:text-foreground">
+                    <Select.Value>{modelLabel}</Select.Value>
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox className="text-[13px]">
                       {MODEL_OPTIONS.map((m) => (
-                        <DropdownMenuRadioItem
-                          key={m.id}
-                          value={m.id}
-                          className="text-[13px]"
-                        >
+                        <ListBox.Item key={m.id} id={m.id}>
                           {m.label}
-                        </DropdownMenuRadioItem>
+                        </ListBox.Item>
                       ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <button
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
+                <Button
+                  isIconOnly
                   type="submit"
-                  disabled={
+                  isDisabled={
                     (!input.trim() && attachments.length === 0) || isLoading
                   }
-                  className="nodrag flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity disabled:opacity-20"
+                  className="nodrag h-7 w-7 min-w-0 rounded-lg bg-primary text-primary-foreground disabled:opacity-20"
                 >
                   <ArrowUp size={15} strokeWidth={2} />
-                </button>
+                </Button>
               </div>
             </div>
           </div>

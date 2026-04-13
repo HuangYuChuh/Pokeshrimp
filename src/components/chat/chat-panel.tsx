@@ -11,14 +11,13 @@ import {
 import { useAppState, useAppDispatch, type OutputFile } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { PanelLeft, PanelRight, ClipboardList, ChevronUp } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button, Skeleton, ScrollShadow } from "@heroui/react";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
 import { MessageBubble } from "./message-bubble";
 import { ApprovalCards } from "./approval-cards";
 import { InputArea, type SkillInfo } from "./input-area";
 
-/* ─── Example prompts for empty state ─── */
+/* --- Example prompts for empty state --- */
 
 const EXAMPLE_PROMPTS = [
   "\u5E2E\u6211\u6279\u91CF\u53BB\u9664\u4EA7\u54C1\u56FE\u80CC\u666F",
@@ -26,7 +25,7 @@ const EXAMPLE_PROMPTS = [
   "\u7528 ComfyUI \u751F\u6210\u8D5B\u535A\u98CE\u683C\u5934\u50CF",
 ];
 
-/* ─── Session summary hook ─── */
+/* --- Session summary hook --- */
 
 interface SessionSummary {
   summary: string;
@@ -86,7 +85,7 @@ function formatRelativeTime(isoDate: string): string {
   return `${months}mo ago`;
 }
 
-/* ─── Skill data hook ─── */
+/* --- Skill data hook --- */
 
 function useSkills() {
   const [skills, setSkills] = useState<SkillInfo[]>([]);
@@ -99,7 +98,7 @@ function useSkills() {
   return skills;
 }
 
-/* ─── Props ─── */
+/* --- Props --- */
 
 interface ChatPanelProps {
   modelId: string;
@@ -205,13 +204,13 @@ export function ChatPanel({
     },
   });
 
-  /* ─── Auto-scroll ─── */
+  /* --- Auto-scroll --- */
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  /* ─── Re-run from preview panel ─── */
+  /* --- Re-run from preview panel --- */
 
   useEffect(() => {
     if (rerunRequested) {
@@ -220,7 +219,7 @@ export function ChatPanel({
     }
   }, [rerunRequested, dispatch, append]);
 
-  /* ─── Textarea auto-resize ─── */
+  /* --- Textarea auto-resize --- */
 
   const adjustHeight = useCallback(() => {
     const el = textareaRef.current;
@@ -232,7 +231,7 @@ export function ChatPanel({
 
   useEffect(adjustHeight, [input, adjustHeight]);
 
-  /* ─── Keyboard ─── */
+  /* --- Keyboard --- */
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -263,7 +262,7 @@ export function ChatPanel({
     [setInput]
   );
 
-  /* ─── Edit / Delete / Regenerate ─── */
+  /* --- Edit / Delete / Regenerate --- */
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
@@ -324,7 +323,7 @@ export function ChatPanel({
     [messages, setMessages, reload]
   );
 
-  /* ─── Session summary ─── */
+  /* --- Session summary --- */
 
   const { summary: sessionSummary } = useSessionSummary(
     currentSessionId,
@@ -346,7 +345,7 @@ export function ChatPanel({
     setSummaryCollapsed(false);
   }, [currentSessionId]);
 
-  /* ─── Example prompt click ─── */
+  /* --- Example prompt click --- */
 
   const handleExampleClick = useCallback(
     (prompt: string) => {
@@ -356,7 +355,7 @@ export function ChatPanel({
     [setInput, textareaRef],
   );
 
-  /* ─── Render ─── */
+  /* --- Render --- */
 
   const isEmpty = messages.length === 0 && !isLoading && !sessionSummary;
 
@@ -380,28 +379,32 @@ export function ChatPanel({
     <div className="flex min-w-0 flex-1 flex-col bg-background">
       {/* Drag region with toggle buttons */}
       <div className="drag flex h-13 shrink-0 items-center justify-between px-3">
-        <button
-          type="button"
-          onClick={onToggleSidebar}
+        <Button
+          isIconOnly
+          variant="ghost"
+          size="sm"
+          onPress={onToggleSidebar}
           className={cn(
-            "nodrag flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+            "nodrag h-7 w-7 min-w-0 text-muted-foreground hover:text-foreground",
             sidebarOpen && "invisible"
           )}
-          title="Toggle sidebar"
+          aria-label="Toggle sidebar"
         >
           <PanelLeft size={16} strokeWidth={1.5} />
-        </button>
-        <button
-          type="button"
-          onClick={onTogglePreview}
+        </Button>
+        <Button
+          isIconOnly
+          variant="ghost"
+          size="sm"
+          onPress={onTogglePreview}
           className={cn(
-            "nodrag flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+            "nodrag h-7 w-7 min-w-0 text-muted-foreground hover:text-foreground",
             previewOpen && "invisible"
           )}
-          title="Toggle preview"
+          aria-label="Toggle preview"
         >
           <PanelRight size={16} strokeWidth={1.5} />
-        </button>
+        </Button>
       </div>
 
       {/* Content area */}
@@ -417,14 +420,15 @@ export function ChatPanel({
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
                 {EXAMPLE_PROMPTS.map((prompt) => (
-                  <button
+                  <Button
                     key={prompt}
-                    type="button"
-                    onClick={() => handleExampleClick(prompt)}
-                    className="rounded-full border border-border px-4 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+                    variant="outline"
+                    size="sm"
+                    onPress={() => handleExampleClick(prompt)}
+                    className="rounded-full border-border text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground"
                   >
                     {prompt}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -433,7 +437,7 @@ export function ChatPanel({
         </div>
       ) : (
         <>
-          <ScrollArea className="flex-1">
+          <ScrollShadow className="flex-1 overflow-y-auto">
             <div className="selectable mx-auto max-w-[680px] px-3 pb-6 pt-4 sm:px-6">
               {/* Session summary card */}
               {sessionSummary && !summaryCollapsed && (
@@ -443,14 +447,15 @@ export function ChatPanel({
                       <ClipboardList size={15} strokeWidth={1.5} />
                       Session Summary
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setSummaryCollapsed(true)}
-                      className="flex h-6 items-center gap-1 rounded-md px-2 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onPress={() => setSummaryCollapsed(true)}
+                      className="h-6 min-w-0 gap-1 px-2 text-[12px] text-muted-foreground"
                     >
                       Collapse
                       <ChevronUp size={12} strokeWidth={1.5} />
-                    </button>
+                    </Button>
                   </div>
                   <p className="mt-1 text-[12px] text-muted-foreground">
                     {sessionSummary.messageCount} messages
@@ -468,16 +473,17 @@ export function ChatPanel({
               {/* Collapsed summary — minimal inline hint */}
               {sessionSummary && summaryCollapsed && (
                 <div className="mb-4 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={() => setSummaryCollapsed(false)}
-                    className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-[12px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onPress={() => setSummaryCollapsed(false)}
+                    className="rounded-full border-border text-[12px] text-muted-foreground"
                   >
                     <ClipboardList size={12} strokeWidth={1.5} />
                     {sessionSummary.messageCount} messages
                     {sessionSummary.lastActiveAt &&
                       ` \u00B7 ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -499,8 +505,8 @@ export function ChatPanel({
               {isLoading &&
                 messages[messages.length - 1]?.role !== "assistant" && (
                   <div className="flex flex-col gap-2.5 py-2">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-4 w-3/4 rounded-lg" />
+                    <Skeleton className="h-4 w-1/2 rounded-lg" />
                   </div>
                 )}
 
@@ -514,7 +520,7 @@ export function ChatPanel({
 
               <div ref={messagesEndRef} />
             </div>
-          </ScrollArea>
+          </ScrollShadow>
           {inputArea}
         </>
       )}

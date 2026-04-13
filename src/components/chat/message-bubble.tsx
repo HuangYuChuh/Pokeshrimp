@@ -8,7 +8,7 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Message } from "@ai-sdk/react";
 
-/* ─── Markdown components for assistant messages ─── */
+/* --- Markdown components for assistant messages --- */
 
 const markdownComponents: Components = {
   code({ className, children, ...props }) {
@@ -36,7 +36,7 @@ const markdownComponents: Components = {
   },
 };
 
-/* ─── Props ─── */
+/* --- Props --- */
 
 interface MessageBubbleProps {
   message: Message;
