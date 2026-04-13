@@ -117,10 +117,13 @@ export function getModel(
       if (authMode === "oauth") {
         // OAuth tokens are ChatGPT session tokens (not API platform keys).
         // They only work against chatgpt.com/backend-api, NOT api.openai.com.
-        // This is how OpenClaw does it — verified from their source code.
+        // The User-Agent header is required — chatgpt.com is behind Cloudflare
+        // which blocks requests without a recognized agent string.
+        // Verified from OpenClaw source: provider-attribution.ts + openai-codex-catalog.ts
         const codex = createOpenAI({
           apiKey: key,
           baseURL: "https://chatgpt.com/backend-api",
+          headers: { "User-Agent": "pokeshrimp/0.1.0" },
         });
         return codex.responses(option.modelId);
       }
