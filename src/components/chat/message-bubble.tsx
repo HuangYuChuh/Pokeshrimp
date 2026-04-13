@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Card } from "@heroui/react";
 import { MessageActions } from "./message-actions";
 import { EditBubble } from "./edit-bubble";
 import { ToolCard } from "./tool-card";
@@ -80,9 +81,13 @@ export function MessageBubble({
               />
             ) : (
               <div className="relative max-w-[95%] sm:max-w-[85%]">
-                <div className="whitespace-pre-wrap break-words rounded-2xl bg-primary px-4 py-2.5 text-[14px] leading-7 text-primary-foreground">
-                  {message.content}
-                </div>
+                <Card variant="secondary" className="bg-primary text-primary-foreground">
+                  <Card.Content className="px-4 py-2.5">
+                    <div className="whitespace-pre-wrap break-words text-[14px] leading-7">
+                      {message.content}
+                    </div>
+                  </Card.Content>
+                </Card>
                 <MessageActions
                   role="user"
                   onEdit={() => onStartEdit(message.id, message.content)}

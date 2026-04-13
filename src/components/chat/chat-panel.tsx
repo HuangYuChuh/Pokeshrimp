@@ -11,7 +11,7 @@ import {
 import { useAppState, useAppDispatch, type OutputFile } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { PanelLeft, PanelRight, ClipboardList, ChevronUp } from "lucide-react";
-import { Button, Skeleton, ScrollShadow } from "@heroui/react";
+import { Button, Card, Chip, Skeleton, ScrollShadow } from "@heroui/react";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
 import { MessageBubble } from "./message-bubble";
 import { ApprovalCards } from "./approval-cards";
@@ -385,7 +385,7 @@ export function ChatPanel({
           size="sm"
           onPress={onToggleSidebar}
           className={cn(
-            "nodrag h-7 w-7 min-w-0 text-muted-foreground hover:text-foreground",
+            "nodrag h-7 w-7 min-w-0",
             sidebarOpen && "invisible"
           )}
           aria-label="Toggle sidebar"
@@ -398,7 +398,7 @@ export function ChatPanel({
           size="sm"
           onPress={onTogglePreview}
           className={cn(
-            "nodrag h-7 w-7 min-w-0 text-muted-foreground hover:text-foreground",
+            "nodrag h-7 w-7 min-w-0",
             previewOpen && "invisible"
           )}
           aria-label="Toggle preview"
@@ -420,15 +420,15 @@ export function ChatPanel({
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
                 {EXAMPLE_PROMPTS.map((prompt) => (
-                  <Button
+                  <Chip
                     key={prompt}
-                    variant="outline"
-                    size="sm"
-                    onPress={() => handleExampleClick(prompt)}
-                    className="rounded-full border-border text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground"
+                    variant="secondary"
+                    size="md"
+                    className="cursor-pointer transition-colors hover:bg-muted"
+                    onClick={() => handleExampleClick(prompt)}
                   >
                     {prompt}
-                  </Button>
+                  </Chip>
                 ))}
               </div>
             </div>
@@ -441,8 +441,8 @@ export function ChatPanel({
             <div className="selectable mx-auto max-w-[680px] px-3 pb-6 pt-4 sm:px-6">
               {/* Session summary card */}
               {sessionSummary && !summaryCollapsed && (
-                <div className="mb-6 rounded-xl border border-border bg-card px-4 py-3">
-                  <div className="flex items-center justify-between">
+                <Card variant="secondary" className="mb-6">
+                  <Card.Header className="flex flex-row items-center justify-between px-4 pb-0 pt-3">
                     <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
                       <ClipboardList size={15} strokeWidth={1.5} />
                       Session Summary
@@ -451,39 +451,41 @@ export function ChatPanel({
                       variant="ghost"
                       size="sm"
                       onPress={() => setSummaryCollapsed(true)}
-                      className="h-6 min-w-0 gap-1 px-2 text-[12px] text-muted-foreground"
+                      className="h-6 min-w-0 gap-1 px-2 text-[12px]"
                     >
                       Collapse
                       <ChevronUp size={12} strokeWidth={1.5} />
                     </Button>
-                  </div>
-                  <p className="mt-1 text-[12px] text-muted-foreground">
-                    {sessionSummary.messageCount} messages
-                    {sessionSummary.lastActiveAt &&
-                      ` \u00B7 Last active ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
-                  </p>
-                  <div className="mt-2 space-y-1 text-[13px] leading-relaxed text-muted-foreground">
-                    {sessionSummary.summary.split("\n").map((line, i) => (
-                      <p key={i}>{line}</p>
-                    ))}
-                  </div>
-                </div>
+                  </Card.Header>
+                  <Card.Content className="px-4 pb-3 pt-1">
+                    <Card.Description className="text-[12px]">
+                      {sessionSummary.messageCount} messages
+                      {sessionSummary.lastActiveAt &&
+                        ` \u00B7 Last active ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
+                    </Card.Description>
+                    <div className="mt-2 space-y-1 text-[13px] leading-relaxed text-muted-foreground">
+                      {sessionSummary.summary.split("\n").map((line, i) => (
+                        <p key={i}>{line}</p>
+                      ))}
+                    </div>
+                  </Card.Content>
+                </Card>
               )}
 
               {/* Collapsed summary — minimal inline hint */}
               {sessionSummary && summaryCollapsed && (
                 <div className="mb-4 flex justify-center">
-                  <Button
-                    variant="outline"
+                  <Chip
+                    variant="secondary"
                     size="sm"
-                    onPress={() => setSummaryCollapsed(false)}
-                    className="rounded-full border-border text-[12px] text-muted-foreground"
+                    className="cursor-pointer"
+                    onClick={() => setSummaryCollapsed(false)}
                   >
                     <ClipboardList size={12} strokeWidth={1.5} />
                     {sessionSummary.messageCount} messages
                     {sessionSummary.lastActiveAt &&
                       ` \u00B7 ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
-                  </Button>
+                  </Chip>
                 </div>
               )}
 
@@ -511,9 +513,11 @@ export function ChatPanel({
                 )}
 
               {error && (
-                <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-[13px] text-destructive">
-                  {error.message || "Something went wrong"}
-                </div>
+                <Card variant="default" className="border-destructive/20 bg-destructive/5">
+                  <Card.Content className="px-4 py-3 text-[13px] text-destructive">
+                    {error.message || "Something went wrong"}
+                  </Card.Content>
+                </Card>
               )}
 
               <ApprovalCards data={data ?? []} />

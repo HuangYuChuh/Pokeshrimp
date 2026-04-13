@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
-import { Card } from "@heroui/react";
+import { Card, Chip } from "@heroui/react";
 
 interface ToolInvocation {
   toolCallId: string;
@@ -34,48 +34,51 @@ export function ToolCard({ invocation }: ToolCardProps) {
 
   return (
     <div className="mt-2">
-      <button
-        type="button"
-        onClick={() => canExpand && setExpanded(!expanded)}
+      <Card
+        variant="default"
         className={cn(
-          "flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-[12px] text-muted-foreground transition-colors",
+          "cursor-default transition-colors",
           canExpand && "cursor-pointer hover:bg-muted"
         )}
       >
-        <span
-          className={cn(
-            "h-1.5 w-1.5 shrink-0 rounded-full",
-            isDone ? "bg-green-400" : "animate-pulse bg-yellow-400"
+        <Card.Header
+          className="flex flex-row items-center gap-2 px-3 py-2"
+          onClick={() => canExpand && setExpanded(!expanded)}
+        >
+          <Chip
+            size="sm"
+            color={isDone ? "success" : "warning"}
+            variant="soft"
+          >
+            {isDone ? "Done" : "Running"}
+          </Chip>
+          <Card.Title className="text-[12px] font-medium">{label}</Card.Title>
+          {hasArgs && (
+            <span className="max-w-[200px] truncate text-[12px] text-muted-foreground opacity-50">
+              {(() => {
+                const entries = Object.entries(
+                  invocation.args as Record<string, unknown>
+                );
+                if (!entries.length) return "";
+                const [k, v] = entries[0];
+                const s = typeof v === "string" ? v : JSON.stringify(v);
+                return `${k}: ${s.length > 30 ? s.slice(0, 30) + "..." : s}`;
+              })()}
+            </span>
           )}
-        />
-        <span className="font-medium text-foreground">{label}</span>
-        {hasArgs && (
-          <span className="max-w-[200px] truncate opacity-50">
-            {(() => {
-              const entries = Object.entries(
-                invocation.args as Record<string, unknown>
-              );
-              if (!entries.length) return "";
-              const [k, v] = entries[0];
-              const s = typeof v === "string" ? v : JSON.stringify(v);
-              return `${k}: ${s.length > 30 ? s.slice(0, 30) + "..." : s}`;
-            })()}
-          </span>
-        )}
-        {canExpand && (
-          <ChevronDown
-            size={12}
-            className={cn(
-              "ml-auto shrink-0 transition-transform",
-              expanded && "rotate-180"
-            )}
-          />
-        )}
-      </button>
+          {canExpand && (
+            <ChevronDown
+              size={12}
+              className={cn(
+                "ml-auto shrink-0 transition-transform",
+                expanded && "rotate-180"
+              )}
+            />
+          )}
+        </Card.Header>
 
-      {expanded && (
-        <Card className="ml-3 mt-1 max-h-[300px] overflow-y-auto border border-border bg-background shadow-none">
-          <Card.Content className="p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
+        {expanded && (
+          <Card.Content className="max-h-[300px] overflow-y-auto px-3 pb-3 pt-0 font-mono text-[11px] leading-relaxed text-muted-foreground">
             {hasArgs && (
               <>
                 <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
@@ -97,8 +100,8 @@ export function ToolCard({ invocation }: ToolCardProps) {
               </>
             )}
           </Card.Content>
-        </Card>
-      )}
+        )}
+      </Card>
     </div>
   );
 }
