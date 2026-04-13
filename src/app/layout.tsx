@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -29,7 +28,7 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem("pokeshrimp-theme");if(t==="light")document.documentElement.classList.remove("dark");else if(t==="system"&&!window.matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.classList.remove("dark")}catch(e){}})()`,
           }}
         />
-        <TooltipProvider>{children}</TooltipProvider>
+        {children}
       </body>
     </html>
   );

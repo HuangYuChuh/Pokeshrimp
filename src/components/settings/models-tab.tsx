@@ -1,5 +1,6 @@
 "use client";
 
+import { Select, ListBox } from "@heroui/react";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
 
 interface ModelsTabProps {
@@ -18,17 +19,27 @@ export function ModelsTab({ defaultModel, onDefaultModelChange }: ModelsTabProps
             Default Model
           </label>
         </div>
-        <select
-          value={defaultModel}
-          onChange={(e) => onDefaultModelChange(e.target.value)}
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
+        <Select
+          selectedKey={defaultModel}
+          onSelectionChange={(key) => {
+            if (key) onDefaultModelChange(String(key));
+          }}
+          className="w-full"
         >
-          {MODEL_OPTIONS.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.label}
-            </option>
-          ))}
-        </select>
+          <Select.Trigger className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground">
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover className="rounded-lg border border-border bg-card shadow-lg">
+            <ListBox>
+              {MODEL_OPTIONS.map((m) => (
+                <ListBox.Item key={m.id} id={m.id} textValue={m.label}>
+                  {m.label}
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
+        </Select>
       </div>
     </div>
   );

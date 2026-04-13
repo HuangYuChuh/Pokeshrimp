@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
+import { Card } from "@heroui/react";
 
 interface ToolInvocation {
   toolCallId: string;
@@ -73,28 +74,30 @@ export function ToolCard({ invocation }: ToolCardProps) {
       </button>
 
       {expanded && (
-        <div className="selectable ml-3 mt-1 max-h-[300px] overflow-y-auto rounded-lg border border-border bg-background p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
-          {hasArgs && (
-            <>
-              <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
-                Input
-              </div>
-              <pre className="mb-3 whitespace-pre-wrap break-all">
-                {formatVal(invocation.args)}
-              </pre>
-            </>
-          )}
-          {hasResult && (
-            <>
-              <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
-                Result
-              </div>
-              <pre className="whitespace-pre-wrap break-all">
-                {formatVal(invocation.result)}
-              </pre>
-            </>
-          )}
-        </div>
+        <Card className="ml-3 mt-1 max-h-[300px] overflow-y-auto border border-border bg-background shadow-none">
+          <Card.Content className="p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
+            {hasArgs && (
+              <>
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
+                  Input
+                </div>
+                <pre className="mb-3 whitespace-pre-wrap break-all">
+                  {formatVal(invocation.args)}
+                </pre>
+              </>
+            )}
+            {hasResult && (
+              <>
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
+                  Result
+                </div>
+                <pre className="whitespace-pre-wrap break-all">
+                  {formatVal(invocation.result)}
+                </pre>
+              </>
+            )}
+          </Card.Content>
+        </Card>
       )}
     </div>
   );

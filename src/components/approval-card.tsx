@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
+import { Button, Card, Chip } from "@heroui/react";
 
 export interface ApprovalRequestData {
   type: "approval-request";
@@ -93,70 +94,79 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
         : ShieldAlert;
 
   return (
-    <div className="mt-2 rounded-xl border border-border bg-card p-4">
-      <div className="flex items-start gap-3">
-        <RiskIcon size={18} className={cn("mt-0.5 shrink-0", riskColor)} />
-        <div className="min-w-0 flex-1">
-          <div className="text-[13px] font-medium text-foreground">
-            Command Approval Required
-          </div>
-          <code className="mt-1.5 block truncate rounded bg-muted px-2 py-1 font-mono text-[12px] text-muted-foreground">
-            $ {request.command}
-          </code>
-          <div className={cn("mt-1 text-[11px]", riskColor)}>
-            Risk: {request.riskLevel}
-          </div>
-
-          {isPending ? (
-            <div className="mt-3">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleDecision("allow-once")}
-                  disabled={loading}
-                  className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-                >
-                  Allow Once
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDecision("always-allow")}
-                  disabled={loading}
-                  className="rounded-md border border-border px-3 py-1.5 text-[12px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
-                >
-                  Always Allow
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDecision("deny")}
-                  disabled={loading}
-                  className="rounded-md border border-destructive/30 px-3 py-1.5 text-[12px] font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
-                >
-                  Deny
-                </button>
-              </div>
-              {error && (
-                <p className="mt-1.5 text-[11px] text-red-500">{error}</p>
-              )}
+    <Card className="mt-2 border border-border shadow-none">
+      <Card.Content className="p-4">
+        <div className="flex items-start gap-3">
+          <RiskIcon size={18} className={cn("mt-0.5 shrink-0", riskColor)} />
+          <div className="min-w-0 flex-1">
+            <div className="text-[13px] font-medium text-foreground">
+              Command Approval Required
             </div>
-          ) : (
-            <div
-              className={cn(
-                "mt-3 text-[12px] font-medium",
-                state === "denied" || state === "expired"
-                  ? "text-destructive"
-                  : "text-green-500",
-              )}
+            <code className="mt-1.5 block truncate rounded bg-muted px-2 py-1 font-mono text-[12px] text-muted-foreground">
+              $ {request.command}
+            </code>
+            <Chip
+              size="sm"
+              variant="soft"
+              className="mt-1"
             >
-              {state === "allowed" && "Allowed (once)"}
-              {state === "always-allowed" && "Always allowed — pattern saved to config"}
-              {state === "denied" && "Denied"}
-              {state === "expired" && "Expired — auto-denied after timeout"}
-            </div>
-          )}
+              Risk: {request.riskLevel}
+            </Chip>
+
+            {isPending ? (
+              <div className="mt-3">
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onPress={() => handleDecision("allow-once")}
+                    isDisabled={loading}
+                    className="bg-primary text-[12px] font-medium text-primary-foreground"
+                  >
+                    Allow Once
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onPress={() => handleDecision("always-allow")}
+                    isDisabled={loading}
+                    className="text-[12px] font-medium"
+                  >
+                    Always Allow
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger-soft"
+                    onPress={() => handleDecision("deny")}
+                    isDisabled={loading}
+                    className="text-[12px] font-medium"
+                  >
+                    Deny
+                  </Button>
+                </div>
+                {error && (
+                  <p className="mt-1.5 text-[11px] text-red-500">{error}</p>
+                )}
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  "mt-3 text-[12px] font-medium",
+                  state === "denied" || state === "expired"
+                    ? "text-destructive"
+                    : "text-green-500",
+                )}
+              >
+                {state === "allowed" && "Allowed (once)"}
+                {state === "always-allowed" && "Always allowed — pattern saved to config"}
+                {state === "denied" && "Denied"}
+                {state === "expired" && "Expired — auto-denied after timeout"}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+      </Card.Content>
+    </Card>
   );
 }
 

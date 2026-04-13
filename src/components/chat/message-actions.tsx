@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Pencil, Trash2, RefreshCw } from "lucide-react";
+import { Button, Tooltip } from "@heroui/react";
 
 interface MessageActionsProps {
   role: "user" | "assistant";
@@ -19,33 +20,51 @@ export function MessageActions({ role, onEdit, onDelete, onRegenerate }: Message
       )}
     >
       {role === "user" && onEdit && (
-        <button
-          type="button"
-          onClick={onEdit}
-          className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          title="Edit"
-        >
-          <Pencil size={13} />
-        </button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button
+              isIconOnly
+              variant="ghost"
+              size="sm"
+              onPress={onEdit}
+              className="h-6 w-6 min-w-0 text-muted-foreground hover:text-foreground"
+            >
+              <Pencil size={13} />
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>Edit</Tooltip.Content>
+        </Tooltip>
       )}
       {role === "assistant" && onRegenerate && (
-        <button
-          type="button"
-          onClick={onRegenerate}
-          className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          title="Regenerate"
-        >
-          <RefreshCw size={13} />
-        </button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button
+              isIconOnly
+              variant="ghost"
+              size="sm"
+              onPress={onRegenerate}
+              className="h-6 w-6 min-w-0 text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw size={13} />
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>Regenerate</Tooltip.Content>
+        </Tooltip>
       )}
-      <button
-        type="button"
-        onClick={onDelete}
-        className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-        title="Delete"
-      >
-        <Trash2 size={13} />
-      </button>
+      <Tooltip>
+        <Tooltip.Trigger>
+          <Button
+            isIconOnly
+            variant="ghost"
+            size="sm"
+            onPress={onDelete}
+            className="h-6 w-6 min-w-0 text-muted-foreground hover:text-destructive"
+          >
+            <Trash2 size={13} />
+          </Button>
+        </Tooltip.Trigger>
+        <Tooltip.Content>Delete</Tooltip.Content>
+      </Tooltip>
     </div>
   );
 }

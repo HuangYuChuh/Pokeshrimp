@@ -1,9 +1,17 @@
 "use client";
 
+import { Select, ListBox } from "@heroui/react";
+
 interface AppearanceTabProps {
   theme: "dark" | "light" | "system";
   onThemeChange: (value: "dark" | "light" | "system") => void;
 }
+
+const THEME_OPTIONS = [
+  { id: "dark", label: "Dark" },
+  { id: "light", label: "Light" },
+  { id: "system", label: "System" },
+] as const;
 
 export function AppearanceTab({ theme, onThemeChange }: AppearanceTabProps) {
   return (
@@ -16,17 +24,27 @@ export function AppearanceTab({ theme, onThemeChange }: AppearanceTabProps) {
             Theme
           </label>
         </div>
-        <select
-          value={theme}
-          onChange={(e) =>
-            onThemeChange(e.target.value as "dark" | "light" | "system")
-          }
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground outline-none focus:ring-1 focus:ring-ring"
+        <Select
+          selectedKey={theme}
+          onSelectionChange={(key) => {
+            if (key) onThemeChange(String(key) as "dark" | "light" | "system");
+          }}
+          className="w-full"
         >
-          <option value="dark">Dark</option>
-          <option value="light">Light</option>
-          <option value="system">System</option>
-        </select>
+          <Select.Trigger className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[13px] text-foreground">
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover className="rounded-lg border border-border bg-card shadow-lg">
+            <ListBox>
+              {THEME_OPTIONS.map((opt) => (
+                <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
+                  {opt.label}
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
+        </Select>
       </div>
     </div>
   );
