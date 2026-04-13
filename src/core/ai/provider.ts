@@ -1,20 +1,22 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
+import type { CustomProvider } from "@/core/config/schema";
 
-export type ModelProvider = "anthropic" | "openai";
-
-/** How the user authenticated with OpenAI. */
-export type OpenAIAuthMode = "api-key" | "oauth";
+export type ModelProvider = "anthropic" | "openai" | "custom";
 
 export interface ModelOption {
   id: string;
   label: string;
   provider: ModelProvider;
   modelId: string;
+  /** For custom providers: the provider key in config.customProviders */
+  customProviderId?: string;
 }
 
-export const MODEL_OPTIONS: ModelOption[] = [
+// ─── Built-in models ─────────────────────────────────────────
+
+export const BUILTIN_MODEL_OPTIONS: ModelOption[] = [
   // ─── Anthropic ─────────────────────────────────────────
   {
     id: "claude-sonnet",
@@ -80,24 +82,48 @@ export const MODEL_OPTIONS: ModelOption[] = [
 ];
 
 /**
- * Create a LanguageModel for the given model ID.
- *
- * For OpenAI, the auth mode matters:
- *   - "api-key" (sk-xxx): uses Chat Completions API (/v1/chat/completions)
- *   - "oauth" (OAuth token): uses Responses API (/v1/responses)
- *     The OAuth token from "Login with OpenAI" is a Codex subscription
- *     token that only works with the Responses API, not Chat Completions.
+ * Build the full model list: built-in + custom providers from config.
+ * Custom provider models get a prefixed ID like "custom:deepseek:deepseek-chat".
  */
+export function buildModelOptions(
+  customProviders?: Record<string, CustomProvider>,
+): ModelOption[] {
+  const options = [...BUILTIN_MODEL_OPTIONS];
+
+  if (customProviders) {
+    for (const [providerId, provider] of Object.entries(customProviders)) {
+      if (!provider.enabled) continue;
+      for (const modelId of provider.models) {
+        options.push({
+          id: `custom:${providerId}:${modelId}`,
+          label: `${provider.name} / ${modelId}`,
+          provider: "custom",
+          modelId,
+          customProviderId: providerId,
+        });
+      }
+    }
+  }
+
+  return options;
+}
+
+/** Backward compat: MODEL_OPTIONS without custom providers */
+export const MODEL_OPTIONS = BUILTIN_MODEL_OPTIONS;
+
+// ─── Model resolution ────────────────────────────────────────
+
 export function getModel(
   modelId?: string,
   apiKeys?: {
     anthropic?: string;
     openai?: string;
-    openaiAuthMode?: OpenAIAuthMode;
   },
+  customProviders?: Record<string, CustomProvider>,
 ): LanguageModel {
   const selected = modelId || "claude-sonnet";
-  const option = MODEL_OPTIONS.find((m) => m.id === selected);
+  const allOptions = buildModelOptions(customProviders);
+  const option = allOptions.find((m) => m.id === selected);
 
   if (!option) {
     throw new Error(`Unknown model: ${selected}`);
@@ -112,27 +138,21 @@ export function getModel(
     }
     case "openai": {
       const key = apiKeys?.openai || process.env.OPENAI_API_KEY || "";
-      const authMode = apiKeys?.openaiAuthMode ?? detectAuthMode(key);
-
-      // Both OAuth tokens and API keys work with api.openai.com.
-      // OAuth tokens from auth.openai.com are accepted as Bearer tokens
-      // for Chat Completions (verified via curl test).
       const openai = createOpenAI({ apiKey: key });
       return openai(option.modelId);
+    }
+    case "custom": {
+      if (!option.customProviderId || !customProviders?.[option.customProviderId]) {
+        throw new Error(`Custom provider not found: ${option.customProviderId}`);
+      }
+      const provider = customProviders[option.customProviderId];
+      const client = createOpenAI({
+        apiKey: provider.apiKey,
+        baseURL: provider.baseURL,
+      });
+      return client(option.modelId);
     }
     default:
       throw new Error(`Unknown provider: ${(option as ModelOption).provider}`);
   }
-}
-
-/**
- * Detect whether a key is an API key (sk-xxx) or an OAuth token.
- * OAuth tokens are JWTs (eyJ...) or opaque tokens from auth.openai.com.
- * API keys start with "sk-".
- */
-function detectAuthMode(key: string): OpenAIAuthMode {
-  if (!key) return "api-key";
-  if (key.startsWith("sk-")) return "api-key";
-  // OAuth tokens are typically JWTs or long opaque strings
-  return "oauth";
 }

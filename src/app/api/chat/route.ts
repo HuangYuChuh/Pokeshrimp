@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createDataStreamResponse } from "ai";
-import { getModel, MODEL_OPTIONS } from "@/core/ai/provider";
+import { getModel, buildModelOptions } from "@/core/ai/provider";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 import { createSession, addMessage, touchSession } from "@/lib/db";
 import { getRuntime } from "@/core/init";
@@ -75,28 +75,39 @@ export async function POST(req: Request) {
   // check the failure only surfaces ~10s later after internal retries.
   const config = getConfig();
   // Use the user's selected model, or fall back to config default, or first available
-  const resolvedModelId = modelId ?? config.defaultModel ?? MODEL_OPTIONS[0]?.id ?? "claude-sonnet";
-  const option = MODEL_OPTIONS.find((m) => m.id === resolvedModelId);
+  const allModels = buildModelOptions(config.customProviders);
+  const resolvedModelId = modelId ?? config.defaultModel ?? allModels[0]?.id ?? "claude-sonnet";
+  const option = allModels.find((m) => m.id === resolvedModelId);
   if (!option) {
     return new Response(
       JSON.stringify({ error: `Unknown model: ${modelId}` }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
-  const apiKey =
-    option.provider === "anthropic"
-      ? config.apiKeys?.anthropic || process.env.ANTHROPIC_API_KEY
-      : config.apiKeys?.openai || process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return missingApiKeyResponse(option.provider);
+  // For custom providers, the key is in the provider config itself.
+  // For built-in providers, check config + env vars.
+  if (option.provider === "custom") {
+    const cp = config.customProviders?.[option.customProviderId ?? ""];
+    if (!cp?.apiKey && !cp?.baseURL) {
+      return missingApiKeyResponse("custom");
+    }
+  } else {
+    const apiKey =
+      option.provider === "anthropic"
+        ? config.apiKeys?.anthropic || process.env.ANTHROPIC_API_KEY
+        : config.apiKeys?.openai || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return missingApiKeyResponse(option.provider);
+    }
   }
 
   let model;
   try {
-    model = getModel(option.id, {
-      anthropic: config.apiKeys?.anthropic,
-      openai: config.apiKeys?.openai,
-    });
+    model = getModel(
+      option.id,
+      { anthropic: config.apiKeys?.anthropic, openai: config.apiKeys?.openai },
+      config.customProviders,
+    );
   } catch (err) {
     return new Response(
       JSON.stringify({
