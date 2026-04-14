@@ -15,7 +15,7 @@ AI-powered image & video creative workstation — a CLI orchestrator for visual 
 
 - **Desktop**: Electron (pure shell)
 - **Frontend**: Next.js App Router + React 19 + TypeScript
-- **Styling**: shadcn/ui + Tailwind CSS v4
+- **Styling**: HeroUI v3 + Tailwind CSS v4
 - **LLM**: Vercel AI SDK (multi-model support)
 - **Agent**: Self-built AgentRuntime + Middleware Chain
 - **Database**: SQLite via better-sqlite3
@@ -27,7 +27,7 @@ AI-powered image & video creative workstation — a CLI orchestrator for visual 
 **AgentRuntime + Middleware Chain** — inspired by Claude Code (loop), DeerFlow (middleware), OpenClaw (CLI approval).
 
 - `src/core/agent/` — AgentRuntime (core loop), Middleware chain (5 built-in), Sub-agent
-- `src/core/tool/` — Tool interface, Registry, Executor, 10 builtin tools: `read_file`, `write_file`, `list_directory`, `run_command`, `read_skill`, `read_designfile`, `rebuild_asset`, `mark_asset_built` (registered at boot) + `spawn_agent` (registered after runtime init)
+- `src/core/tool/` — Tool interface, Registry, Executor, 12 builtin tools: `read_file`, `write_file`, `list_directory`, `run_command`, `read_skill`, `read_designfile`, `rebuild_asset`, `mark_asset_built`, `run_pipeline`, `list_asset_versions`, `diff_asset_versions`, `watch_designfile` (registered at boot) + `spawn_agent` (registered after runtime init)
 - `src/core/skill/` — Skill engine (.skill.md parsing + prompt injection)
 - `src/core/permission/` — CLI command approval (allow/deny/ask) with interactive approval channel
 - `src/core/config/` — Three-level config + Zod validation

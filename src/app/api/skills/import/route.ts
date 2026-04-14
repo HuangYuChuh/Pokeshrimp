@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { parseSkillFrontmatter } from "@/core/skill/engine";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/core/http/rate-limit";
 
 const limiter = rateLimit({ interval: 60_000, limit: 10 });
 

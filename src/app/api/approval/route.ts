@@ -1,5 +1,5 @@
 import { approvalBus } from "./channel";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/core/http/rate-limit";
 import type { ApprovalDecision } from "@/core/permission/approval";
 
 const limiter = rateLimit({ interval: 60_000, limit: 60 });

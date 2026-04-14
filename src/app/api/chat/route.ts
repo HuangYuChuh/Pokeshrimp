@@ -6,7 +6,7 @@ import { createSession, addMessage, touchSession } from "@/lib/db";
 import { getRuntime } from "@/core/init";
 import { getConfig } from "@/core/config/loader";
 import { approvalBus } from "@/app/api/approval/channel";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/core/http/rate-limit";
 import type { ToolContext } from "@/core/tool/types";
 import type { CoreMessage } from "ai";
 
