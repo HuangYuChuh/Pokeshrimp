@@ -2,6 +2,8 @@
 docs/00-产品定义与愿景.md
 docs/01-设计哲学与技术架构.md
 docs/02-api-to-cli-design.md
+docs/02-coding-standards.md
+docs/03-contributing.md
 VisAgent-产品定义与技术架构方案.md
 
 # Dependencies
