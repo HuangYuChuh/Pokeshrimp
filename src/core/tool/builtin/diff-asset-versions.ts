@@ -7,11 +7,15 @@ const inputSchema = z.object({
   hashA: z
     .string()
     .optional()
-    .describe("Hash of the older version. If omitted along with hashB, diffs the two most recent versions."),
+    .describe(
+      "Hash of the older version. If omitted along with hashB, diffs the two most recent versions.",
+    ),
   hashB: z
     .string()
     .optional()
-    .describe("Hash of the newer version. If omitted along with hashA, diffs the two most recent versions."),
+    .describe(
+      "Hash of the newer version. If omitted along with hashA, diffs the two most recent versions.",
+    ),
 });
 
 function formatValue(v: unknown): string {

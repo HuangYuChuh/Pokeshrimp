@@ -1,10 +1,5 @@
 import { spawn } from "child_process";
-import type {
-  HookEventName,
-  HookEntry,
-  HookPayload,
-  HookResponse,
-} from "./types";
+import type { HookEventName, HookEntry, HookPayload, HookResponse } from "./types";
 import { BLOCKING_EVENTS } from "./types";
 
 // ─── HooksEngine ─────────────────────────────────────────────
@@ -34,19 +29,14 @@ export class HooksEngine {
    * Emit an event. Returns a HookResponse if a blocking hook denies
    * or modifies the operation; null otherwise.
    */
-  async emit(
-    event: HookEventName,
-    payload: HookPayload,
-  ): Promise<HookResponse | null> {
+  async emit(event: HookEventName, payload: HookPayload): Promise<HookResponse | null> {
     const entries = this.hooks.get(event);
     if (!entries || entries.length === 0) return null;
 
     const isBlocking = BLOCKING_EVENTS.has(event);
 
     // Filter by matcher if present
-    const matched = entries.filter((e) =>
-      matchesFilter(e.matcher, payload.tool, payload.command),
-    );
+    const matched = entries.filter((e) => matchesFilter(e.matcher, payload.tool, payload.command));
     if (matched.length === 0) return null;
 
     let mergedModifiedInput: unknown = undefined;
@@ -110,10 +100,7 @@ const VISUAL_FILE_EXTENSIONS =
  * Detect generated visual asset file paths from a command + its stdout.
  * Used by HooksMiddleware to decide whether to emit `post-generate`.
  */
-export function detectGeneratedFiles(
-  command: string,
-  stdout: string,
-): string[] {
+export function detectGeneratedFiles(command: string, stdout: string): string[] {
   const combined = command + "\n" + stdout;
   const matches = combined.match(VISUAL_FILE_EXTENSIONS);
   if (!matches) return [];
@@ -135,10 +122,7 @@ export function detectGeneratedFiles(
 
 // ─── Script Execution ────────────────────────────────────────
 
-function executeScript(
-  entry: HookEntry,
-  payload: HookPayload,
-): Promise<HookResponse | null> {
+function executeScript(entry: HookEntry, payload: HookPayload): Promise<HookResponse | null> {
   const timeout = entry.timeout ?? DEFAULT_TIMEOUT;
 
   return new Promise<HookResponse | null>((resolve) => {
@@ -200,11 +184,7 @@ function executeScript(
  * - Matcher is a pipe-separated list of tool names ("run_command|write_file")
  * - Or a glob pattern for command strings ("comfyui-cli *")
  */
-function matchesFilter(
-  matcher: string | undefined,
-  toolName?: string,
-  command?: string,
-): boolean {
+function matchesFilter(matcher: string | undefined, toolName?: string, command?: string): boolean {
   if (!matcher) return true;
 
   // Tool name match (pipe-separated list)
@@ -216,9 +196,7 @@ function matchesFilter(
   // Glob match against command string
   if (command) {
     const escaped = matcher.replace(/[.+^${}()|[\]\\]/g, "\\$&");
-    const regex = new RegExp(
-      "^" + escaped.replace(/\*/g, ".*") + "$",
-    );
+    const regex = new RegExp("^" + escaped.replace(/\*/g, ".*") + "$");
     return regex.test(command);
   }
 

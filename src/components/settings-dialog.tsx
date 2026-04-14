@@ -1,21 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  Modal,
-  Button,
-  Separator,
-  Skeleton,
-  useOverlayState,
-} from "@heroui/react";
-import {
-  KeyRound,
-  Brain,
-  Puzzle,
-  Wrench,
-  Zap,
-  Palette,
-} from "lucide-react";
+import { Modal, Button, Separator, Skeleton, useOverlayState } from "@heroui/react";
+import { KeyRound, Brain, Puzzle, Wrench, Zap, Palette } from "lucide-react";
 import {
   type McpServerConfig,
   type HookEntryConfig,
@@ -52,13 +39,7 @@ interface SettingsData {
  * Navigation config
  * --------------------------------------------------------------------------- */
 
-type SettingsTabId =
-  | "accounts"
-  | "models"
-  | "skills"
-  | "tools"
-  | "automation"
-  | "appearance";
+type SettingsTabId = "accounts" | "models" | "skills" | "tools" | "automation" | "appearance";
 
 const NAV_ITEMS: { id: SettingsTabId; label: string; icon: typeof KeyRound }[] = [
   { id: "accounts", label: "Accounts", icon: KeyRound },
@@ -112,30 +93,21 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
 
   // Load theme from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem("pokeshrimp-theme") as
-      | "dark"
-      | "light"
-      | "system"
-      | null;
+    const stored = localStorage.getItem("pokeshrimp-theme") as "dark" | "light" | "system" | null;
     if (stored) setThemeState(stored);
   }, []);
 
-  const handleThemeChange = useCallback(
-    (value: "dark" | "light" | "system") => {
-      setThemeState(value);
-      localStorage.setItem("pokeshrimp-theme", value);
-      const root = document.documentElement;
-      if (value === "system") {
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)",
-        ).matches;
-        root.classList.toggle("dark", prefersDark);
-      } else {
-        root.classList.toggle("dark", value === "dark");
-      }
-    },
-    [],
-  );
+  const handleThemeChange = useCallback((value: "dark" | "light" | "system") => {
+    setThemeState(value);
+    localStorage.setItem("pokeshrimp-theme", value);
+    const root = document.documentElement;
+    if (value === "system") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      root.classList.toggle("dark", prefersDark);
+    } else {
+      root.classList.toggle("dark", value === "dark");
+    }
+  }, []);
 
   // Check if a stored OAuth token exists and is valid
   useEffect(() => {
@@ -161,9 +133,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
         setDefaultModel(data.defaultModel ?? "claude-sonnet");
         setMcpServers(data.mcpServers ?? {});
         setHooks(data.hooks ?? {});
-        setPermissions(
-          data.permissions ?? { alwaysAllow: [], alwaysDeny: [], alwaysAsk: [] },
-        );
+        setPermissions(data.permissions ?? { alwaysAllow: [], alwaysDeny: [], alwaysAsk: [] });
         setConventionHooks(data.conventionHooks ?? []);
       })
       .catch(() => {});
@@ -279,14 +249,9 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
                     />
                   )}
                   {activeTab === "models" && (
-                    <ModelsTab
-                      defaultModel={defaultModel}
-                      onDefaultModelChange={setDefaultModel}
-                    />
+                    <ModelsTab defaultModel={defaultModel} onDefaultModelChange={setDefaultModel} />
                   )}
-                  {activeTab === "skills" && (
-                    <SkillsTab active={activeTab === "skills"} />
-                  )}
+                  {activeTab === "skills" && <SkillsTab active={activeTab === "skills"} />}
                   {activeTab === "tools" && (
                     <ToolsTab
                       active={activeTab === "tools"}
@@ -304,10 +269,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
                     />
                   )}
                   {activeTab === "appearance" && (
-                    <AppearanceTab
-                      theme={theme}
-                      onThemeChange={handleThemeChange}
-                    />
+                    <AppearanceTab theme={theme} onThemeChange={handleThemeChange} />
                   )}
                 </>
               )}
@@ -318,23 +280,12 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
 
           {/* Footer */}
           <Modal.Footer className="flex items-center justify-between">
-            <p className="text-[11px] text-muted/60">
-              Saved to ~/.visagent/config.json
-            </p>
+            <p className="text-[11px] text-muted/60">Saved to ~/.visagent/config.json</p>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onPress={onClose}
-              >
+              <Button variant="outline" size="sm" onPress={onClose}>
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                onPress={handleSave}
-                isDisabled={saving}
-              >
+              <Button variant="primary" size="sm" onPress={handleSave} isDisabled={saving}>
                 {saved ? "Saved!" : saving ? "Saving..." : "Save"}
               </Button>
             </div>

@@ -14,10 +14,7 @@ const inputSchema = z.object({
 /**
  * Singleton watcher keyed by cwd — one watcher per project directory.
  */
-const watchers = new Map<
-  string,
-  { watcher: DesignfileWatcher; reports: ChangeReport[] }
->();
+const watchers = new Map<string, { watcher: DesignfileWatcher; reports: ChangeReport[] }>();
 
 export const watchDesignfileTool: Tool = {
   name: "watch_designfile",
@@ -107,9 +104,10 @@ export const watchDesignfileTool: Tool = {
           success: true,
           data: {
             active: entry.watcher.active,
-            message: pending.length > 0
-              ? `${pending.length} change(s) detected since last poll.`
-              : "Watching. No changes detected since last poll.",
+            message:
+              pending.length > 0
+                ? `${pending.length} change(s) detected since last poll.`
+                : "Watching. No changes detected since last poll.",
             reports: pending,
           },
         };

@@ -8,9 +8,12 @@ import { rateLimit } from "@/core/http/rate-limit";
 const limiter = rateLimit({ interval: 60_000, limit: 10 });
 
 const ImportSkillSchema = z.object({
-  filename: z.string().min(1).refine((f) => f.endsWith(".skill.md"), {
-    message: "File must end with .skill.md",
-  }),
+  filename: z
+    .string()
+    .min(1)
+    .refine((f) => f.endsWith(".skill.md"), {
+      message: "File must end with .skill.md",
+    }),
   content: z.string().min(1),
 });
 
@@ -18,10 +21,10 @@ export async function POST(req: Request) {
   const ip = req.headers.get("x-forwarded-for") || "local";
   const { success } = limiter(ip);
   if (!success) {
-    return new Response(
-      JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }),
-      { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } },
-    );
+    return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }), {
+      status: 429,
+      headers: { "Content-Type": "application/json", "Retry-After": "60" },
+    });
   }
 
   const body = await req.json();

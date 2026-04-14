@@ -8,10 +8,7 @@ import { getSession, getMessages } from "@/lib/db";
  * the first user message, last assistant message, and any file paths
  * found in tool results.
  */
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await getSession(id);
   if (!session) {
@@ -48,9 +45,7 @@ export async function GET(
 
   if (firstUser) {
     const preview =
-      firstUser.content.length > 60
-        ? firstUser.content.slice(0, 60) + "..."
-        : firstUser.content;
+      firstUser.content.length > 60 ? firstUser.content.slice(0, 60) + "..." : firstUser.content;
     parts.push(`Started with: "${preview}"`);
   }
 

@@ -80,16 +80,22 @@ npm run package      # Package as macOS desktop app
 1. Create a feature branch: `git checkout -b feat/description`
 2. Develop and commit (following commit convention below)
 3. Push branch and open PR via `gh pr create`
-4. CI runs automatically (TypeScript check + Next.js build + Electron build + commit lint)
+4. CI runs automatically (TypeScript + ESLint + Prettier + tests + build + commit lint)
 5. Review and merge
 
 **Branch naming**: `<type>/<short-description>` (e.g. `feat/tool-use-loop`, `fix/sidebar-overflow`, `refactor/core-config`)
 
 **CI checks** (must all pass before merge):
 - `npx tsc --noEmit` — TypeScript type check
+- `npm run lint` — ESLint check
+- `npm run format:check` — Prettier format check
 - `npm run build` — Next.js production build
 - `npm run build:electron` — Electron compilation
 - Commit message lint (Conventional Commits)
+
+**Pre-commit hooks** (via Husky + lint-staged):
+- ESLint + Prettier on staged `src/**/*.{ts,tsx}` files
+- Commit message validated by commitlint
 
 ## Git Commit Convention
 
@@ -99,12 +105,12 @@ Use **Conventional Commits** with scope:
 <type>(<scope>): <description>
 ```
 
-**Types**: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`
+**Types**: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`, `ci`, `revert`
 
-**Scopes** (match project modules):
-- `core/tool`, `core/permission`, `core/hooks`, `core/config`, `core/mcp`, `core/skill`, `core/session`, `core/ai`, `core/designfile`
+**Scopes** (required, must be one of):
+- `core/tool`, `core/permission`, `core/hooks`, `core/config`, `core/mcp`, `core/skill`, `core/session`, `core/ai`, `core/agent`, `core`, `core/designfile`
 - `electron`, `ui`, `api`
-- Omit scope for cross-cutting changes
+- `architecture`, `conventions`, `ci`, `deps`
 
 **Examples**:
 ```
@@ -112,7 +118,7 @@ feat(core/tool): add unified Tool interface and registry
 fix(electron): auto-start Next.js dev server
 refactor(core): extract framework-agnostic core layer
 docs(architecture): add technical architecture document
-chore: update dependencies
+chore(deps): update dependencies
 ```
 
 **Rules**:

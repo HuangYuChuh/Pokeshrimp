@@ -28,9 +28,7 @@ if (opts.help) {
 }
 
 if (opts.version) {
-  const pkg = JSON.parse(
-    readFileSync(resolve(__dirname, "../../package.json"), "utf-8"),
-  );
+  const pkg = JSON.parse(readFileSync(resolve(__dirname, "../../package.json"), "utf-8"));
   console.log(pkg.version);
   process.exit(0);
 }
@@ -67,9 +65,7 @@ try {
   });
 } catch {
   console.error("Error: No API key configured.");
-  console.error(
-    "Set ANTHROPIC_API_KEY env var or add it to ~/.visagent/config.json:",
-  );
+  console.error("Set ANTHROPIC_API_KEY env var or add it to ~/.visagent/config.json:");
   console.error('  { "apiKeys": { "anthropic": "sk-ant-..." } }');
   process.exit(1);
 }
@@ -117,13 +113,12 @@ if (oneshotMessage) {
     if (opts.json) {
       // Extract tool calls from messages for structured output
       const toolCalls = result.messages
-        .filter(
-          (m): m is CoreMessage & { role: "assistant" } =>
-            m.role === "assistant",
-        )
+        .filter((m): m is CoreMessage & { role: "assistant" } => m.role === "assistant")
         .flatMap((m) => {
           if (!Array.isArray(m.content)) return [];
-          return (m.content as unknown as Array<{ type: string; toolName?: string; args?: unknown }>)
+          return (
+            m.content as unknown as Array<{ type: string; toolName?: string; args?: unknown }>
+          )
             .filter((part) => part.type === "tool-call")
             .map((part) => ({
               toolName: part.toolName,
@@ -157,10 +152,7 @@ if (oneshotMessage) {
         }),
       );
     } else {
-      console.error(
-        "Error:",
-        err instanceof Error ? err.message : String(err),
-      );
+      console.error("Error:", err instanceof Error ? err.message : String(err));
     }
     process.exit(1);
   }
@@ -183,9 +175,7 @@ if (!opts.quiet) {
 
 function getVersion(): string {
   try {
-    const pkg = JSON.parse(
-      readFileSync(resolve(__dirname, "../../package.json"), "utf-8"),
-    );
+    const pkg = JSON.parse(readFileSync(resolve(__dirname, "../../package.json"), "utf-8"));
     return pkg.version ?? "0.0.0";
   } catch {
     return "0.0.0";

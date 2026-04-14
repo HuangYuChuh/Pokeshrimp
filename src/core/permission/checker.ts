@@ -10,10 +10,7 @@ import type { RiskLevel } from "./approval";
  *   matchCommandPattern("rm -rf /tmp/foo", "rm -rf *")                   → true
  *   matchCommandPattern("ls", "rm *")                                    → false
  */
-export function matchCommandPattern(
-  command: string,
-  pattern: string,
-): boolean {
+export function matchCommandPattern(command: string, pattern: string): boolean {
   const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&");
   const regex = new RegExp("^" + escaped.replace(/\*/g, ".*") + "$");
   return regex.test(command);
@@ -30,10 +27,7 @@ export type CommandDecision = "allow" | "deny" | "ask";
  *   - alwaysAsk patterns next (explicitly require user confirmation)
  *   - unmatched commands fall through to "ask" so the user can decide
  */
-export function classifyCommand(
-  command: string,
-  config: PermissionConfig,
-): CommandDecision {
+export function classifyCommand(command: string, config: PermissionConfig): CommandDecision {
   for (const pattern of config.alwaysDeny) {
     if (matchCommandPattern(command, pattern)) return "deny";
   }

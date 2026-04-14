@@ -34,18 +34,12 @@ export interface OAuthResult {
 // ─── PKCE ────────────────────────────────────────────────────
 
 function base64URLEncode(buffer: Buffer): string {
-  return buffer
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=/g, "");
+  return buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
 function generatePKCE(): { verifier: string; challenge: string } {
   const verifier = base64URLEncode(crypto.randomBytes(32));
-  const challenge = base64URLEncode(
-    crypto.createHash("sha256").update(verifier).digest(),
-  );
+  const challenge = base64URLEncode(crypto.createHash("sha256").update(verifier).digest());
   return { verifier, challenge };
 }
 
@@ -85,7 +79,11 @@ export async function startOpenAIOAuth(): Promise<OAuthResult> {
 
     function cleanup() {
       if (callbackServer) {
-        try { callbackServer.close(); } catch { /* ignore */ }
+        try {
+          callbackServer.close();
+        } catch {
+          /* ignore */
+        }
         callbackServer = null;
       }
       if (authWindow && !authWindow.isDestroyed()) {
@@ -206,10 +204,7 @@ interface TokenExchangeResponse {
   token_type: string;
 }
 
-async function exchangeCodeForToken(
-  code: string,
-  codeVerifier: string,
-): Promise<OAuthResult> {
+async function exchangeCodeForToken(code: string, codeVerifier: string): Promise<OAuthResult> {
   // Use Electron's net.fetch instead of Node's fetch so the request
   // goes through Chromium's network stack and respects system proxy.
   // Without this, users behind a proxy/VPN will get 403 from OpenAI

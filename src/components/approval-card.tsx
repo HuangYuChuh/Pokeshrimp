@@ -141,17 +141,13 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
                 Deny
               </Button>
             </div>
-            {error && (
-              <p className="mt-1.5 text-[11px] text-red-500">{error}</p>
-            )}
+            {error && <p className="mt-1.5 text-[11px] text-red-500">{error}</p>}
           </div>
         ) : (
           <div
             className={cn(
               "ml-[30px] text-[12px] font-medium",
-              state === "denied" || state === "expired"
-                ? "text-danger"
-                : "text-green-500",
+              state === "denied" || state === "expired" ? "text-danger" : "text-green-500",
             )}
           >
             {state === "allowed" && "Allowed (once)"}

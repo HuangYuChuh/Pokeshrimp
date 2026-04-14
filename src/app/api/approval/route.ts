@@ -4,11 +4,7 @@ import type { ApprovalDecision } from "@/core/permission/approval";
 
 const limiter = rateLimit({ interval: 60_000, limit: 60 });
 
-const VALID_DECISIONS = new Set<ApprovalDecision>([
-  "allow-once",
-  "always-allow",
-  "deny",
-]);
+const VALID_DECISIONS = new Set<ApprovalDecision>(["allow-once", "always-allow", "deny"]);
 
 /**
  * POST /api/approval
@@ -24,29 +20,29 @@ export async function POST(req: Request) {
   const ip = req.headers.get("x-forwarded-for") || "local";
   const { success } = limiter(ip);
   if (!success) {
-    return new Response(
-      JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }),
-      { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } },
-    );
+    return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }), {
+      status: 429,
+      headers: { "Content-Type": "application/json", "Retry-After": "60" },
+    });
   }
 
   let body: { id?: string; decision?: string };
   try {
     body = await req.json();
   } catch {
-    return new Response(
-      JSON.stringify({ error: "Invalid JSON" }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const { id, decision } = body;
 
   if (!id || typeof id !== "string") {
-    return new Response(
-      JSON.stringify({ error: "Missing or invalid 'id'" }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: "Missing or invalid 'id'" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   if (!decision || !VALID_DECISIONS.has(decision as ApprovalDecision)) {
@@ -67,8 +63,8 @@ export async function POST(req: Request) {
     );
   }
 
-  return new Response(
-    JSON.stringify({ ok: true, id, decision }),
-    { status: 200, headers: { "Content-Type": "application/json" } },
-  );
+  return new Response(JSON.stringify({ ok: true, id, decision }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }

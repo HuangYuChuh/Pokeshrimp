@@ -146,14 +146,8 @@ export function DesignfileGraph() {
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-4">
-        <h2 className="mb-1 text-[15px] font-semibold text-foreground">
-          {data.brand}
-        </h2>
-        {data.description && (
-          <p className="mb-3 text-[12px] text-muted">
-            {data.description}
-          </p>
-        )}
+        <h2 className="mb-1 text-[15px] font-semibold text-foreground">{data.brand}</h2>
+        {data.description && <p className="mb-3 text-[12px] text-muted">{data.description}</p>}
         {data.cycle && (
           <div className="mb-3 rounded-lg border border-danger/50 bg-danger/10 px-3 py-2 text-[12px] text-danger">
             Cycle detected: {data.cycle}
@@ -217,11 +211,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
   }
 
   if (assets.length === 0) {
-    return (
-      <div className="text-[13px] text-muted">
-        No assets defined.
-      </div>
-    );
+    return <div className="text-[13px] text-muted">No assets defined.</div>;
   }
 
   return (
@@ -234,14 +224,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
       >
         {/* Arrow marker definition */}
         <defs>
-          <marker
-            id="arrowhead"
-            markerWidth="8"
-            markerHeight="6"
-            refX="8"
-            refY="3"
-            orient="auto"
-          >
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
             <path d="M 0 0 L 8 3 L 0 6 Z" className="fill-border" />
           </marker>
         </defs>
@@ -273,14 +256,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
           const pos = positions.get(asset.name);
           if (!pos) return null;
 
-          return (
-            <AssetCard
-              key={asset.name}
-              asset={asset}
-              x={pos.x}
-              y={pos.y}
-            />
-          );
+          return <AssetCard key={asset.name} asset={asset} x={pos.x} y={pos.y} />;
         })}
       </svg>
     </div>
@@ -289,15 +265,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
 
 // --- Asset Card (SVG foreignObject) ---
 
-function AssetCard({
-  asset,
-  x,
-  y,
-}: {
-  asset: AssetOverview;
-  x: number;
-  y: number;
-}) {
+function AssetCard({ asset, x, y }: { asset: AssetOverview; x: number; y: number }) {
   return (
     <foreignObject x={x} y={y} width={CARD_W} height={CARD_H}>
       <button
@@ -309,15 +277,10 @@ function AssetCard({
         title={`${asset.name} (${asset.skill}) — ${STATUS_LABEL[asset.status]}`}
       >
         <span
-          className={cn(
-            "h-2 w-2 shrink-0 rounded-full",
-            STATUS_COLOR[asset.status],
-          )}
+          className={cn("h-2 w-2 shrink-0 rounded-full", STATUS_COLOR[asset.status])}
           aria-hidden="true"
         />
-        <span className="truncate text-[12px] text-foreground">
-          {asset.name}
-        </span>
+        <span className="truncate text-[12px] text-foreground">{asset.name}</span>
       </button>
     </foreignObject>
   );

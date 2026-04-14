@@ -60,7 +60,7 @@ describe("StateTracker", () => {
 
     // Build with old params
     const df1 = makeDesignfile({ logo: { params: { color: "red" } } });
-    const graph1 = new DependencyGraph(df1);
+    const _graph1 = new DependencyGraph(df1);
     tracker.markBuilt("logo", { color: "red" }, "abc123", []);
 
     // Now the designfile has different params

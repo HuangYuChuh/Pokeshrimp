@@ -17,7 +17,7 @@ export function MessageActions({ role, onEdit, onDelete, onRegenerate }: Message
       variant="default"
       className={cn(
         "absolute -top-3 z-10 flex items-center gap-0.5 p-0.5 opacity-0 transition-opacity group-hover/msg:opacity-100",
-        role === "user" ? "right-0" : "left-0"
+        role === "user" ? "right-0" : "left-0",
       )}
     >
       {role === "user" && onEdit && (

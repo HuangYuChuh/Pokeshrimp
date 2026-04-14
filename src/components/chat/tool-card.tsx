@@ -28,9 +28,7 @@ export function ToolCard({ invocation }: ToolCardProps) {
   const hasResult = !!(isDone && invocation.result != null);
   const canExpand = hasArgs || hasResult;
 
-  const label = invocation.toolName
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  const label = invocation.toolName.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
     <div className="mt-2">
@@ -38,27 +36,21 @@ export function ToolCard({ invocation }: ToolCardProps) {
         variant="default"
         className={cn(
           "cursor-default transition-colors",
-          canExpand && "cursor-pointer hover:bg-muted"
+          canExpand && "cursor-pointer hover:bg-muted",
         )}
       >
         <Card.Header
           className="flex flex-row items-center gap-2 px-3 py-2"
           onClick={() => canExpand && setExpanded(!expanded)}
         >
-          <Chip
-            size="sm"
-            color={isDone ? "success" : "warning"}
-            variant="soft"
-          >
+          <Chip size="sm" color={isDone ? "success" : "warning"} variant="soft">
             {isDone ? "Done" : "Running"}
           </Chip>
           <Card.Title className="text-[12px] font-medium">{label}</Card.Title>
           {hasArgs && (
             <span className="max-w-[200px] truncate text-[12px] text-muted opacity-50">
               {(() => {
-                const entries = Object.entries(
-                  invocation.args as Record<string, unknown>
-                );
+                const entries = Object.entries(invocation.args as Record<string, unknown>);
                 if (!entries.length) return "";
                 const [k, v] = entries[0];
                 const s = typeof v === "string" ? v : JSON.stringify(v);
@@ -69,10 +61,7 @@ export function ToolCard({ invocation }: ToolCardProps) {
           {canExpand && (
             <ChevronDown
               size={12}
-              className={cn(
-                "ml-auto shrink-0 transition-transform",
-                expanded && "rotate-180"
-              )}
+              className={cn("ml-auto shrink-0 transition-transform", expanded && "rotate-180")}
             />
           )}
         </Card.Header>
@@ -94,9 +83,7 @@ export function ToolCard({ invocation }: ToolCardProps) {
                 <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted/50">
                   Result
                 </div>
-                <pre className="whitespace-pre-wrap break-all">
-                  {formatVal(invocation.result)}
-                </pre>
+                <pre className="whitespace-pre-wrap break-all">{formatVal(invocation.result)}</pre>
               </>
             )}
           </Card.Content>
@@ -107,8 +94,7 @@ export function ToolCard({ invocation }: ToolCardProps) {
 }
 
 function formatVal(v: unknown): string {
-  if (typeof v === "string")
-    return v.length > 2000 ? v.slice(0, 2000) + "\n...(truncated)" : v;
+  if (typeof v === "string") return v.length > 2000 ? v.slice(0, 2000) + "\n...(truncated)" : v;
   try {
     const s = JSON.stringify(v, null, 2);
     return s.length > 2000 ? s.slice(0, 2000) + "\n...(truncated)" : s;

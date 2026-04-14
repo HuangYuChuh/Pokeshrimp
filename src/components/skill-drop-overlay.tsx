@@ -25,9 +25,7 @@ export function SkillDropOverlay({ visible }: SkillDropOverlayProps) {
     <div
       className={cn(
         "fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm bg-black/60 transition-opacity duration-200",
-        visible
-          ? "pointer-events-auto opacity-100"
-          : "pointer-events-none opacity-0",
+        visible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
       )}
     >
       <div className="flex flex-col items-center gap-3">

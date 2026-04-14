@@ -11,10 +11,7 @@ import path from "path";
  * Scope is project-level (not global) — a pattern approved in one
  * project does not affect another.
  */
-export function persistAlwaysAllow(
-  pattern: string,
-  cwd: string,
-): void {
+export function persistAlwaysAllow(pattern: string, cwd: string): void {
   const configDir = path.join(cwd, ".visagent");
   const configPath = path.join(configDir, "config.json");
 

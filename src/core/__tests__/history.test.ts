@@ -41,14 +41,14 @@ describe("VersionHistory", () => {
     const dir = makeTmpDir();
     const history = new VersionHistory(dir);
 
-    const v1 = history.record("logo", {
+    const _v1 = history.record("logo", {
       skill: "/logo-design",
       params: { color: "red" },
       outputFiles: [],
     });
 
     // Record a second version with different params (different hash)
-    const v2 = history.record("logo", {
+    const _v2 = history.record("logo", {
       skill: "/logo-design",
       params: { color: "blue" },
       outputFiles: [],
@@ -57,9 +57,9 @@ describe("VersionHistory", () => {
     const versions = history.listVersions("logo");
     expect(versions.length).toBe(2);
     // Newest first
-    expect(
-      new Date(versions[0].timestamp).getTime(),
-    ).toBeGreaterThanOrEqual(new Date(versions[1].timestamp).getTime());
+    expect(new Date(versions[0].timestamp).getTime()).toBeGreaterThanOrEqual(
+      new Date(versions[1].timestamp).getTime(),
+    );
   });
 
   it("param diffing detects added keys", () => {
@@ -249,11 +249,7 @@ describe("VersionHistory", () => {
       outputFiles: [outFile],
     });
 
-    const result = history.getStoredFile(
-      "banner",
-      version.hash,
-      "banner.jpg",
-    );
+    const result = history.getStoredFile("banner", version.hash, "banner.jpg");
     expect(result).not.toBeNull();
     expect(fs.readFileSync(result!, "utf-8")).toBe("banner-bytes");
   });

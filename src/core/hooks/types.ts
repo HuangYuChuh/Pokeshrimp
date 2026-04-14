@@ -15,10 +15,7 @@ export type HookEventName =
   | "session-end";
 
 /** Events where the hook script can deny/modify the operation. */
-export const BLOCKING_EVENTS: ReadonlySet<HookEventName> = new Set([
-  "pre-tool-call",
-  "pre-export",
-]);
+export const BLOCKING_EVENTS: ReadonlySet<HookEventName> = new Set(["pre-tool-call", "pre-export"]);
 
 // ─── Hook Configuration ──────────────────────────────────────
 

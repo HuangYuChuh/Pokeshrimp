@@ -20,9 +20,7 @@ export function AppearanceTab({ theme, onThemeChange }: AppearanceTabProps) {
 
       <div>
         <div className="mb-1.5">
-          <label className="text-[13px] font-medium text-foreground">
-            Theme
-          </label>
+          <label className="text-[13px] font-medium text-foreground">Theme</label>
         </div>
         <Select
           selectedKey={theme}

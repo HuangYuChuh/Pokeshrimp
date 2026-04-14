@@ -46,11 +46,7 @@ export class DesignfileWatcher {
 
   private _active = false;
 
-  constructor(
-    designfilePath: string,
-    onChange: ChangeHandler,
-    debounceMs = 500,
-  ) {
+  constructor(designfilePath: string, onChange: ChangeHandler, debounceMs = 500) {
     this.designfilePath = designfilePath;
     this.onChange = onChange;
     this.debounceMs = debounceMs;
@@ -76,9 +72,7 @@ export class DesignfileWatcher {
     this._active = true;
 
     try {
-      this.fsWatcher = fs.watch(this.designfilePath, () =>
-        this.scheduleProcess(),
-      );
+      this.fsWatcher = fs.watch(this.designfilePath, () => this.scheduleProcess());
       this.fsWatcher.on("error", () => this.fallbackToPoll());
     } catch {
       this.fallbackToPoll();
@@ -122,11 +116,7 @@ export class DesignfileWatcher {
       this.fsWatcher = null;
     }
     this.usingPoll = true;
-    fs.watchFile(
-      this.designfilePath,
-      { interval: 1000 },
-      () => this.scheduleProcess(),
-    );
+    fs.watchFile(this.designfilePath, { interval: 1000 }, () => this.scheduleProcess());
   }
 
   private scheduleProcess(): void {
@@ -160,9 +150,7 @@ export class DesignfileWatcher {
         name,
         skill: config.skill,
         params: config.params,
-        reason: isDirect
-          ? "params changed in designfile"
-          : `upstream dependency changed`,
+        reason: isDirect ? "params changed in designfile" : `upstream dependency changed`,
       };
     });
 
@@ -189,10 +177,7 @@ export class DesignfileWatcher {
  * Compare two designfile snapshots and return the names of assets
  * whose params have changed (added, removed, or modified).
  */
-function diffDesignfiles(
-  prev: Designfile | null,
-  curr: Designfile,
-): string[] {
+function diffDesignfiles(prev: Designfile | null, curr: Designfile): string[] {
   const changed: string[] = [];
   const prevAssets = prev?.assets ?? {};
 
@@ -204,8 +189,10 @@ function diffDesignfiles(
       changed.push(name);
       continue;
     }
-    if (JSON.stringify(sortedParams(config.params)) !==
-        JSON.stringify(sortedParams(prevConfig.params))) {
+    if (
+      JSON.stringify(sortedParams(config.params)) !==
+      JSON.stringify(sortedParams(prevConfig.params))
+    ) {
       changed.push(name);
     }
   }

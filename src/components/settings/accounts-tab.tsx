@@ -120,11 +120,7 @@ export function AccountsTab({
             OpenAI OAuth connected (token auto-refreshes)
           </p>
         )}
-        {oauthError && (
-          <p className="mt-1 text-[11px] text-danger">
-            {oauthError}
-          </p>
-        )}
+        {oauthError && <p className="mt-1 text-[11px] text-danger">{oauthError}</p>}
         <EnvKeyHint
           envAvailable={envKeys?.openai}
           hasConfigKey={!!apiKeys?.openai}
@@ -149,22 +145,14 @@ function Field({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <label className="text-[13px] font-medium text-foreground">
-          {label}
-        </label>
+        <label className="text-[13px] font-medium text-foreground">{label}</label>
         {getKeyUrl && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onPress={() => openKeyUrl(getKeyUrl)}
-          >
+          <Button variant="ghost" size="sm" onPress={() => openKeyUrl(getKeyUrl)}>
             Get key &rarr;
           </Button>
         )}
       </div>
-      {hint && (
-        <p className="mb-2 text-[12px] text-muted">{hint}</p>
-      )}
+      {hint && <p className="mb-2 text-[12px] text-muted">{hint}</p>}
       {children}
     </div>
   );
@@ -181,15 +169,7 @@ function EnvKeyHint({
 }) {
   if (!envAvailable) return null;
   if (hasConfigKey) {
-    return (
-      <p className="mt-1.5 text-[11px] text-muted">
-        Config key takes priority over env var
-      </p>
-    );
+    return <p className="mt-1.5 text-[11px] text-muted">Config key takes priority over env var</p>;
   }
-  return (
-    <p className="mt-1.5 text-[11px] text-green-400">
-      Using {envVarName} from environment
-    </p>
-  );
+  return <p className="mt-1.5 text-[11px] text-green-400">Using {envVarName} from environment</p>;
 }

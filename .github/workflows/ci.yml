@@ -28,6 +28,12 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
+      - name: Lint check
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
       - name: Run tests with coverage
         run: npx vitest run --coverage
 

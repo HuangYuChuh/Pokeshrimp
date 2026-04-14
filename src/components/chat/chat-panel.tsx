@@ -1,13 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import {
-  useRef,
-  useEffect,
-  useCallback,
-  useState,
-  type KeyboardEvent,
-} from "react";
+import { useRef, useEffect, useCallback, useState, type KeyboardEvent } from "react";
 import { useAppState, useAppDispatch, type OutputFile } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { PanelLeft, PanelRight, ClipboardList, ChevronUp } from "lucide-react";
@@ -154,10 +148,7 @@ export function ChatPanel({
         const collectedFiles: OutputFile[] = [];
 
         for (const part of message.parts) {
-          if (
-            part.type === "tool-invocation" &&
-            part.toolInvocation.state === "result"
-          ) {
+          if (part.type === "tool-invocation" && part.toolInvocation.state === "result") {
             const inv = part.toolInvocation;
 
             const result = inv.result;
@@ -172,19 +163,15 @@ export function ChatPanel({
             if (inv.args && typeof inv.args === "object") {
               const args = inv.args as Record<string, unknown>;
               const editorText =
-                inv.toolName === "run_command" &&
-                typeof args.command === "string"
+                inv.toolName === "run_command" && typeof args.command === "string"
                   ? args.command
                   : JSON.stringify(args, null, 2);
               dispatch({ type: "SET_EDITOR_PARAMS", params: editorText });
             }
 
-            const resultStr =
-              typeof result === "string"
-                ? result
-                : JSON.stringify(result ?? "");
+            const resultStr = typeof result === "string" ? result : JSON.stringify(result ?? "");
             const fileMatches = resultStr.match(
-              /(?:^|[\s"'=])(\/?(?:[\w./-]+\/)?[\w.-]+\.(?:png|jpe?g|gif|webp|svg|bmp|tiff?|mp4|mov|avi|mkv|webm))\b/gi
+              /(?:^|[\s"'=])(\/?(?:[\w./-]+\/)?[\w.-]+\.(?:png|jpe?g|gif|webp|svg|bmp|tiff?|mp4|mov|avi|mkv|webm))\b/gi,
             );
             if (fileMatches) {
               for (const raw of fileMatches) {
@@ -242,24 +229,21 @@ export function ChatPanel({
         }
       }
     },
-    [input, isLoading, handleSubmit]
+    [input, isLoading, handleSubmit],
   );
 
   const handleSubmitWithAttachments = useCallback(
-    (
-      e: React.FormEvent<HTMLFormElement>,
-      options?: { experimental_attachments?: FileList }
-    ) => {
+    (e: React.FormEvent<HTMLFormElement>, options?: { experimental_attachments?: FileList }) => {
       handleSubmit(e, options);
     },
-    [handleSubmit]
+    [handleSubmit],
   );
 
   const handleSelectSkill = useCallback(
     (command: string) => {
       setInput(command + " ");
     },
-    [setInput]
+    [setInput],
   );
 
   /* --- Edit / Delete / Regenerate --- */
@@ -267,13 +251,10 @@ export function ChatPanel({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
 
-  const handleStartEdit = useCallback(
-    (messageId: string, content: string) => {
-      setEditingId(messageId);
-      setEditingContent(content);
-    },
-    []
-  );
+  const handleStartEdit = useCallback((messageId: string, content: string) => {
+    setEditingId(messageId);
+    setEditingContent(content);
+  }, []);
 
   const handleCancelEdit = useCallback(() => {
     setEditingId(null);
@@ -293,7 +274,7 @@ export function ChatPanel({
       setEditingContent("");
       reload();
     },
-    [editingContent, messages, setMessages, reload]
+    [editingContent, messages, setMessages, reload],
   );
 
   const handleDelete = useCallback(
@@ -310,7 +291,7 @@ export function ChatPanel({
         setMessages(messages.filter((m) => m.id !== messageId));
       }
     },
-    [messages, setMessages]
+    [messages, setMessages],
   );
 
   const handleRegenerate = useCallback(
@@ -320,15 +301,12 @@ export function ChatPanel({
       setMessages(messages.slice(0, idx));
       reload();
     },
-    [messages, setMessages, reload]
+    [messages, setMessages, reload],
   );
 
   /* --- Session summary --- */
 
-  const { summary: sessionSummary } = useSessionSummary(
-    currentSessionId,
-    messages.length > 0,
-  );
+  const { summary: sessionSummary } = useSessionSummary(currentSessionId, messages.length > 0);
   const [summaryCollapsed, setSummaryCollapsed] = useState(false);
 
   // Auto-collapse summary when user sends a new message
@@ -384,10 +362,7 @@ export function ChatPanel({
           variant="ghost"
           size="sm"
           onPress={onToggleSidebar}
-          className={cn(
-            "nodrag h-7 w-7 min-w-0",
-            sidebarOpen && "invisible"
-          )}
+          className={cn("nodrag h-7 w-7 min-w-0", sidebarOpen && "invisible")}
           aria-label="Toggle sidebar"
         >
           <PanelLeft size={16} strokeWidth={1.5} />
@@ -397,10 +372,7 @@ export function ChatPanel({
           variant="ghost"
           size="sm"
           onPress={onTogglePreview}
-          className={cn(
-            "nodrag h-7 w-7 min-w-0",
-            previewOpen && "invisible"
-          )}
+          className={cn("nodrag h-7 w-7 min-w-0", previewOpen && "invisible")}
           aria-label="Toggle preview"
         >
           <PanelRight size={16} strokeWidth={1.5} />
@@ -504,13 +476,12 @@ export function ChatPanel({
                 />
               ))}
 
-              {isLoading &&
-                messages[messages.length - 1]?.role !== "assistant" && (
-                  <div className="flex flex-col gap-2.5 py-2">
-                    <Skeleton className="h-4 w-3/4 rounded-lg" />
-                    <Skeleton className="h-4 w-1/2 rounded-lg" />
-                  </div>
-                )}
+              {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+                <div className="flex flex-col gap-2.5 py-2">
+                  <Skeleton className="h-4 w-3/4 rounded-lg" />
+                  <Skeleton className="h-4 w-1/2 rounded-lg" />
+                </div>
+              )}
 
               {error && (
                 <Card variant="default" className="border-danger/20 bg-danger/5">

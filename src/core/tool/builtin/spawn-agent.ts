@@ -3,12 +3,7 @@ import path from "path";
 import fs from "fs";
 import crypto from "crypto";
 import type { LanguageModel } from "ai";
-import type {
-  Tool,
-  ToolContext,
-  ToolResult,
-  PermissionResult,
-} from "../types";
+import type { Tool, ToolContext, ToolResult, PermissionResult } from "../types";
 import { ToolRegistry } from "../registry";
 import type { AgentRuntime } from "@/core/agent/runtime";
 
@@ -22,15 +17,11 @@ let activeCount = 0;
 // ─── Schema ──────────────────────────────────────────────────
 
 const inputSchema = z.object({
-  prompt: z
-    .string()
-    .describe("The task description to delegate to the sub-agent"),
+  prompt: z.string().describe("The task description to delegate to the sub-agent"),
   toolWhitelist: z
     .array(z.string())
     .optional()
-    .describe(
-      "Tool names the sub-agent may use. Defaults to all parent tools except spawn_agent.",
-    ),
+    .describe("Tool names the sub-agent may use. Defaults to all parent tools except spawn_agent."),
 });
 
 // ─── Factory ─────────────────────────────────────────────────
@@ -66,15 +57,12 @@ export function createSpawnAgentTool(parent: AgentRuntime): Tool {
     async call(input: unknown, context: ToolContext): Promise<ToolResult> {
       const { prompt, toolWhitelist } = input as z.infer<typeof inputSchema>;
 
-      const model = (
-        context as ToolContext & { model?: LanguageModel }
-      ).model;
+      const model = (context as ToolContext & { model?: LanguageModel }).model;
       if (!model) {
         return {
           success: false,
           data: null,
-          error:
-            "spawn_agent requires `model` in ToolContext. The runtime should populate it.",
+          error: "spawn_agent requires `model` in ToolContext. The runtime should populate it.",
         };
       }
 
@@ -87,12 +75,7 @@ export function createSpawnAgentTool(parent: AgentRuntime): Tool {
       }
 
       const agentId = crypto.randomUUID().slice(0, 8);
-      const isolatedCwd = path.join(
-        context.cwd,
-        ".visagent",
-        ".agents",
-        agentId,
-      );
+      const isolatedCwd = path.join(context.cwd, ".visagent", ".agents", agentId);
       try {
         fs.mkdirSync(isolatedCwd, { recursive: true });
       } catch (err) {
@@ -148,10 +131,7 @@ export function createSpawnAgentTool(parent: AgentRuntime): Tool {
 
 // ─── Helpers ─────────────────────────────────────────────────
 
-function filterRegistry(
-  source: ToolRegistry,
-  whitelist?: string[],
-): ToolRegistry {
+function filterRegistry(source: ToolRegistry, whitelist?: string[]): ToolRegistry {
   const filtered = new ToolRegistry();
   for (const tool of source.getAllTools()) {
     // Frozen rule: max nesting depth = 1.

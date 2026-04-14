@@ -7,9 +7,7 @@ const inputSchema = z.object({
   force: z
     .boolean()
     .optional()
-    .describe(
-      "Force rebuild even if the asset is up to date. Default false.",
-    ),
+    .describe("Force rebuild even if the asset is up to date. Default false."),
 });
 
 /**

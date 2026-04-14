@@ -58,17 +58,11 @@ export class VersionHistory {
     for (const filePath of build.outputFiles) {
       try {
         if (!fs.existsSync(filePath)) {
-          console.warn(
-            `[VersionHistory] Output file not found, skipping: ${filePath}`,
-          );
+          console.warn(`[VersionHistory] Output file not found, skipping: ${filePath}`);
           continue;
         }
         const content = fs.readFileSync(filePath);
-        const contentHash = crypto
-          .createHash("sha256")
-          .update(content)
-          .digest("hex")
-          .slice(0, 12);
+        const contentHash = crypto.createHash("sha256").update(content).digest("hex").slice(0, 12);
         const filename = path.basename(filePath);
         const objectDir = path.join(this.objectsDir, contentHash);
         const storedPath = path.join(objectDir, filename);
@@ -84,10 +78,7 @@ export class VersionHistory {
           storedPath,
         });
       } catch (err) {
-        console.warn(
-          `[VersionHistory] Failed to store file ${filePath}:`,
-          err,
-        );
+        console.warn(`[VersionHistory] Failed to store file ${filePath}:`, err);
       }
     }
 
@@ -104,10 +95,7 @@ export class VersionHistory {
 
     const assetDir = path.join(this.baseDir, assetName);
     fs.mkdirSync(assetDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(assetDir, `${hash}.json`),
-      JSON.stringify(version, null, 2) + "\n",
-    );
+    fs.writeFileSync(path.join(assetDir, `${hash}.json`), JSON.stringify(version, null, 2) + "\n");
 
     return version;
   }
@@ -116,17 +104,11 @@ export class VersionHistory {
    * Get the absolute path to a stored copy of an output file.
    * Returns null if the version or file is not found.
    */
-  getStoredFile(
-    assetName: string,
-    versionHash: string,
-    filename: string,
-  ): string | null {
+  getStoredFile(assetName: string, versionHash: string, filename: string): string | null {
     const version = this.getVersion(assetName, versionHash);
     if (!version?.storedFiles) return null;
 
-    const entry = version.storedFiles.find(
-      (sf) => path.basename(sf.originalPath) === filename,
-    );
+    const entry = version.storedFiles.find((sf) => path.basename(sf.originalPath) === filename);
     if (!entry) return null;
 
     return fs.existsSync(entry.storedPath) ? entry.storedPath : null;
@@ -155,8 +137,7 @@ export class VersionHistory {
     }
 
     return versions.sort((a, b) => {
-      const timeDiff =
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+      const timeDiff = new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
       if (timeDiff !== 0) return timeDiff;
       // Stable tiebreaker: monotonic sequence number (higher = newer)
       const seqA = a.seq ?? 0;
@@ -221,10 +202,7 @@ export class VersionHistory {
  * Deterministic hash from skill + params. Same configuration always
  * produces the same hash, enabling deduplication and cache hits.
  */
-function computeHash(
-  skill: string,
-  params: Record<string, unknown>,
-): string {
+function computeHash(skill: string, params: Record<string, unknown>): string {
   const content = JSON.stringify({ skill, params: sortKeys(params) });
   return crypto.createHash("sha256").update(content).digest("hex").slice(0, 12);
 }

@@ -4,10 +4,7 @@ import type { Tool, ToolContext, ToolResult, PermissionResult } from "../types";
 
 const inputSchema = z.object({
   command: z.string().describe("Shell command to execute"),
-  timeout: z
-    .number()
-    .optional()
-    .describe("Maximum runtime in milliseconds (default 30000)"),
+  timeout: z.number().optional().describe("Maximum runtime in milliseconds (default 30000)"),
 });
 
 const DEFAULT_TIMEOUT_MS = 30_000;

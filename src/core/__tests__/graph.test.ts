@@ -2,9 +2,7 @@ import { describe, it, expect } from "vitest";
 import { DependencyGraph } from "@/core/designfile/graph";
 import type { Designfile } from "@/core/designfile/types";
 
-function makeDesignfile(
-  assets: Record<string, { depends_on?: string[] }>,
-): Designfile {
+function makeDesignfile(assets: Record<string, { depends_on?: string[] }>): Designfile {
   const result: Designfile = { brand: "test", assets: {} };
   for (const [name, cfg] of Object.entries(assets)) {
     result.assets[name] = {

@@ -6,7 +6,7 @@ import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
   {
-    ignores: ["node_modules/", ".next/", "dist-electron/", "dist-cli/"],
+    ignores: ["node_modules/", ".next/", "dist-electron/", "dist-cli/", ".claude/", "next-env.d.ts"],
   },
   {
     files: ["**/*.{ts,tsx}"],
@@ -26,7 +26,7 @@ export default [
       ...tsPlugin.configs.recommended.rules,
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs["core-web-vitals"].rules,
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "warn",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",

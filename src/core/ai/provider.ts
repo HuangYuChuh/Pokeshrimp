@@ -85,9 +85,7 @@ export const BUILTIN_MODEL_OPTIONS: ModelOption[] = [
  * Build the full model list: built-in + custom providers from config.
  * Custom provider models get a prefixed ID like "custom:deepseek:deepseek-chat".
  */
-export function buildModelOptions(
-  customProviders?: Record<string, CustomProvider>,
-): ModelOption[] {
+export function buildModelOptions(customProviders?: Record<string, CustomProvider>): ModelOption[] {
   const options = [...BUILTIN_MODEL_OPTIONS];
 
   if (customProviders) {

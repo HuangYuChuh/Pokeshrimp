@@ -50,18 +50,10 @@ export function EditBubble({ content, onChange, onSave, onCancel }: EditBubblePr
           />
         </Card.Content>
         <Card.Footer className="flex justify-end gap-2 px-3 pb-3 pt-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onPress={onCancel}
-          >
+          <Button variant="ghost" size="sm" onPress={onCancel}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onPress={onSave}
-          >
+          <Button variant="primary" size="sm" onPress={onSave}>
             Save
           </Button>
         </Card.Footer>

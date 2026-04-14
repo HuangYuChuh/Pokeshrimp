@@ -38,9 +38,7 @@ export interface AgentRunOptions {
    * The caller can call `stream.mergeIntoDataStream(dataStream)` to
    * forward text deltas, tool calls, and tool results to a client.
    */
-  onIterationStream?: (
-    stream: StreamTextResult<ToolSet, never>,
-  ) => void | Promise<void>;
+  onIterationStream?: (stream: StreamTextResult<ToolSet, never>) => void | Promise<void>;
 }
 
 export interface AgentRunResult {
@@ -161,10 +159,7 @@ export class AgentRuntime {
    * filtered tool registry (typically with `spawn_agent` removed to
    * enforce max nesting depth = 1).
    */
-  spawnSubAgent(
-    filteredRegistry: ToolRegistry,
-    runOpts: AgentRunOptions,
-  ): Promise<AgentRunResult> {
+  spawnSubAgent(filteredRegistry: ToolRegistry, runOpts: AgentRunOptions): Promise<AgentRunResult> {
     const sub = new AgentRuntime({
       registry: filteredRegistry,
       middlewares: this.middlewares,
@@ -185,27 +180,12 @@ export class AgentRuntime {
         description: t.description,
         parameters: t.inputSchema,
         execute: async (input) => {
-          const before = await runMiddlewaresBefore(
-            this.middlewares,
-            t.name,
-            input,
-            context,
-          );
+          const before = await runMiddlewaresBefore(this.middlewares, t.name, input, context);
           if (!before.allowed) {
             return `Error: ${before.reason ?? "Denied by middleware"}`;
           }
-          const result = await executeTool(
-            this.registry,
-            t.name,
-            before.input,
-            context,
-          );
-          await runMiddlewaresAfter(
-            this.middlewares,
-            t.name,
-            before.input,
-            result,
-          );
+          const result = await executeTool(this.registry, t.name, before.input, context);
+          await runMiddlewaresAfter(this.middlewares, t.name, before.input, result);
           if (!result.success) {
             return `Error: ${result.error ?? "unknown"}`;
           }

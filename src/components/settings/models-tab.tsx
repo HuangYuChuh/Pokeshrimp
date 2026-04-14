@@ -15,9 +15,7 @@ export function ModelsTab({ defaultModel, onDefaultModelChange }: ModelsTabProps
 
       <div>
         <div className="mb-1.5">
-          <label className="text-[13px] font-medium text-foreground">
-            Default Model
-          </label>
+          <label className="text-[13px] font-medium text-foreground">Default Model</label>
         </div>
         <Select
           selectedKey={defaultModel}

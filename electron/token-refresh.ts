@@ -11,9 +11,7 @@ interface TokenResponse {
   token_type: string;
 }
 
-export async function refreshAccessToken(
-  refreshToken: string
-): Promise<TokenSet | null> {
+export async function refreshAccessToken(refreshToken: string): Promise<TokenSet | null> {
   try {
     const response = await net.fetch(`${AUTH_DOMAIN}/oauth/token`, {
       method: "POST",
@@ -26,10 +24,7 @@ export async function refreshAccessToken(
     });
 
     if (!response.ok) {
-      console.error(
-        `[token-refresh] Refresh failed (${response.status}):`,
-        await response.text()
-      );
+      console.error(`[token-refresh] Refresh failed (${response.status}):`, await response.text());
       clearTokens("openai");
       return null;
     }

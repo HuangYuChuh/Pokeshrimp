@@ -13,8 +13,7 @@ interface PreviewPanelProps {
 }
 
 export function PreviewPanel({ open }: PreviewPanelProps) {
-  const { previewTab, previewContent, previousPreview, editorParams, outputFiles } =
-    useAppState();
+  const { previewTab, previewContent, previousPreview, editorParams, outputFiles } = useAppState();
   const dispatch = useAppDispatch();
 
   const handleTabChange = useCallback(
@@ -129,10 +128,7 @@ function PreviewContent({
     }
   }, [content.url]);
 
-  const clampZoom = useCallback(
-    (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z)),
-    [],
-  );
+  const clampZoom = useCallback((z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z)), []);
 
   const handleZoomIn = useCallback(() => {
     setZoom((z) => clampZoom(z + ZOOM_STEP));
@@ -212,12 +208,7 @@ function PreviewContent({
         <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
           <Music size={15} strokeWidth={1.5} className="h-10 w-10 text-muted" />
         </div>
-        <audio
-          key={content.url}
-          controls
-          preload="metadata"
-          className="w-full max-w-xs"
-        >
+        <audio key={content.url} controls preload="metadata" className="w-full max-w-xs">
           <source src={content.url} />
         </audio>
       </div>
@@ -232,31 +223,16 @@ function PreviewContent({
       <div className="flex h-full flex-col">
         {/* Zoom toolbar */}
         <div className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-1.5">
-          <Button
-            isIconOnly
-            variant="ghost"
-            size="sm"
-            onPress={handleZoomOut}
-          >
+          <Button isIconOnly variant="ghost" size="sm" onPress={handleZoomOut}>
             <ZoomOut size={15} strokeWidth={1.5} />
           </Button>
           <span className="min-w-[3.5rem] text-center text-[12px] tabular-nums text-muted">
             {Math.round(zoom * 100)}%
           </span>
-          <Button
-            isIconOnly
-            variant="ghost"
-            size="sm"
-            onPress={handleZoomIn}
-          >
+          <Button isIconOnly variant="ghost" size="sm" onPress={handleZoomIn}>
             <ZoomIn size={15} strokeWidth={1.5} />
           </Button>
-          <Button
-            isIconOnly
-            variant="ghost"
-            size="sm"
-            onPress={handleReset}
-          >
+          <Button isIconOnly variant="ghost" size="sm" onPress={handleReset}>
             <Maximize size={15} strokeWidth={1.5} />
           </Button>
           {hasComparison && (
@@ -280,6 +256,7 @@ function PreviewContent({
             <div className="flex flex-1 items-center justify-center overflow-hidden border-r border-border p-2">
               <div className="flex flex-col items-center gap-1">
                 <span className="text-[11px] font-medium text-muted">Before</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={previousPreview!.url}
                   alt="Before"
@@ -291,6 +268,7 @@ function PreviewContent({
             <div className="flex flex-1 items-center justify-center overflow-hidden p-2">
               <div className="flex flex-col items-center gap-1">
                 <span className="text-[11px] font-medium text-muted">After</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={content.url}
                   alt="After"
@@ -306,18 +284,14 @@ function PreviewContent({
             ref={containerRef}
             className="flex flex-1 items-center justify-center overflow-hidden"
             style={{
-              cursor:
-                zoom > 1
-                  ? isDragging.current
-                    ? "grabbing"
-                    : "grab"
-                  : "default",
+              cursor: zoom > 1 ? (isDragging.current ? "grabbing" : "grab") : "default",
             }}
             onWheel={handleWheel}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={content.url}
               alt="Preview"
@@ -367,13 +341,7 @@ function PreviewContent({
 
 // --- Editor tab content ---
 
-function EditorContent({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
+function EditorContent({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex h-full flex-col p-4">
       <label className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted">
@@ -393,11 +361,7 @@ function EditorContent({
 
 // --- Output tab content ---
 
-function OutputContent({
-  files,
-}: {
-  files: { name: string; path: string; type: string }[];
-}) {
+function OutputContent({ files }: { files: { name: string; path: string; type: string }[] }) {
   if (files.length === 0) {
     return (
       <div className="flex h-full items-center justify-center text-[13px] text-muted">
@@ -409,18 +373,11 @@ function OutputContent({
     <div className="h-full overflow-y-auto">
       <div className="space-y-1 p-4">
         {files.map((file, i) => (
-          <Button
-            key={i}
-            variant="ghost"
-            fullWidth
-            className="justify-start gap-2.5"
-          >
+          <Button key={i} variant="ghost" fullWidth className="justify-start gap-2.5">
             <Chip size="sm" variant="soft" className="font-mono">
               {file.type}
             </Chip>
-            <span className="flex-1 truncate text-[13px] text-foreground">
-              {file.name}
-            </span>
+            <span className="flex-1 truncate text-[13px] text-foreground">{file.name}</span>
           </Button>
         ))}
       </div>

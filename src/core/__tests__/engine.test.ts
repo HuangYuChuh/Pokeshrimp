@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { HooksEngine } from "@/core/hooks/engine";
-import type { HookEntry, HookEventName } from "@/core/hooks/types";
+import type { HookEntry } from "@/core/hooks/types";
 
 let tmpDirs: string[] = [];
 
@@ -20,9 +20,7 @@ afterEach(() => {
   tmpDirs = [];
 });
 
-function makeEngine(
-  hooks: Record<string, HookEntry[]>,
-): HooksEngine {
+function makeEngine(hooks: Record<string, HookEntry[]>): HooksEngine {
   const map = new Map<string, HookEntry[]>(Object.entries(hooks));
   return new HooksEngine(map);
 }
@@ -126,7 +124,7 @@ describe("HooksEngine", () => {
     const engine = makeEngine({
       "pre-tool-call": [
         {
-          command: "sleep 10 && echo '{\"decision\":\"deny\"}'",
+          command: 'sleep 10 && echo \'{"decision":"deny"}\'',
           timeout: 200, // very short timeout
         },
       ],

@@ -21,17 +21,11 @@ export function createMCPTool(
       return false;
     },
 
-    async checkPermissions(
-      _input: unknown,
-      _context: ToolContext,
-    ): Promise<PermissionResult> {
+    async checkPermissions(_input: unknown, _context: ToolContext): Promise<PermissionResult> {
       return { behavior: "ask" };
     },
 
-    async call(
-      input: unknown,
-      _context: ToolContext,
-    ): Promise<ToolResult> {
+    async call(input: unknown, _context: ToolContext): Promise<ToolResult> {
       try {
         const result = await clientManager.callTool(
           serverName,
