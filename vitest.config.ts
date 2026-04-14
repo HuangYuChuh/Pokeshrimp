@@ -15,12 +15,12 @@ export default defineConfig({
       include: ["src/core/**/*.ts"],
       exclude: ["src/core/__tests__/**", "src/core/**/index.ts"],
       thresholds: {
-        statements: 20,
-        branches: 15,
-        functions: 18,
-        lines: 20,
+        // Current baseline — raise to 50% as tests are added
+        statements: 30,
+        branches: 24,
+        functions: 26,
+        lines: 30,
       },
     },
   },
 });
-// test

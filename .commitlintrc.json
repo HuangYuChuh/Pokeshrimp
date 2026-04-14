@@ -12,7 +12,7 @@
       [
         "core/tool", "core/permission", "core/hooks", "core/config",
         "core/mcp", "core/skill", "core/session", "core/ai", "core/agent", "core",
-        "core/designfile",
+        "core/designfile", "core/http",
         "electron", "ui", "api",
         "architecture", "conventions", "ci", "deps"
       ]
