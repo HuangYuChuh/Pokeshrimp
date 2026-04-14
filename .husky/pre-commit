@@ -1,1 +1,2 @@
-npx tsc --noEmit
+npx lint-staged
+npx tsc -p tsconfig.electron.json --noEmit

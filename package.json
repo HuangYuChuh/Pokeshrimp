@@ -15,8 +15,8 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "format": "prettier --write \"**/*.{ts,tsx}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx}\" --ignore-path .gitignore",
     "package": "npm run build && npm run build:electron && electron-builder --mac",
     "build:cli": "tsc -p tsconfig.cli.json",
     "cli": "npx tsx src/cli/index.ts",
@@ -64,6 +64,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.5.0",
     "prettier": "^3.8.2",
     "tailwindcss": "^4.1.0",
@@ -95,6 +96,16 @@
         "to": ".next/static"
       }
     ]
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --max-warnings 0",
+      "prettier --check"
+    ]
+  },
+  "engines": {
+    "node": ">=20.17.0",
+    "npm": ">=10"
   },
   "author": "科林 KELIN <onepigge1999@gmail.com>",
   "license": "Apache-2.0"
