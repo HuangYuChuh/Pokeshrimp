@@ -1,10 +1,13 @@
+import { z } from "zod";
 import { approvalBus } from "./channel";
 import { rateLimit } from "@/core/http/rate-limit";
-import type { ApprovalDecision } from "@/core/permission/approval";
 
 const limiter = rateLimit({ interval: 60_000, limit: 60 });
 
-const VALID_DECISIONS = new Set<ApprovalDecision>(["allow-once", "always-allow", "deny"]);
+const ApprovalBodySchema = z.object({
+  id: z.string().min(1),
+  decision: z.enum(["allow-once", "always-allow", "deny"]),
+});
 
 /**
  * POST /api/approval
@@ -26,35 +29,24 @@ export async function POST(req: Request) {
     });
   }
 
-  let body: { id?: string; decision?: string };
-  try {
-    body = await req.json();
-  } catch {
+  const raw = await req.json().catch(() => null);
+  if (!raw) {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  const { id, decision } = body;
-
-  if (!id || typeof id !== "string") {
-    return new Response(JSON.stringify({ error: "Missing or invalid 'id'" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  if (!decision || !VALID_DECISIONS.has(decision as ApprovalDecision)) {
+  const parsed = ApprovalBodySchema.safeParse(raw);
+  if (!parsed.success) {
     return new Response(
-      JSON.stringify({
-        error: `Invalid decision. Must be one of: ${[...VALID_DECISIONS].join(", ")}`,
-      }),
+      JSON.stringify({ error: "Invalid payload", details: parsed.error.flatten() }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
 
-  const found = approvalBus.respond(id, decision as ApprovalDecision);
+  const { id, decision } = parsed.data;
+  const found = approvalBus.respond(id, decision);
 
   if (!found) {
     return new Response(
