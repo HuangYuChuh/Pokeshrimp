@@ -203,14 +203,14 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
                   className="nodrag flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent"
                   onClick={() => onSelectSkill(skill.command)}
                 >
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-muted text-muted-foreground">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-muted text-muted">
                     <Slash size={11} strokeWidth={2} />
                   </span>
                   <div className="min-w-0">
                     <div className="text-[13px] font-medium text-foreground">
                       {skill.command}
                     </div>
-                    <div className="truncate text-[12px] text-muted-foreground">
+                    <div className="truncate text-[12px] text-muted">
                       {skill.description}
                     </div>
                   </div>
@@ -247,7 +247,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
                         <div className="flex h-10 w-10 items-center justify-center rounded bg-muted">
                           <FileIcon
                             size={16}
-                            className="text-muted-foreground"
+                            className="text-muted"
                           />
                         </div>
                       )}
@@ -255,7 +255,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
                         <div className="truncate text-[12px] font-medium text-foreground">
                           {att.name}
                         </div>
-                        <div className="text-[11px] text-muted-foreground">
+                        <div className="text-[11px] text-muted">
                           {formatFileSize(att.size)}
                         </div>
                       </div>
@@ -314,7 +314,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(
                     }}
                     className="nodrag w-auto min-w-0"
                   >
-                    <Select.Trigger className="flex h-7 items-center gap-1 rounded-lg border-none bg-transparent px-2 text-[12px] text-muted-foreground shadow-none transition-colors hover:bg-muted hover:text-foreground">
+                    <Select.Trigger className="flex h-7 items-center gap-1 rounded-lg border-none bg-transparent px-2 text-[12px] text-muted shadow-none transition-colors hover:bg-muted hover:text-foreground">
                       <Select.Value>{modelLabel}</Select.Value>
                       <Select.Indicator />
                     </Select.Trigger>

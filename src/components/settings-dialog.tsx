@@ -220,7 +220,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
     <Modal state={state}>
       <Modal.Backdrop isDismissable />
       <Modal.Container size="lg" className="nodrag max-h-[80vh] w-[720px]">
-        <Modal.Dialog className="flex max-h-[80vh] flex-col overflow-hidden rounded-2xl border border-border bg-card">
+        <Modal.Dialog className="flex max-h-[80vh] flex-col overflow-hidden rounded-2xl border border-border bg-surface">
           {/* Header */}
           <Modal.Header>
             <Modal.Heading>Settings</Modal.Heading>
@@ -318,7 +318,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
 
           {/* Footer */}
           <Modal.Footer className="flex items-center justify-between">
-            <p className="text-[11px] text-muted-foreground/60">
+            <p className="text-[11px] text-muted/60">
               Saved to ~/.visagent/config.json
             </p>
             <div className="flex gap-2">

@@ -121,7 +121,7 @@ export function AccountsTab({
           </p>
         )}
         {oauthError && (
-          <p className="mt-1 text-[11px] text-destructive">
+          <p className="mt-1 text-[11px] text-danger">
             {oauthError}
           </p>
         )}
@@ -163,7 +163,7 @@ function Field({
         )}
       </div>
       {hint && (
-        <p className="mb-2 text-[12px] text-muted-foreground">{hint}</p>
+        <p className="mb-2 text-[12px] text-muted">{hint}</p>
       )}
       {children}
     </div>
@@ -182,7 +182,7 @@ function EnvKeyHint({
   if (!envAvailable) return null;
   if (hasConfigKey) {
     return (
-      <p className="mt-1.5 text-[11px] text-muted-foreground">
+      <p className="mt-1.5 text-[11px] text-muted">
         Config key takes priority over env var
       </p>
     );

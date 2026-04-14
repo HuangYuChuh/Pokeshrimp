@@ -34,7 +34,7 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
   return (
     <aside
       className={cn(
-        "flex h-screen shrink-0 flex-col border-l border-border bg-sidebar overflow-hidden transition-all duration-200",
+        "flex h-screen shrink-0 flex-col border-l border-border bg-surface-secondary overflow-hidden transition-all duration-200",
         open ? "w-[380px] min-w-[380px]" : "w-0 min-w-0 border-l-0",
       )}
     >
@@ -210,7 +210,7 @@ function PreviewContent({
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 p-4">
         <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
-          <Music size={15} strokeWidth={1.5} className="h-10 w-10 text-muted-foreground" />
+          <Music size={15} strokeWidth={1.5} className="h-10 w-10 text-muted" />
         </div>
         <audio
           key={content.url}
@@ -240,7 +240,7 @@ function PreviewContent({
           >
             <ZoomOut size={15} strokeWidth={1.5} />
           </Button>
-          <span className="min-w-[3.5rem] text-center text-[12px] tabular-nums text-muted-foreground">
+          <span className="min-w-[3.5rem] text-center text-[12px] tabular-nums text-muted">
             {Math.round(zoom * 100)}%
           </span>
           <Button
@@ -279,7 +279,7 @@ function PreviewContent({
           <div className="flex flex-1 overflow-hidden">
             <div className="flex flex-1 items-center justify-center overflow-hidden border-r border-border p-2">
               <div className="flex flex-col items-center gap-1">
-                <span className="text-[11px] font-medium text-muted-foreground">Before</span>
+                <span className="text-[11px] font-medium text-muted">Before</span>
                 <img
                   src={previousPreview!.url}
                   alt="Before"
@@ -290,7 +290,7 @@ function PreviewContent({
             </div>
             <div className="flex flex-1 items-center justify-center overflow-hidden p-2">
               <div className="flex flex-col items-center gap-1">
-                <span className="text-[11px] font-medium text-muted-foreground">After</span>
+                <span className="text-[11px] font-medium text-muted">After</span>
                 <img
                   src={content.url}
                   alt="After"
@@ -359,7 +359,7 @@ function PreviewContent({
 
   // Empty state
   return (
-    <div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
+    <div className="flex h-full items-center justify-center text-[13px] text-muted">
       Generated content will appear here
     </div>
   );
@@ -376,7 +376,7 @@ function EditorContent({
 }) {
   return (
     <div className="flex h-full flex-col p-4">
-      <label className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+      <label className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted">
         Parameters
       </label>
       <TextArea
@@ -400,7 +400,7 @@ function OutputContent({
 }) {
   if (files.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-[13px] text-muted-foreground">
+      <div className="flex h-full items-center justify-center text-[13px] text-muted">
         Output files will appear here
       </div>
     );

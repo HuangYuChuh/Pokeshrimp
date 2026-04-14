@@ -54,7 +54,7 @@ export function ToolCard({ invocation }: ToolCardProps) {
           </Chip>
           <Card.Title className="text-[12px] font-medium">{label}</Card.Title>
           {hasArgs && (
-            <span className="max-w-[200px] truncate text-[12px] text-muted-foreground opacity-50">
+            <span className="max-w-[200px] truncate text-[12px] text-muted opacity-50">
               {(() => {
                 const entries = Object.entries(
                   invocation.args as Record<string, unknown>
@@ -78,10 +78,10 @@ export function ToolCard({ invocation }: ToolCardProps) {
         </Card.Header>
 
         {expanded && (
-          <Card.Content className="max-h-[300px] overflow-y-auto px-3 pb-3 pt-0 font-mono text-[11px] leading-relaxed text-muted-foreground">
+          <Card.Content className="max-h-[300px] overflow-y-auto px-3 pb-3 pt-0 font-mono text-[11px] leading-relaxed text-muted">
             {hasArgs && (
               <>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted/50">
                   Input
                 </div>
                 <pre className="mb-3 whitespace-pre-wrap break-all">
@@ -91,7 +91,7 @@ export function ToolCard({ invocation }: ToolCardProps) {
             )}
             {hasResult && (
               <>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted/50">
                   Result
                 </div>
                 <pre className="whitespace-pre-wrap break-all">

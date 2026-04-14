@@ -40,12 +40,12 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
   }
 
   if (error) {
-    return <p className="text-[13px] text-destructive">{error}</p>;
+    return <p className="text-[13px] text-danger">{error}</p>;
   }
 
   if (tools.length === 0) {
     return (
-      <p className="text-[13px] text-muted-foreground">
+      <p className="text-[13px] text-muted">
         No CLI tools required by installed skills.
       </p>
     );
@@ -77,7 +77,7 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
                   {tool.status === "available" ? "Available" : "Not installed"}
                 </span>
               </div>
-              <p className="mt-0.5 text-[12px] text-muted-foreground">
+              <p className="mt-0.5 text-[12px] text-muted">
                 Used by: {tool.skills.join(", ")}
               </p>
             </div>

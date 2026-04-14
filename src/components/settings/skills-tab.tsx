@@ -209,7 +209,7 @@ export function SkillsTab({ active }: SkillsTabProps) {
             className={cn(
               "px-3 py-2 text-[13px] font-medium",
               toast.isError
-                ? "text-destructive"
+                ? "text-danger"
                 : "text-foreground",
             )}
           >
@@ -259,19 +259,19 @@ function SkillCard({
               <ChevronDown
                 size={14}
                 strokeWidth={1.5}
-                className="shrink-0 text-muted-foreground"
+                className="shrink-0 text-muted"
               />
             ) : (
               <ChevronRight
                 size={14}
                 strokeWidth={1.5}
-                className="shrink-0 text-muted-foreground"
+                className="shrink-0 text-muted"
               />
             )}
             <Puzzle
               size={14}
               strokeWidth={1.5}
-              className="shrink-0 text-muted-foreground"
+              className="shrink-0 text-muted"
             />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
@@ -283,7 +283,7 @@ function SkillCard({
                 </Chip>
               </div>
               {skill.description && (
-                <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                <p className="mt-0.5 truncate text-[12px] text-muted">
                   {skill.description}
                 </p>
               )}
@@ -331,16 +331,16 @@ function SkillCard({
                         <span className="font-mono font-medium text-foreground">
                           {param.name}
                         </span>
-                        <span className="ml-1.5 text-muted-foreground">
+                        <span className="ml-1.5 text-muted">
                           ({param.type})
                         </span>
                         {param.description && (
-                          <span className="ml-1.5 text-muted-foreground">
+                          <span className="ml-1.5 text-muted">
                             — {param.description}
                           </span>
                         )}
                         {param.default !== undefined && (
-                          <span className="ml-1.5 text-muted-foreground/60">
+                          <span className="ml-1.5 text-muted/60">
                             default: {param.default}
                           </span>
                         )}
@@ -359,7 +359,7 @@ function SkillCard({
                           {output.type}
                         </span>
                         {output.description && (
-                          <span className="ml-1.5 text-muted-foreground">
+                          <span className="ml-1.5 text-muted">
                             — {output.description}
                           </span>
                         )}
@@ -372,7 +372,7 @@ function SkillCard({
               {skill.requiredTools.length === 0 &&
                 skill.inputParams.length === 0 &&
                 skill.outputs.length === 0 && (
-                  <p className="text-[12px] text-muted-foreground">
+                  <p className="text-[12px] text-muted">
                     No additional details available for this skill.
                   </p>
                 )}
@@ -412,7 +412,7 @@ function DetailSection({
 }) {
   return (
     <div>
-      <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
+      <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted/60">
         {label}
       </p>
       {children}
@@ -426,12 +426,12 @@ function EmptyState() {
       <Puzzle
         size={32}
         strokeWidth={1}
-        className="mb-3 text-muted-foreground/40"
+        className="mb-3 text-muted/40"
       />
-      <p className="text-[13px] font-medium text-muted-foreground">
+      <p className="text-[13px] font-medium text-muted">
         No skills installed
       </p>
-      <p className="mt-1 text-[12px] text-muted-foreground/60">
+      <p className="mt-1 text-[12px] text-muted/60">
         Drag a .skill.md file onto the app or click Import.
       </p>
     </div>

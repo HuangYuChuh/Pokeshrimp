@@ -415,7 +415,7 @@ export function ChatPanel({
               <h1 className="text-[28px] font-semibold tracking-tight text-foreground">
                 What would you like to create?
               </h1>
-              <p className="mt-3 text-[15px] text-muted-foreground">
+              <p className="mt-3 text-[15px] text-muted">
                 Describe what you want to create, and leave the rest to me
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
@@ -463,7 +463,7 @@ export function ChatPanel({
                       {sessionSummary.lastActiveAt &&
                         ` \u00B7 Last active ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
                     </Card.Description>
-                    <div className="mt-2 space-y-1 text-[13px] leading-relaxed text-muted-foreground">
+                    <div className="mt-2 space-y-1 text-[13px] leading-relaxed text-muted">
                       {sessionSummary.summary.split("\n").map((line, i) => (
                         <p key={i}>{line}</p>
                       ))}
@@ -513,8 +513,8 @@ export function ChatPanel({
                 )}
 
               {error && (
-                <Card variant="default" className="border-destructive/20 bg-destructive/5">
-                  <Card.Content className="px-4 py-3 text-[13px] text-destructive">
+                <Card variant="default" className="border-danger/20 bg-danger/5">
+                  <Card.Content className="px-4 py-3 text-[13px] text-danger">
                     {error.message || "Something went wrong"}
                   </Card.Content>
                 </Card>

@@ -72,7 +72,7 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex h-full shrink-0 flex-col overflow-hidden bg-sidebar transition-all duration-200",
+        "flex h-full shrink-0 flex-col overflow-hidden bg-surface-secondary transition-all duration-200",
         open ? "w-[260px]" : "w-0",
       )}
     >
@@ -97,7 +97,7 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
 
       {/* Recents label */}
       <div className="px-5 pb-2">
-        <span className="whitespace-nowrap text-[11px] font-medium tracking-wide text-muted-foreground/60">
+        <span className="whitespace-nowrap text-[11px] font-medium tracking-wide text-muted/60">
           Recents
         </span>
       </div>

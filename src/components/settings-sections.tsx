@@ -101,7 +101,7 @@ export function McpServersSection({
         <Accordion.Panel>
           <Accordion.Body className="mt-2 space-y-3">
             {entries.length === 0 && !adding && (
-              <p className="text-[12px] text-muted-foreground">
+              <p className="text-[12px] text-muted">
                 No MCP servers configured.
               </p>
             )}
@@ -111,12 +111,12 @@ export function McpServersSection({
                   <span
                     className={cn(
                       "h-2 w-2 shrink-0 rounded-full",
-                      server.enabled ? "bg-green-400" : "bg-muted-foreground/40",
+                      server.enabled ? "bg-green-400" : "bg-muted/40",
                     )}
                   />
                   <div className="min-w-0 flex-1">
                     <span className="text-[13px] font-medium">{name}</span>
-                    <p className="truncate text-[12px] font-mono text-muted-foreground">
+                    <p className="truncate text-[12px] font-mono text-muted">
                       {server.command} {server.args.join(" ")}
                     </p>
                   </div>
@@ -308,7 +308,7 @@ export function HooksSection({
         <Accordion.Panel>
           <Accordion.Body className="mt-2 space-y-3">
             {allEvents.size === 0 && !adding && (
-              <p className="text-[12px] text-muted-foreground">
+              <p className="text-[12px] text-muted">
                 No hooks configured.
               </p>
             )}
@@ -324,7 +324,7 @@ export function HooksSection({
                         convention
                       </Chip>
                     </div>
-                    <p className="text-[12px] font-mono text-muted-foreground">
+                    <p className="text-[12px] font-mono text-muted">
                       .visagent/hooks/{event}
                     </p>
                   </div>
@@ -341,10 +341,10 @@ export function HooksSection({
                       <div className="flex items-center gap-2">
                         <span className="text-[13px] font-medium">{event}</span>
                       </div>
-                      <p className="truncate text-[12px] font-mono text-muted-foreground">
+                      <p className="truncate text-[12px] font-mono text-muted">
                         {entry.command}
                       </p>
-                      <div className="mt-0.5 flex gap-3 text-[11px] text-muted-foreground">
+                      <div className="mt-0.5 flex gap-3 text-[11px] text-muted">
                         <span>timeout: {entry.timeout}ms</span>
                         {entry.matcher && <span>matcher: {entry.matcher}</span>}
                       </div>
@@ -442,7 +442,7 @@ export function HooksSection({
               </Button>
             )}
 
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[11px] text-muted">
               See docs/hook-events.md for event reference.
             </p>
           </Accordion.Body>
@@ -501,7 +501,7 @@ function PatternList({
             {p}
             <button
               type="button"
-              className="ml-1 text-muted-foreground transition-colors hover:text-destructive"
+              className="ml-1 text-muted transition-colors hover:text-danger"
               onClick={() => handleRemove(i)}
             >
               <X size={11} strokeWidth={2} />

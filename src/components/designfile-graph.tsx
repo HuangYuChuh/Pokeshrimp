@@ -135,7 +135,7 @@ export function DesignfileGraph() {
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center px-4 text-center text-[13px] text-muted-foreground">
+      <div className="flex h-full items-center justify-center px-4 text-center text-[13px] text-muted">
         {error}
       </div>
     );
@@ -150,12 +150,12 @@ export function DesignfileGraph() {
           {data.brand}
         </h2>
         {data.description && (
-          <p className="mb-3 text-[12px] text-muted-foreground">
+          <p className="mb-3 text-[12px] text-muted">
             {data.description}
           </p>
         )}
         {data.cycle && (
-          <div className="mb-3 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-[12px] text-destructive">
+          <div className="mb-3 rounded-lg border border-danger/50 bg-danger/10 px-3 py-2 text-[12px] text-danger">
             Cycle detected: {data.cycle}
           </div>
         )}
@@ -218,7 +218,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
 
   if (assets.length === 0) {
     return (
-      <div className="text-[13px] text-muted-foreground">
+      <div className="text-[13px] text-muted">
         No assets defined.
       </div>
     );
@@ -303,8 +303,8 @@ function AssetCard({
       <button
         type="button"
         className={cn(
-          "flex h-full w-full items-center gap-2 rounded-lg border border-border bg-card px-3 py-2",
-          "transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-ring",
+          "flex h-full w-full items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2",
+          "transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-focus",
         )}
         title={`${asset.name} (${asset.skill}) — ${STATUS_LABEL[asset.status]}`}
       >
