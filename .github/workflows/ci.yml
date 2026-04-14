@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -37,11 +39,9 @@ jobs:
       - name: Run tests with coverage
         run: npx vitest run --coverage
 
-      - name: Lint commit message
+      - name: Lint commit messages
         if: github.event_name == 'pull_request'
-        uses: wagoid/commitlint-github-action@v6
-        with:
-          configFile: .commitlintrc.json
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.sha }}
 
   build:
     name: Build

@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { AppProvider, useAppDispatch, useAppState } from "@/lib/store";
 import { Sidebar } from "@/components/sidebar";
-import { ChatPanel } from "@/components/chat-panel";
+import { ChatPanel } from "@/components/chat/chat-panel";
 import { PreviewPanel } from "@/components/preview-panel";
 import { SettingsDialog, type SettingsTabId } from "@/components/settings-dialog";
 import { SkillDropOverlay } from "@/components/skill-drop-overlay";

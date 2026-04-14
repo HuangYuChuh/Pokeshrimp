@@ -22,7 +22,7 @@ const markdownComponents: Components = {
       );
     }
     return (
-      <pre className="overflow-x-auto rounded-lg bg-zinc-900 p-4 text-[13px]">
+      <pre className="overflow-x-auto rounded-lg bg-surface p-4 text-[13px]">
         <code className={className} {...props}>
           {children}
         </code>

@@ -67,8 +67,8 @@ function computeDepths(assets: AssetOverview[]): Map<string, number> {
 
 const STATUS_COLOR: Record<AssetStatus, string> = {
   clean: "bg-green-400",
-  dirty: "bg-yellow-400",
-  "never-built": "bg-zinc-500",
+  dirty: "bg-warning",
+  "never-built": "bg-muted",
 };
 
 const STATUS_LABEL: Record<AssetStatus, string> = {

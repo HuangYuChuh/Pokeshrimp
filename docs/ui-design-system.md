@@ -1,6 +1,6 @@
 # Pokeshrimp — UI/UX Design System
 
-> Last updated: 2026-04-12 | Status: Active reference
+> Last updated: 2026-04-14 | Status: Active reference
 
 ---
 
@@ -22,25 +22,25 @@ Aligned with the product philosophy in docs/00:
 
 Built on CSS custom properties using oklch color space. Defined in `src/app/globals.css`.
 
-### Semantic tokens
+### Semantic tokens (HeroUI v3)
 
-| Token | Dark | Light | Usage |
-|---|---|---|---|
-| `--background` | `oklch(0.14 0.005 60)` | `oklch(1 0 0)` | Page background |
-| `--foreground` | `oklch(0.93 0.005 60)` | `oklch(0.145 0 0)` | Primary text |
-| `--card` | `oklch(0.19 0.005 60)` | `oklch(1 0 0)` | Card surfaces (input area, tool cards) |
-| `--muted` | `oklch(0.22 0.005 60)` | `oklch(0.97 0 0)` | Subtle backgrounds (hover, badges) |
-| `--muted-foreground` | `oklch(0.60 ...)` | `oklch(0.556 ...)` | Secondary text, hints, timestamps |
-| `--primary` | `oklch(0.93 ...)` | `oklch(0.205 ...)` | Primary actions, user message bubbles |
-| `--destructive` | `oklch(0.704 0.191 22)` | `oklch(0.577 0.245 27)` | Errors, delete actions |
-| `--border` | `oklch(1 0 0 / 8%)` | `oklch(0.922 0 0)` | Borders, separators |
-| `--sidebar` | `oklch(0.16 ...)` | `oklch(0.985 ...)` | Sidebar background |
+| Token | Tailwind class | Usage |
+|---|---|---|
+| `--background` | `bg-background` | Page background |
+| `--foreground` | `text-foreground` | Primary text |
+| `--surface` | `bg-surface` | Card surfaces (input area, tool cards, settings dialog) |
+| `--surface-secondary` | `bg-surface-secondary` | Sidebar, secondary panels |
+| `--muted` | `text-muted`, `bg-muted` | Secondary text, subtle backgrounds |
+| `--primary` | `bg-primary`, `text-primary` | Primary actions, user message bubbles |
+| `--danger` | `text-danger`, `bg-danger` | Errors, delete actions, destructive |
+| `--border` | `border-border` | Borders, separators |
+| `--focus` | `ring-focus` | Focus rings |
 
 ### Rules
 - Never use hardcoded hex/rgb colors in components. Always use semantic tokens via Tailwind: `bg-background`, `text-foreground`, `border-border`, etc.
-- `--card` is for elevated surfaces (input box, tool cards, settings dialog). Don't use `--background` for cards.
-- `--muted` is for subtle interactive states (hover backgrounds, disabled surfaces). `--muted-foreground` is for secondary text.
-- Destructive actions (delete, deny) always use `--destructive` color family.
+- `--surface` is for elevated surfaces (input box, tool cards, settings dialog). Don't use `--background` for cards.
+- `--muted` is for secondary text and subtle interactive states (hover backgrounds, disabled surfaces).
+- Destructive actions (delete, deny) always use `--danger` color family (not `--destructive`).
 - Green for success: use `text-green-400` / `text-green-500` (not a semantic token — these are rare enough to use Tailwind colors directly).
 
 ---
@@ -53,7 +53,7 @@ Built on CSS custom properties using oklch color space. Defined in `src/app/glob
 | Section heading | 15px | 600 | 1.4 | `text-[15px] font-semibold` |
 | Body text | 14px | 400 | 1.75 (28px) | `text-[14px] leading-7` |
 | Small text | 13px | 400-500 | 1.4 | `text-[13px]` |
-| Caption / hint | 12px | 400 | 1.4 | `text-[12px] text-muted-foreground` |
+| Caption / hint | 12px | 400 | 1.4 | `text-[12px] text-muted` |
 | Micro label | 11px | 500 | 1.3 | `text-[11px] font-medium` |
 | Code (inline) | 13px | 400 | — | `font-mono text-[13px]` |
 | Code (block) | 13px | 400 | relaxed | `font-mono text-[13px] leading-relaxed` |
@@ -110,7 +110,7 @@ Built on CSS custom properties using oklch color space. Defined in `src/app/glob
 | `primary` | Primary action (Send, Save) | Solid background, white text |
 | `outline` | Secondary action (Cancel, Always Allow) | Border, transparent background |
 | `ghost` | Tertiary action (sidebar items, toggles) | No border, hover background |
-| `destructive` | Dangerous action (Deny, Delete) | Red border/text |
+| `danger` | Dangerous action (Deny, Delete) | Red border/text |
 
 Size: `size="sm"` for most UI. `size="icon"` for icon-only buttons (close, toggle). Always add `type="button"` to prevent form submission.
 
@@ -120,12 +120,12 @@ Two patterns:
 1. **Tool invocation card** — shows tool name, status dot, expandable input/output
 2. **Approval card** — shows command, risk level, action buttons
 
-Both use: `rounded-xl border border-border bg-card px-3 py-2` base, expandable content below.
+Both use: `rounded-xl border border-border bg-surface px-3 py-2` base, expandable content below.
 
 ### Input areas
 
 The chat input follows a unique pattern:
-- Outer: `rounded-2xl border border-border bg-card shadow-sm`
+- Outer: `rounded-2xl border border-border bg-surface shadow-sm`
 - Inner textarea: no border, transparent background, auto-resize
 - Bottom row: model selector (left), send button (right)
 - Slash command popup: `absolute bottom-full` positioned above
@@ -136,7 +136,7 @@ Settings dialog pattern: full-screen overlay (`bg-black/60`) + centered card (`r
 
 ### Sidebar items
 
-Session list items: `rounded-lg px-3 py-1.5 text-[13px]`. Active state: `bg-sidebar-accent`. Hover: `bg-sidebar-accent/50`. Delete button visible on group-hover.
+Session list items: `rounded-lg px-3 py-1.5 text-[13px]`. Active state: `bg-surface-secondary`. Hover: `bg-surface-secondary/50`. Delete button visible on group-hover.
 
 ---
 
@@ -175,10 +175,10 @@ Session list items: `rounded-lg px-3 py-1.5 text-[13px]`. Active state: `bg-side
 - All components are `"use client"` unless explicitly server components
 - Custom hooks in `src/hooks/`: `use-keyboard-shortcuts.ts`, `use-mobile.ts`
 
-### shadcn/ui components
-- Live in `src/components/ui/`
-- Never modify shadcn components directly — override via className props or wrapper components
-- Available components: button, input, textarea, scroll-area, skeleton, tabs, dropdown-menu, dialog, separator, badge, tooltip, sheet, sidebar, avatar, command
+### HeroUI components
+- Use `@heroui/react` components directly — no wrapper layer needed
+- Semantic color tokens: `bg-surface`, `text-muted`, `text-danger`, `bg-surface-secondary`, `ring-focus`
+- Custom components live in `src/components/` (kebab-case files, PascalCase exports)
 
 ### CSS
 - Tailwind utility classes only. No custom CSS except in `globals.css` for app-level resets.
@@ -197,11 +197,11 @@ Session list items: `rounded-lg px-3 py-1.5 text-[13px]`. Active state: `bg-side
 Every new component must satisfy:
 
 - [ ] Interactive elements use `<button>` (not `<div onClick>`) with `type="button"`
-- [ ] Focus states visible: `focus:ring-1 focus:ring-ring` or `focus:outline-none focus-visible:ring-2`
+- [ ] Focus states visible: `focus:ring-1 focus:ring-focus` or `focus:outline-none focus-visible:ring-2`
 - [ ] Keyboard navigable: Enter/Space to activate, Escape to close
 - [ ] Color is not the only indicator (add icons or text alongside color-coded status)
 - [ ] Images have `alt` text (even if empty for decorative images: `alt=""`)
-- [ ] Sufficient contrast: `--muted-foreground` on `--background` passes WCAG AA
+- [ ] Sufficient contrast: `--muted` text on `--background` passes WCAG AA
 
 ---
 
