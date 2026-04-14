@@ -141,7 +141,7 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
                 Deny
               </Button>
             </div>
-            {error && <p className="mt-1.5 text-[11px] text-red-500">{error}</p>}
+            {error && <p className="mt-1.5 text-[11px] text-danger">{error}</p>}
           </div>
         ) : (
           <div

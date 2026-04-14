@@ -55,7 +55,7 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
             <span
               className={cn(
                 "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                tool.status === "available" ? "bg-green-400" : "bg-red-500",
+                tool.status === "available" ? "bg-green-400" : "bg-danger",
               )}
               aria-hidden="true"
             />
@@ -65,7 +65,7 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
                 <span
                   className={cn(
                     "text-[11px]",
-                    tool.status === "available" ? "text-green-400" : "text-red-500",
+                    tool.status === "available" ? "text-green-400" : "text-danger",
                   )}
                 >
                   {tool.status === "available" ? "Available" : "Not installed"}
