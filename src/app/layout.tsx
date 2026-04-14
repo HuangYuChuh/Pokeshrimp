@@ -10,17 +10,9 @@ export const metadata: Metadata = {
   description: "AI-powered image & video creative workstation",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="zh-CN"
-      className={cn("dark font-sans", geist.variable)}
-      suppressHydrationWarning
-    >
+    <html lang="zh-CN" className={cn("dark font-sans", geist.variable)} suppressHydrationWarning>
       <body className="h-full overflow-hidden bg-background text-foreground">
         {/* Restore theme preference before first paint to prevent flash */}
         <script

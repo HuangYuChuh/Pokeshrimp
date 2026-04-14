@@ -4,12 +4,7 @@ export type {
   PermissionBehavior,
   PermissionResult,
 } from "./types";
-export {
-  matchCommandPattern,
-  classifyCommand,
-  assessRisk,
-  type CommandDecision,
-} from "./checker";
+export { matchCommandPattern, classifyCommand, assessRisk, type CommandDecision } from "./checker";
 export type {
   ApprovalChannel,
   ApprovalRequest,

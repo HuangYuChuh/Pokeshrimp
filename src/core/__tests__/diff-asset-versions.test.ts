@@ -25,9 +25,10 @@ afterEach(() => {
  * Set up a project dir with a designfile and two asset versions
  * recorded in .visagent/.history.
  */
-function setupProject(opts?: {
-  skipSecondVersion?: boolean;
-}): { cwd: string; context: ToolContext } {
+function setupProject(opts?: { skipSecondVersion?: boolean }): {
+  cwd: string;
+  context: ToolContext;
+} {
   const cwd = makeTmpDir();
   const visagentDir = path.join(cwd, ".visagent");
   fs.mkdirSync(visagentDir, { recursive: true });
@@ -106,10 +107,7 @@ describe("diff_asset_versions tool", () => {
     const hashA = versions[1].hash; // older
     const hashB = versions[0].hash; // newer
 
-    const result = await diffAssetVersionsTool.call(
-      { asset: "logo", hashA, hashB },
-      context,
-    );
+    const result = await diffAssetVersionsTool.call({ asset: "logo", hashA, hashB }, context);
 
     expect(result.success).toBe(true);
     const data = result.data as Record<string, unknown>;
@@ -139,10 +137,7 @@ describe("diff_asset_versions tool", () => {
       "brand: TestBrand\nassets:\n  banner:\n    skill: /banner-gen\n    params: {}\n",
     );
 
-    const result = await diffAssetVersionsTool.call(
-      { asset: "banner" },
-      { cwd },
-    );
+    const result = await diffAssetVersionsTool.call({ asset: "banner" }, { cwd });
 
     expect(result.success).toBe(false);
     expect(result.error).toContain("No recorded versions");
@@ -163,10 +158,7 @@ describe("diff_asset_versions tool", () => {
   it("returns error when no designfile exists", async () => {
     const cwd = makeTmpDir();
 
-    const result = await diffAssetVersionsTool.call(
-      { asset: "logo" },
-      { cwd },
-    );
+    const result = await diffAssetVersionsTool.call({ asset: "logo" }, { cwd });
 
     expect(result.success).toBe(false);
     expect(result.error).toContain("No designfile.yaml");
@@ -196,10 +188,7 @@ describe("diff_asset_versions tool", () => {
       outputFiles: [],
     });
 
-    const result = await diffAssetVersionsTool.call(
-      { asset: "icon" },
-      { cwd },
-    );
+    const result = await diffAssetVersionsTool.call({ asset: "icon" }, { cwd });
 
     expect(result.success).toBe(true);
     const data = result.data as Record<string, unknown>;

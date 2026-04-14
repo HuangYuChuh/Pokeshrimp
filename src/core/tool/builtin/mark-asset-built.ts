@@ -4,18 +4,9 @@ import { DesignfileEngine } from "@/core/designfile";
 
 const inputSchema = z.object({
   asset: z.string().describe("The asset name that was just built"),
-  params: z
-    .record(z.unknown())
-    .default({})
-    .describe("The params that were used for this build"),
-  outputFiles: z
-    .array(z.string())
-    .default([])
-    .describe("Paths of generated output files"),
-  command: z
-    .string()
-    .optional()
-    .describe("The shell command that was executed (if applicable)"),
+  params: z.record(z.unknown()).default({}).describe("The params that were used for this build"),
+  outputFiles: z.array(z.string()).default([]).describe("Paths of generated output files"),
+  command: z.string().optional().describe("The shell command that was executed (if applicable)"),
 });
 
 /**
@@ -42,9 +33,7 @@ export const markAssetBuiltTool: Tool = {
   },
 
   async call(input: unknown, context: ToolContext): Promise<ToolResult> {
-    const { asset, params, outputFiles, command } = input as z.infer<
-      typeof inputSchema
-    >;
+    const { asset, params, outputFiles, command } = input as z.infer<typeof inputSchema>;
     const engine = new DesignfileEngine(context.cwd);
 
     if (!engine.isLoaded) {

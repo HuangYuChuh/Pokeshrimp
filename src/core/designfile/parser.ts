@@ -23,10 +23,7 @@ export function parseDesignfile(filePath: string): Designfile | null {
 
   const result = DesignfileSchema.safeParse(parsed);
   if (!result.success) {
-    console.warn(
-      `[designfile] Validation failed for ${filePath}:`,
-      result.error.format(),
-    );
+    console.warn(`[designfile] Validation failed for ${filePath}:`, result.error.format());
     return null;
   }
 

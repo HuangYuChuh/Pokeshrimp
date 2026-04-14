@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useReducer,
-  type ReactNode,
-  type Dispatch,
-} from "react";
+import { createContext, useContext, useReducer, type ReactNode, type Dispatch } from "react";
 
 // --- Types ---
 
@@ -88,8 +82,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         sessions: filtered,
-        currentSessionId:
-          state.currentSessionId === action.id ? null : state.currentSessionId,
+        currentSessionId: state.currentSessionId === action.id ? null : state.currentSessionId,
       };
     }
     case "SET_PREVIEW_TAB":
@@ -99,8 +92,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         previewContent: action.content,
         previousPreview:
-          state.previewContent.type !== "none" &&
-          state.previewContent.url !== action.content.url
+          state.previewContent.type !== "none" && state.previewContent.url !== action.content.url
             ? state.previewContent
             : state.previousPreview,
       };
@@ -129,9 +121,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppStateContext.Provider value={state}>
-      <AppDispatchContext.Provider value={dispatch}>
-        {children}
-      </AppDispatchContext.Provider>
+      <AppDispatchContext.Provider value={dispatch}>{children}</AppDispatchContext.Provider>
     </AppStateContext.Provider>
   );
 }

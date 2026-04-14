@@ -127,7 +127,7 @@ function kahnSort(
   for (const n of nodes) inDegree.set(n, 0);
 
   for (const [, deps] of upstream) {
-    for (const dep of deps) {
+    for (const _dep of deps) {
       // dep → node edge: node depends on dep
       // But we need downstream edges for in-degree.
       // Actually: in the DAG, an edge from A→B means "B depends on A".

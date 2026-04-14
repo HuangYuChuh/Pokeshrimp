@@ -49,10 +49,7 @@ function createWindow() {
   });
 }
 
-function waitForServer(
-  port: number,
-  timeoutMs: number = 30000
-): Promise<void> {
+function waitForServer(port: number, timeoutMs: number = 30000): Promise<void> {
   const start = Date.now();
   return new Promise((resolve, reject) => {
     const check = () => {
@@ -98,12 +95,7 @@ function startNextServer(): Promise<void> {
     return waitForServer(NEXT_PORT);
   }
 
-  const serverPath = path.join(
-    app.getAppPath(),
-    ".next",
-    "standalone",
-    "server.js"
-  );
+  const serverPath = path.join(app.getAppPath(), ".next", "standalone", "server.js");
 
   nextServer = spawn(process.execPath, [serverPath], {
     env: { ...process.env, PORT: String(NEXT_PORT), HOSTNAME: "localhost" },
@@ -126,9 +118,7 @@ function startNextServer(): Promise<void> {
 }
 
 app.whenReady().then(async () => {
-  ipcMain.handle("auth:open-browser", (_event, url: string) =>
-    openExternalAuth(url)
-  );
+  ipcMain.handle("auth:open-browser", (_event, url: string) => openExternalAuth(url));
   ipcMain.handle("auth:openai-oauth", () => startOpenAIOAuth());
   ipcMain.handle("auth:get-valid-token", async () => {
     const tokens = loadTokens("openai");

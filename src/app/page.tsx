@@ -9,7 +9,6 @@ import { SettingsDialog, type SettingsTabId } from "@/components/settings-dialog
 import { SkillDropOverlay } from "@/components/skill-drop-overlay";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { Chip } from "@heroui/react";
-import { cn } from "@/lib/utils";
 
 /* ---------------------------------------------------------------------------
  * Constants
@@ -257,11 +256,7 @@ function HomeInner() {
         {/* Drop result toast */}
         {dropToast && (
           <div className="fixed bottom-6 left-1/2 z-[200] -translate-x-1/2">
-            <Chip
-              size="lg"
-              color={dropToast.isError ? "danger" : "success"}
-              variant="primary"
-            >
+            <Chip size="lg" color={dropToast.isError ? "danger" : "success"} variant="primary">
               {dropToast.message}
             </Chip>
           </div>

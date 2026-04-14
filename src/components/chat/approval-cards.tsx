@@ -8,21 +8,14 @@ interface ApprovalCardsProps {
 }
 
 export function ApprovalCards({ data }: ApprovalCardsProps) {
-  const { requests, resolved } = useMemo(
-    () => parseApprovalEvents(data),
-    [data]
-  );
+  const { requests, resolved } = useMemo(() => parseApprovalEvents(data), [data]);
 
   if (requests.size === 0) return null;
 
   return (
     <>
       {[...requests.values()].map((req) => (
-        <ApprovalCard
-          key={req.id}
-          request={req}
-          resolved={resolved.get(req.id)}
-        />
+        <ApprovalCard key={req.id} request={req} resolved={resolved.get(req.id)} />
       ))}
     </>
   );

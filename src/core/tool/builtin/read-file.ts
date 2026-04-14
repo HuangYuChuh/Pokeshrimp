@@ -17,10 +17,7 @@ export const readFileTool: Tool = {
     return true;
   },
 
-  async checkPermissions(
-    _input: unknown,
-    _context: ToolContext,
-  ): Promise<PermissionResult> {
+  async checkPermissions(_input: unknown, _context: ToolContext): Promise<PermissionResult> {
     return { behavior: "allow" };
   },
 
@@ -28,7 +25,11 @@ export const readFileTool: Tool = {
     const { path: filePath } = input as z.infer<typeof inputSchema>;
     const resolved = path.resolve(context.cwd, filePath);
     if (resolved !== context.cwd && !resolved.startsWith(context.cwd + path.sep)) {
-      return { success: false, data: null, error: `Path "${filePath}" is outside the working directory` };
+      return {
+        success: false,
+        data: null,
+        error: `Path "${filePath}" is outside the working directory`,
+      };
     }
     try {
       const content = fs.readFileSync(resolved, "utf-8");

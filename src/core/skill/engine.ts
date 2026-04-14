@@ -77,9 +77,7 @@ export function parseSkillFile(filePath: string): Skill | null {
   }
 
   const requiredTools = Array.isArray(frontmatter.requiredTools)
-    ? (frontmatter.requiredTools as unknown[]).filter(
-        (t): t is string => typeof t === "string",
-      )
+    ? (frontmatter.requiredTools as unknown[]).filter((t): t is string => typeof t === "string")
     : [];
 
   const inputParams: SkillInputParam[] = Array.isArray(frontmatter.inputParams)

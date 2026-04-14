@@ -15,7 +15,7 @@ AI-powered image & video creative workstation — a CLI orchestrator for visual 
 
 - **Desktop**: Electron (pure shell)
 - **Frontend**: Next.js App Router + React 19 + TypeScript
-- **Styling**: shadcn/ui + Tailwind CSS v4
+- **Styling**: HeroUI v3 + Tailwind CSS v4
 - **LLM**: Vercel AI SDK (multi-model support)
 - **Agent**: Self-built AgentRuntime + Middleware Chain
 - **Database**: SQLite via better-sqlite3
@@ -27,7 +27,7 @@ AI-powered image & video creative workstation — a CLI orchestrator for visual 
 **AgentRuntime + Middleware Chain** — inspired by Claude Code (loop), DeerFlow (middleware), OpenClaw (CLI approval).
 
 - `src/core/agent/` — AgentRuntime (core loop), Middleware chain (5 built-in), Sub-agent
-- `src/core/tool/` — Tool interface, Registry, Executor, 10 builtin tools: `read_file`, `write_file`, `list_directory`, `run_command`, `read_skill`, `read_designfile`, `rebuild_asset`, `mark_asset_built` (registered at boot) + `spawn_agent` (registered after runtime init)
+- `src/core/tool/` — Tool interface, Registry, Executor, 12 builtin tools: `read_file`, `write_file`, `list_directory`, `run_command`, `read_skill`, `read_designfile`, `rebuild_asset`, `mark_asset_built`, `run_pipeline`, `list_asset_versions`, `diff_asset_versions`, `watch_designfile` (registered at boot) + `spawn_agent` (registered after runtime init)
 - `src/core/skill/` — Skill engine (.skill.md parsing + prompt injection)
 - `src/core/permission/` — CLI command approval (allow/deny/ask) with interactive approval channel
 - `src/core/config/` — Three-level config + Zod validation
@@ -80,16 +80,22 @@ npm run package      # Package as macOS desktop app
 1. Create a feature branch: `git checkout -b feat/description`
 2. Develop and commit (following commit convention below)
 3. Push branch and open PR via `gh pr create`
-4. CI runs automatically (TypeScript check + Next.js build + Electron build + commit lint)
+4. CI runs automatically (TypeScript + ESLint + Prettier + tests + build + commit lint)
 5. Review and merge
 
 **Branch naming**: `<type>/<short-description>` (e.g. `feat/tool-use-loop`, `fix/sidebar-overflow`, `refactor/core-config`)
 
 **CI checks** (must all pass before merge):
 - `npx tsc --noEmit` — TypeScript type check
+- `npm run lint` — ESLint check
+- `npm run format:check` — Prettier format check
 - `npm run build` — Next.js production build
 - `npm run build:electron` — Electron compilation
 - Commit message lint (Conventional Commits)
+
+**Pre-commit hooks** (via Husky + lint-staged):
+- ESLint + Prettier on staged `src/**/*.{ts,tsx}` files
+- Commit message validated by commitlint
 
 ## Git Commit Convention
 
@@ -99,12 +105,12 @@ Use **Conventional Commits** with scope:
 <type>(<scope>): <description>
 ```
 
-**Types**: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`
+**Types**: `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, `style`, `perf`, `ci`, `revert`
 
-**Scopes** (match project modules):
-- `core/tool`, `core/permission`, `core/hooks`, `core/config`, `core/mcp`, `core/skill`, `core/session`, `core/ai`, `core/designfile`
+**Scopes** (required, must be one of):
+- `core/tool`, `core/permission`, `core/hooks`, `core/config`, `core/mcp`, `core/skill`, `core/session`, `core/ai`, `core/agent`, `core`, `core/designfile`
 - `electron`, `ui`, `api`
-- Omit scope for cross-cutting changes
+- `architecture`, `conventions`, `ci`, `deps`
 
 **Examples**:
 ```
@@ -112,7 +118,7 @@ feat(core/tool): add unified Tool interface and registry
 fix(electron): auto-start Next.js dev server
 refactor(core): extract framework-agnostic core layer
 docs(architecture): add technical architecture document
-chore: update dependencies
+chore(deps): update dependencies
 ```
 
 **Rules**:

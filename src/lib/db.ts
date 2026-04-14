@@ -47,9 +47,7 @@ export async function getMessages(sessionId: string): Promise<Message[]> {
   return getManager().getMessages(sessionId);
 }
 
-export async function addToolCall(
-  params: Omit<ToolCall, "id" | "createdAt">,
-): Promise<ToolCall> {
+export async function addToolCall(params: Omit<ToolCall, "id" | "createdAt">): Promise<ToolCall> {
   return getManager().addToolCall(params);
 }
 

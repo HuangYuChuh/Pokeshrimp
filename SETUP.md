@@ -6,8 +6,8 @@ Get the app running from a fresh clone in 5 minutes.
 
 | Requirement | Version | Check |
 |---|---|---|
-| Node.js | 18+ | `node -v` |
-| npm | 9+ | `npm -v` |
+| Node.js | >=20.17 | `node -v` |
+| npm | >=10 | `npm -v` |
 | Git | any | `git -v` |
 
 Optional (for CLI tool testing):

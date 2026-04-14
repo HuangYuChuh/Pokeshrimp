@@ -17,10 +17,7 @@ export interface MCPServerTools {
 export class MCPClientManager {
   private clients = new Map<string, Client>();
 
-  async connectServer(
-    name: string,
-    config: MCPServerConnectConfig,
-  ): Promise<Client> {
+  async connectServer(name: string, config: MCPServerConnectConfig): Promise<Client> {
     if (this.clients.has(name)) {
       return this.clients.get(name)!;
     }

@@ -67,18 +67,14 @@ export class SessionManager {
     const id = this.uid();
     const now = new Date().toISOString();
     this.db
-      .prepare(
-        "INSERT INTO sessions (id, title, created_at, updated_at) VALUES (?, ?, ?, ?)",
-      )
+      .prepare("INSERT INTO sessions (id, title, created_at, updated_at) VALUES (?, ?, ?, ?)")
       .run(id, title, now, now);
     return { id, title, createdAt: now, updatedAt: now };
   }
 
   async listSessions(): Promise<Session[]> {
     const rows = this.db
-      .prepare(
-        "SELECT id, title, created_at, updated_at FROM sessions ORDER BY updated_at DESC",
-      )
+      .prepare("SELECT id, title, created_at, updated_at FROM sessions ORDER BY updated_at DESC")
       .all() as {
       id: string;
       title: string;
@@ -95,12 +91,8 @@ export class SessionManager {
 
   async getSession(id: string): Promise<Session | null> {
     const r = this.db
-      .prepare(
-        "SELECT id, title, created_at, updated_at FROM sessions WHERE id = ?",
-      )
-      .get(id) as
-      | { id: string; title: string; created_at: string; updated_at: string }
-      | undefined;
+      .prepare("SELECT id, title, created_at, updated_at FROM sessions WHERE id = ?")
+      .get(id) as { id: string; title: string; created_at: string; updated_at: string } | undefined;
     if (!r) return null;
     return {
       id: r.id,
@@ -124,11 +116,7 @@ export class SessionManager {
 
   // --- Messages ---
 
-  async addMessage(
-    sessionId: string,
-    role: string,
-    content: string,
-  ): Promise<Message> {
+  async addMessage(sessionId: string, role: string, content: string): Promise<Message> {
     const id = this.uid();
     const now = new Date().toISOString();
     this.db
@@ -168,9 +156,7 @@ export class SessionManager {
 
   // --- Tool Calls ---
 
-  async addToolCall(
-    params: Omit<ToolCall, "id" | "createdAt">,
-  ): Promise<ToolCall> {
+  async addToolCall(params: Omit<ToolCall, "id" | "createdAt">): Promise<ToolCall> {
     const id = this.uid();
     const now = new Date().toISOString();
     this.db
@@ -192,10 +178,7 @@ export class SessionManager {
     return { ...params, id, createdAt: now };
   }
 
-  async updateToolCall(
-    id: string,
-    updates: { result?: string; status?: string },
-  ): Promise<void> {
+  async updateToolCall(id: string, updates: { result?: string; status?: string }): Promise<void> {
     const sets: string[] = [];
     const vals: unknown[] = [];
     if (updates.result !== undefined) {
@@ -208,8 +191,6 @@ export class SessionManager {
     }
     if (sets.length === 0) return;
     vals.push(id);
-    this.db
-      .prepare(`UPDATE tool_calls SET ${sets.join(", ")} WHERE id = ?`)
-      .run(...vals);
+    this.db.prepare(`UPDATE tool_calls SET ${sets.join(", ")} WHERE id = ?`).run(...vals);
   }
 }

@@ -59,10 +59,7 @@ describe("runCreateSkill", () => {
   it("includes valid YAML frontmatter", () => {
     runCreateSkill("my-tool", tempDir);
 
-    const content = readFileSync(
-      join(tempDir, ".visagent", "skills", "my-tool.skill.md"),
-      "utf-8",
-    );
+    const content = readFileSync(join(tempDir, ".visagent", "skills", "my-tool.skill.md"), "utf-8");
     expect(content.startsWith("---\n")).toBe(true);
     expect(content).toContain("requiredTools:");
     expect(content).toContain("inputParams:");
@@ -72,10 +69,7 @@ describe("runCreateSkill", () => {
   it("includes body with usage instructions", () => {
     runCreateSkill("my-tool", tempDir);
 
-    const content = readFileSync(
-      join(tempDir, ".visagent", "skills", "my-tool.skill.md"),
-      "utf-8",
-    );
+    const content = readFileSync(join(tempDir, ".visagent", "skills", "my-tool.skill.md"), "utf-8");
     expect(content).toContain("## Usage");
     expect(content).toContain("{{input}}");
     expect(content).toContain("## Notes");
@@ -86,9 +80,7 @@ describe("runCreateSkill", () => {
     mkdirSync(skillsDir, { recursive: true });
     writeFileSync(join(skillsDir, "existing.skill.md"), "existing content");
 
-    expect(() => runCreateSkill("existing", tempDir)).toThrow(
-      "already exists",
-    );
+    expect(() => runCreateSkill("existing", tempDir)).toThrow("already exists");
   });
 
   it("does not overwrite existing file content", () => {

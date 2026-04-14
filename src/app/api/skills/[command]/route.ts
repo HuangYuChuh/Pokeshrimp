@@ -3,10 +3,7 @@ import fs from "fs";
 import path from "path";
 import { listSkills } from "@/lib/skill-engine";
 
-export async function DELETE(
-  _req: Request,
-  { params }: { params: Promise<{ command: string }> },
-) {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ command: string }> }) {
   const { command } = await params;
 
   const skills = listSkills();
@@ -35,10 +32,7 @@ export async function DELETE(
   try {
     fs.unlinkSync(fullPath);
   } catch {
-    return NextResponse.json(
-      { error: "Failed to delete skill file" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to delete skill file" }, { status: 500 });
   }
 
   return NextResponse.json({ deleted: command });

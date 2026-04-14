@@ -74,9 +74,7 @@ describe("runInit", () => {
   it("throws if .visagent already exists", () => {
     mkdirSync(join(tempDir, ".visagent"));
 
-    expect(() => runInit({ targetDir: tempDir })).toThrow(
-      ".visagent/ already exists",
-    );
+    expect(() => runInit({ targetDir: tempDir })).toThrow(".visagent/ already exists");
   });
 
   it("uses cwd when no targetDir provided", () => {

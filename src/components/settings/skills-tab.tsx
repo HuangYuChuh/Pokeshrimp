@@ -2,15 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Button, Skeleton, Chip, Card } from "@heroui/react";
-import {
-  ChevronDown,
-  ChevronRight,
-  Trash2,
-  Upload,
-  Puzzle,
-  Globe,
-  FolderOpen,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2, Upload, Puzzle, Globe, FolderOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /* ---------------------------------------------------------------------------
@@ -93,10 +85,7 @@ export function SkillsTab({ active }: SkillsTabProps) {
     async (command: string) => {
       setDeleting(command);
       try {
-        const res = await fetch(
-          `/api/skills/${encodeURIComponent(command)}`,
-          { method: "DELETE" },
-        );
+        const res = await fetch(`/api/skills/${encodeURIComponent(command)}`, { method: "DELETE" });
         const data = await res.json();
         if (res.ok) {
           setSkills((prev) => prev.filter((s) => s.command !== command));
@@ -159,11 +148,7 @@ export function SkillsTab({ active }: SkillsTabProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-[15px] font-semibold">Skills</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          onPress={handleImport}
-        >
+        <Button variant="outline" size="sm" onPress={handleImport}>
           <Upload size={13} strokeWidth={1.5} className="mr-1.5" />
           Import
         </Button>
@@ -208,9 +193,7 @@ export function SkillsTab({ active }: SkillsTabProps) {
           <Card.Content
             className={cn(
               "px-3 py-2 text-[13px] font-medium",
-              toast.isError
-                ? "text-destructive"
-                : "text-foreground",
+              toast.isError ? "text-danger" : "text-foreground",
             )}
           >
             {toast.message}
@@ -256,23 +239,11 @@ function SkillCard({
             className="flex flex-1 items-center gap-2 text-left"
           >
             {expanded ? (
-              <ChevronDown
-                size={14}
-                strokeWidth={1.5}
-                className="shrink-0 text-muted-foreground"
-              />
+              <ChevronDown size={14} strokeWidth={1.5} className="shrink-0 text-muted" />
             ) : (
-              <ChevronRight
-                size={14}
-                strokeWidth={1.5}
-                className="shrink-0 text-muted-foreground"
-              />
+              <ChevronRight size={14} strokeWidth={1.5} className="shrink-0 text-muted" />
             )}
-            <Puzzle
-              size={14}
-              strokeWidth={1.5}
-              className="shrink-0 text-muted-foreground"
-            />
+            <Puzzle size={14} strokeWidth={1.5} className="shrink-0 text-muted" />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="truncate text-[13px] font-medium text-foreground">
@@ -283,9 +254,7 @@ function SkillCard({
                 </Chip>
               </div>
               {skill.description && (
-                <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
-                  {skill.description}
-                </p>
+                <p className="mt-0.5 truncate text-[12px] text-muted">{skill.description}</p>
               )}
             </div>
           </button>
@@ -328,21 +297,13 @@ function SkillCard({
                   <div className="space-y-1.5">
                     {skill.inputParams.map((param) => (
                       <div key={param.name} className="text-[12px]">
-                        <span className="font-mono font-medium text-foreground">
-                          {param.name}
-                        </span>
-                        <span className="ml-1.5 text-muted-foreground">
-                          ({param.type})
-                        </span>
+                        <span className="font-mono font-medium text-foreground">{param.name}</span>
+                        <span className="ml-1.5 text-muted">({param.type})</span>
                         {param.description && (
-                          <span className="ml-1.5 text-muted-foreground">
-                            — {param.description}
-                          </span>
+                          <span className="ml-1.5 text-muted">— {param.description}</span>
                         )}
                         {param.default !== undefined && (
-                          <span className="ml-1.5 text-muted-foreground/60">
-                            default: {param.default}
-                          </span>
+                          <span className="ml-1.5 text-muted/60">default: {param.default}</span>
                         )}
                       </div>
                     ))}
@@ -355,13 +316,9 @@ function SkillCard({
                   <div className="space-y-1">
                     {skill.outputs.map((output, i) => (
                       <div key={i} className="text-[12px]">
-                        <span className="font-mono font-medium text-foreground">
-                          {output.type}
-                        </span>
+                        <span className="font-mono font-medium text-foreground">{output.type}</span>
                         {output.description && (
-                          <span className="ml-1.5 text-muted-foreground">
-                            — {output.description}
-                          </span>
+                          <span className="ml-1.5 text-muted">— {output.description}</span>
                         )}
                       </div>
                     ))}
@@ -372,7 +329,7 @@ function SkillCard({
               {skill.requiredTools.length === 0 &&
                 skill.inputParams.length === 0 &&
                 skill.outputs.length === 0 && (
-                  <p className="text-[12px] text-muted-foreground">
+                  <p className="text-[12px] text-muted">
                     No additional details available for this skill.
                   </p>
                 )}
@@ -403,18 +360,10 @@ function ScopeBadge({ scope }: { scope: "global" | "project" }) {
   );
 }
 
-function DetailSection({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function DetailSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
-        {label}
-      </p>
+      <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted/60">{label}</p>
       {children}
     </div>
   );
@@ -423,15 +372,9 @@ function DetailSection({
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      <Puzzle
-        size={32}
-        strokeWidth={1}
-        className="mb-3 text-muted-foreground/40"
-      />
-      <p className="text-[13px] font-medium text-muted-foreground">
-        No skills installed
-      </p>
-      <p className="mt-1 text-[12px] text-muted-foreground/60">
+      <Puzzle size={32} strokeWidth={1} className="mb-3 text-muted/40" />
+      <p className="text-[13px] font-medium text-muted">No skills installed</p>
+      <p className="mt-1 text-[12px] text-muted/60">
         Drag a .skill.md file onto the app or click Import.
       </p>
     </div>

@@ -1,11 +1,6 @@
 import fs from "fs";
 import crypto from "crypto";
-import type {
-  Designfile,
-  AssetStatus,
-  AssetState,
-  DesignfileState,
-} from "./types";
+import type { Designfile, AssetStatus, AssetState, DesignfileState } from "./types";
 import type { DependencyGraph } from "./graph";
 
 /**
@@ -36,11 +31,7 @@ export class StateTracker {
    * Determine the status of a single asset, considering both its own
    * params and the status of its upstream dependencies.
    */
-  getStatus(
-    assetName: string,
-    designfile: Designfile,
-    graph: DependencyGraph,
-  ): AssetStatus {
+  getStatus(assetName: string, designfile: Designfile, graph: DependencyGraph): AssetStatus {
     const assetConfig = designfile.assets[assetName];
     if (!assetConfig) return "never-built";
 
@@ -49,9 +40,7 @@ export class StateTracker {
 
     // Check if params changed since last build
     const currentParamsHash = hashParams(assetConfig.params);
-    const lastParamsHash = assetState.lastParams
-      ? hashParams(assetState.lastParams)
-      : null;
+    const lastParamsHash = assetState.lastParams ? hashParams(assetState.lastParams) : null;
 
     if (currentParamsHash !== lastParamsHash) return "dirty";
 
@@ -70,10 +59,7 @@ export class StateTracker {
   /**
    * Get all asset statuses at once.
    */
-  getAllStatuses(
-    designfile: Designfile,
-    graph: DependencyGraph,
-  ): Record<string, AssetStatus> {
+  getAllStatuses(designfile: Designfile, graph: DependencyGraph): Record<string, AssetStatus> {
     const result: Record<string, AssetStatus> = {};
     for (const name of Object.keys(designfile.assets)) {
       result[name] = this.getStatus(name, designfile, graph);
@@ -123,10 +109,7 @@ export class StateTracker {
     try {
       const dir = this.statePath.replace(/[/\\][^/\\]+$/, "");
       fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(
-        this.statePath,
-        JSON.stringify(this.state, null, 2) + "\n",
-      );
+      fs.writeFileSync(this.statePath, JSON.stringify(this.state, null, 2) + "\n");
     } catch {
       // Best-effort persistence
     }
@@ -140,9 +123,5 @@ function hashParams(params: Record<string, unknown>): string {
   for (const key of Object.keys(params).sort()) {
     sorted[key] = params[key];
   }
-  return crypto
-    .createHash("sha256")
-    .update(JSON.stringify(sorted))
-    .digest("hex")
-    .slice(0, 12);
+  return crypto.createHash("sha256").update(JSON.stringify(sorted)).digest("hex").slice(0, 12);
 }

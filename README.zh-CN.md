@@ -101,7 +101,7 @@ Pokeshrimp 想补的是中间这层：
 
 | 依赖 | 版本 |
 |------|------|
-| Node.js | 20+ |
+| Node.js | >=20.17 |
 | npm | 9+ |
 | Git | 2.x |
 | macOS | 当前 Electron 打包配置优先面向 macOS |

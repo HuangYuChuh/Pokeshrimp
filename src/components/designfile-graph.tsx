@@ -135,7 +135,7 @@ export function DesignfileGraph() {
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center px-4 text-center text-[13px] text-muted-foreground">
+      <div className="flex h-full items-center justify-center px-4 text-center text-[13px] text-muted">
         {error}
       </div>
     );
@@ -146,16 +146,10 @@ export function DesignfileGraph() {
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-4">
-        <h2 className="mb-1 text-[15px] font-semibold text-foreground">
-          {data.brand}
-        </h2>
-        {data.description && (
-          <p className="mb-3 text-[12px] text-muted-foreground">
-            {data.description}
-          </p>
-        )}
+        <h2 className="mb-1 text-[15px] font-semibold text-foreground">{data.brand}</h2>
+        {data.description && <p className="mb-3 text-[12px] text-muted">{data.description}</p>}
         {data.cycle && (
-          <div className="mb-3 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-[12px] text-destructive">
+          <div className="mb-3 rounded-lg border border-danger/50 bg-danger/10 px-3 py-2 text-[12px] text-danger">
             Cycle detected: {data.cycle}
           </div>
         )}
@@ -217,11 +211,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
   }
 
   if (assets.length === 0) {
-    return (
-      <div className="text-[13px] text-muted-foreground">
-        No assets defined.
-      </div>
-    );
+    return <div className="text-[13px] text-muted">No assets defined.</div>;
   }
 
   return (
@@ -234,14 +224,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
       >
         {/* Arrow marker definition */}
         <defs>
-          <marker
-            id="arrowhead"
-            markerWidth="8"
-            markerHeight="6"
-            refX="8"
-            refY="3"
-            orient="auto"
-          >
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
             <path d="M 0 0 L 8 3 L 0 6 Z" className="fill-border" />
           </marker>
         </defs>
@@ -273,14 +256,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
           const pos = positions.get(asset.name);
           if (!pos) return null;
 
-          return (
-            <AssetCard
-              key={asset.name}
-              asset={asset}
-              x={pos.x}
-              y={pos.y}
-            />
-          );
+          return <AssetCard key={asset.name} asset={asset} x={pos.x} y={pos.y} />;
         })}
       </svg>
     </div>
@@ -289,35 +265,22 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
 
 // --- Asset Card (SVG foreignObject) ---
 
-function AssetCard({
-  asset,
-  x,
-  y,
-}: {
-  asset: AssetOverview;
-  x: number;
-  y: number;
-}) {
+function AssetCard({ asset, x, y }: { asset: AssetOverview; x: number; y: number }) {
   return (
     <foreignObject x={x} y={y} width={CARD_W} height={CARD_H}>
       <button
         type="button"
         className={cn(
-          "flex h-full w-full items-center gap-2 rounded-lg border border-border bg-card px-3 py-2",
-          "transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-ring",
+          "flex h-full w-full items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2",
+          "transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-focus",
         )}
         title={`${asset.name} (${asset.skill}) — ${STATUS_LABEL[asset.status]}`}
       >
         <span
-          className={cn(
-            "h-2 w-2 shrink-0 rounded-full",
-            STATUS_COLOR[asset.status],
-          )}
+          className={cn("h-2 w-2 shrink-0 rounded-full", STATUS_COLOR[asset.status])}
           aria-hidden="true"
         />
-        <span className="truncate text-[12px] text-foreground">
-          {asset.name}
-        </span>
+        <span className="truncate text-[12px] text-foreground">{asset.name}</span>
       </button>
     </foreignObject>
   );

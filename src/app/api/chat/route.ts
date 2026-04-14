@@ -6,17 +6,21 @@ import { createSession, addMessage, touchSession } from "@/lib/db";
 import { getRuntime } from "@/core/init";
 import { getConfig } from "@/core/config/loader";
 import { approvalBus } from "@/app/api/approval/channel";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/core/http/rate-limit";
 import type { ToolContext } from "@/core/tool/types";
 import type { CoreMessage } from "ai";
 
 const limiter = rateLimit({ interval: 60_000, limit: 20 });
 
 const ChatRequestSchema = z.object({
-  messages: z.array(z.object({
-    role: z.string(),
-    content: z.unknown(),
-  }).passthrough()),
+  messages: z.array(
+    z
+      .object({
+        role: z.string(),
+        content: z.unknown(),
+      })
+      .passthrough(),
+  ),
   modelId: z.string().optional(),
   sessionId: z.string().nullable().optional(),
 });
@@ -34,31 +38,27 @@ export async function POST(req: Request) {
   const ip = req.headers.get("x-forwarded-for") || "local";
   const { success } = limiter(ip);
   if (!success) {
-    return new Response(
-      JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }),
-      { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } },
-    );
+    return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again shortly." }), {
+      status: 429,
+      headers: { "Content-Type": "application/json", "Retry-After": "60" },
+    });
   }
 
   const body = await req.json();
   const parsed = ChatRequestSchema.safeParse(body);
   if (!parsed.success) {
-    return new Response(
-      JSON.stringify({ error: parsed.error.message }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: parsed.error.message }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
   const { messages, modelId, sessionId } = parsed.data;
 
   // Auto-create session
   let sid = sessionId as string | undefined;
   if (!sid) {
-    const firstUserMsg = messages.find(
-      (m: { role: string }) => m.role === "user",
-    );
-    const title = firstUserMsg
-      ? (firstUserMsg.content as string).slice(0, 60)
-      : "New Chat";
+    const firstUserMsg = messages.find((m: { role: string }) => m.role === "user");
+    const title = firstUserMsg ? (firstUserMsg.content as string).slice(0, 60) : "New Chat";
     const session = await createSession(title);
     sid = session.id;
   }
@@ -79,10 +79,10 @@ export async function POST(req: Request) {
   const resolvedModelId = modelId ?? config.defaultModel ?? allModels[0]?.id ?? "claude-sonnet";
   const option = allModels.find((m) => m.id === resolvedModelId);
   if (!option) {
-    return new Response(
-      JSON.stringify({ error: `Unknown model: ${modelId}` }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: `Unknown model: ${modelId}` }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
   // For custom providers, the key is in the provider config itself.
   // For built-in providers, check config + env vars.
@@ -157,7 +157,6 @@ export async function POST(req: Request) {
         await touchSession(sid);
       }
     },
-    onError: (error) =>
-      error instanceof Error ? error.message : "Unknown error",
+    onError: (error) => (error instanceof Error ? error.message : "Unknown error"),
   });
 }

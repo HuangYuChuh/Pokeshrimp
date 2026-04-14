@@ -42,9 +42,7 @@ describe("parseArgs", () => {
 
   it("parses -m with value", () => {
     expect(parseArgs(argv("-m", "gpt-4o")).model).toBe("gpt-4o");
-    expect(parseArgs(argv("--model", "claude-haiku")).model).toBe(
-      "claude-haiku",
-    );
+    expect(parseArgs(argv("--model", "claude-haiku")).model).toBe("claude-haiku");
   });
 
   it("parses -c with value", () => {
@@ -63,9 +61,7 @@ describe("parseArgs", () => {
   });
 
   it("joins multiple positional words into one message", () => {
-    expect(parseArgs(argv("list", "files", "here")).message).toBe(
-      "list files here",
-    );
+    expect(parseArgs(argv("list", "files", "here")).message).toBe("list files here");
   });
 
   it("handles flags before positional message", () => {
@@ -90,9 +86,7 @@ describe("parseArgs", () => {
   });
 
   it("throws on missing value for --config", () => {
-    expect(() => parseArgs(argv("--config"))).toThrow(
-      "Missing value for --config",
-    );
+    expect(() => parseArgs(argv("--config"))).toThrow("Missing value for --config");
   });
 
   it("throws on unknown option", () => {

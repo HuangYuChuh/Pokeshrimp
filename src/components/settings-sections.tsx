@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import { Button, Chip, Accordion, Input, Select, ListBox, Switch, Card } from "@heroui/react";
-import {
-  Plus,
-  Trash2,
-  X,
-  Server,
-  Webhook,
-  Shield,
-} from "lucide-react";
+import { Plus, Trash2, X, Server, Webhook, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -101,9 +94,7 @@ export function McpServersSection({
         <Accordion.Panel>
           <Accordion.Body className="mt-2 space-y-3">
             {entries.length === 0 && !adding && (
-              <p className="text-[12px] text-muted-foreground">
-                No MCP servers configured.
-              </p>
+              <p className="text-[12px] text-muted">No MCP servers configured.</p>
             )}
             {entries.map(([name, server]) => (
               <Card key={name}>
@@ -111,20 +102,16 @@ export function McpServersSection({
                   <span
                     className={cn(
                       "h-2 w-2 shrink-0 rounded-full",
-                      server.enabled ? "bg-green-400" : "bg-muted-foreground/40",
+                      server.enabled ? "bg-green-400" : "bg-muted/40",
                     )}
                   />
                   <div className="min-w-0 flex-1">
                     <span className="text-[13px] font-medium">{name}</span>
-                    <p className="truncate text-[12px] font-mono text-muted-foreground">
+                    <p className="truncate text-[12px] font-mono text-muted">
                       {server.command} {server.args.join(" ")}
                     </p>
                   </div>
-                  <Switch
-                    size="sm"
-                    isSelected={server.enabled}
-                    onChange={() => handleToggle(name)}
-                  >
+                  <Switch size="sm" isSelected={server.enabled} onChange={() => handleToggle(name)}>
                     <Switch.Control>
                       <Switch.Thumb />
                     </Switch.Control>
@@ -152,9 +139,7 @@ export function McpServersSection({
                   />
                   <Input
                     value={newServer.command}
-                    onChange={(e) =>
-                      setNewServer({ ...newServer, command: e.target.value })
-                    }
+                    onChange={(e) => setNewServer({ ...newServer, command: e.target.value })}
                     placeholder="Command (e.g. npx -y @modelcontextprotocol/server)"
                     fullWidth
                     className="font-mono"
@@ -216,11 +201,7 @@ export function McpServersSection({
             )}
 
             {!adding && (
-              <Button
-                variant="outline"
-                size="sm"
-                onPress={() => setAdding(true)}
-              >
+              <Button variant="outline" size="sm" onPress={() => setAdding(true)}>
                 <Plus size={13} strokeWidth={2} className="mr-1" />
                 Add Server
               </Button>
@@ -290,10 +271,7 @@ export function HooksSection({
     setAdding(false);
   }
 
-  const allEvents = new Set([
-    ...Object.keys(hooks),
-    ...conventionHooks,
-  ]);
+  const allEvents = new Set([...Object.keys(hooks), ...conventionHooks]);
 
   return (
     <Accordion>
@@ -308,9 +286,7 @@ export function HooksSection({
         <Accordion.Panel>
           <Accordion.Body className="mt-2 space-y-3">
             {allEvents.size === 0 && !adding && (
-              <p className="text-[12px] text-muted-foreground">
-                No hooks configured.
-              </p>
+              <p className="text-[12px] text-muted">No hooks configured.</p>
             )}
 
             {/* Convention hooks */}
@@ -324,9 +300,7 @@ export function HooksSection({
                         convention
                       </Chip>
                     </div>
-                    <p className="text-[12px] font-mono text-muted-foreground">
-                      .visagent/hooks/{event}
-                    </p>
+                    <p className="text-[12px] font-mono text-muted">.visagent/hooks/{event}</p>
                   </div>
                 </Card.Content>
               </Card>
@@ -341,10 +315,8 @@ export function HooksSection({
                       <div className="flex items-center gap-2">
                         <span className="text-[13px] font-medium">{event}</span>
                       </div>
-                      <p className="truncate text-[12px] font-mono text-muted-foreground">
-                        {entry.command}
-                      </p>
-                      <div className="mt-0.5 flex gap-3 text-[11px] text-muted-foreground">
+                      <p className="truncate text-[12px] font-mono text-muted">{entry.command}</p>
+                      <div className="mt-0.5 flex gap-3 text-[11px] text-muted">
                         <span>timeout: {entry.timeout}ms</span>
                         {entry.matcher && <span>matcher: {entry.matcher}</span>}
                       </div>
@@ -432,19 +404,13 @@ export function HooksSection({
             )}
 
             {!adding && (
-              <Button
-                variant="outline"
-                size="sm"
-                onPress={() => setAdding(true)}
-              >
+              <Button variant="outline" size="sm" onPress={() => setAdding(true)}>
                 <Plus size={13} strokeWidth={2} className="mr-1" />
                 Add Hook
               </Button>
             )}
 
-            <p className="text-[11px] text-muted-foreground">
-              See docs/hook-events.md for event reference.
-            </p>
+            <p className="text-[11px] text-muted">See docs/hook-events.md for event reference.</p>
           </Accordion.Body>
         </Accordion.Panel>
       </Accordion.Item>
@@ -487,21 +453,14 @@ function PatternList({
 
   return (
     <div>
-      <label className="mb-1.5 block text-[12px] font-medium text-foreground">
-        {label}
-      </label>
+      <label className="mb-1.5 block text-[12px] font-medium text-foreground">{label}</label>
       <div className="flex flex-wrap gap-1.5">
         {patterns.map((p, i) => (
-          <Chip
-            key={`${p}-${i}`}
-            size="sm"
-            variant="soft"
-            className="font-mono"
-          >
+          <Chip key={`${p}-${i}`} size="sm" variant="soft" className="font-mono">
             {p}
             <button
               type="button"
-              className="ml-1 text-muted-foreground transition-colors hover:text-destructive"
+              className="ml-1 text-muted transition-colors hover:text-danger"
               onClick={() => handleRemove(i)}
             >
               <X size={11} strokeWidth={2} />
@@ -518,12 +477,7 @@ function PatternList({
           fullWidth
           className="font-mono"
         />
-        <Button
-          variant="outline"
-          size="sm"
-          onPress={handleAdd}
-          isDisabled={!input.trim()}
-        >
+        <Button variant="outline" size="sm" onPress={handleAdd} isDisabled={!input.trim()}>
           Add
         </Button>
       </div>
@@ -553,23 +507,17 @@ export function PermissionsSection({
             <PatternList
               label="Always Allow"
               patterns={permissions.alwaysAllow}
-              onChange={(alwaysAllow) =>
-                onChange({ ...permissions, alwaysAllow })
-              }
+              onChange={(alwaysAllow) => onChange({ ...permissions, alwaysAllow })}
             />
             <PatternList
               label="Always Deny"
               patterns={permissions.alwaysDeny}
-              onChange={(alwaysDeny) =>
-                onChange({ ...permissions, alwaysDeny })
-              }
+              onChange={(alwaysDeny) => onChange({ ...permissions, alwaysDeny })}
             />
             <PatternList
               label="Always Ask"
               patterns={permissions.alwaysAsk}
-              onChange={(alwaysAsk) =>
-                onChange({ ...permissions, alwaysAsk })
-              }
+              onChange={(alwaysAsk) => onChange({ ...permissions, alwaysAsk })}
             />
           </Accordion.Body>
         </Accordion.Panel>

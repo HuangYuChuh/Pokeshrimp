@@ -3,9 +3,7 @@ import type { Tool, ToolContext, ToolResult, PermissionResult } from "../types";
 import { buildPipelinePlan } from "@/core/skill/pipeline";
 
 const stepSchema = z.object({
-  skill: z
-    .string()
-    .describe('Slash command for the skill, e.g. "/remove-bg"'),
+  skill: z.string().describe('Slash command for the skill, e.g. "/remove-bg"'),
   params: z
     .record(z.string())
     .optional()
@@ -64,12 +62,8 @@ export const runPipelineTool: Tool = {
       .map(
         (s) =>
           `Step ${s.index}: ${s.skillName} (${s.skill})` +
-          (Object.keys(s.params).length > 0
-            ? `\n  Params: ${JSON.stringify(s.params)}`
-            : "") +
-          (s.requiredTools.length > 0
-            ? `\n  Requires: ${s.requiredTools.join(", ")}`
-            : ""),
+          (Object.keys(s.params).length > 0 ? `\n  Params: ${JSON.stringify(s.params)}` : "") +
+          (s.requiredTools.length > 0 ? `\n  Requires: ${s.requiredTools.join(", ")}` : ""),
       )
       .join("\n");
 

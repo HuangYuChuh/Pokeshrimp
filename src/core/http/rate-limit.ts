@@ -23,9 +23,7 @@ interface RateLimitOptions {
   limit: number;
 }
 
-export function rateLimit(
-  options: RateLimitOptions,
-): (key: string) => RateLimitResult {
+export function rateLimit(options: RateLimitOptions): (key: string) => RateLimitResult {
   const { interval, limit } = options;
   const store = new Map<string, RateLimitEntry>();
 

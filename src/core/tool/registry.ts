@@ -20,9 +20,7 @@ export class ToolRegistry {
   }
 
   getToolsByServer(serverName: string): Tool[] {
-    return this.getAllTools().filter(
-      (t) => t.isMcp && t.serverName === serverName,
-    );
+    return this.getAllTools().filter((t) => t.isMcp && t.serverName === serverName);
   }
 
   clear(): void {

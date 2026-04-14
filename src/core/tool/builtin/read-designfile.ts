@@ -6,9 +6,7 @@ const inputSchema = z.object({
   asset: z
     .string()
     .optional()
-    .describe(
-      "Optional: get details for a specific asset. Omit to get the full overview.",
-    ),
+    .describe("Optional: get details for a specific asset. Omit to get the full overview."),
 });
 
 export const readDesignfileTool: Tool = {

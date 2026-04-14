@@ -10,10 +10,7 @@ import {
 
 function makeMw(
   name: string,
-  beforeFn?: (
-    toolName: string,
-    input: unknown,
-  ) => Promise<MiddlewareAction>,
+  beforeFn?: (toolName: string, input: unknown) => Promise<MiddlewareAction>,
   afterFn?: (toolName: string, input: unknown, result: unknown) => Promise<void>,
 ): Middleware {
   return {
@@ -97,10 +94,15 @@ describe("runMiddlewaresAfter", () => {
     const mw2 = makeMw("b", undefined, async () => {
       calls.push("b");
     });
-    await runMiddlewaresAfter([mw1, mw2], "test", {}, {
-      success: true,
-      data: "ok",
-    });
+    await runMiddlewaresAfter(
+      [mw1, mw2],
+      "test",
+      {},
+      {
+        success: true,
+        data: "ok",
+      },
+    );
     expect(calls).toEqual(["a", "b"]);
   });
 

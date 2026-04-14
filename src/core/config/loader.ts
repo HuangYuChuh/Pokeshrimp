@@ -19,10 +19,7 @@ function deepMerge(
       typeof tgtVal === "object" &&
       !Array.isArray(tgtVal)
     ) {
-      result[key] = deepMerge(
-        tgtVal as Record<string, unknown>,
-        srcVal as Record<string, unknown>,
-      );
+      result[key] = deepMerge(tgtVal as Record<string, unknown>, srcVal as Record<string, unknown>);
     } else {
       result[key] = srcVal;
     }
@@ -47,21 +44,12 @@ export function loadConfigFile(filePath: string): Partial<AppConfig> {
 export function loadConfig(cwd?: string): AppConfig {
   const workDir = cwd ?? process.cwd();
 
-  const globalConfig = loadConfigFile(
-    path.join(os.homedir(), ".visagent", "config.json"),
-  );
-  const projectConfig = loadConfigFile(
-    path.join(workDir, ".visagent", "config.json"),
-  );
-  const localConfig = loadConfigFile(
-    path.join(workDir, ".visagent", "config.local.json"),
-  );
+  const globalConfig = loadConfigFile(path.join(os.homedir(), ".visagent", "config.json"));
+  const projectConfig = loadConfigFile(path.join(workDir, ".visagent", "config.json"));
+  const localConfig = loadConfigFile(path.join(workDir, ".visagent", "config.local.json"));
 
   const merged = deepMerge(
-    deepMerge(
-      globalConfig as Record<string, unknown>,
-      projectConfig as Record<string, unknown>,
-    ),
+    deepMerge(globalConfig as Record<string, unknown>, projectConfig as Record<string, unknown>),
     localConfig as Record<string, unknown>,
   );
 

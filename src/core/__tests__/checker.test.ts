@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  matchCommandPattern,
-  classifyCommand,
-  assessRisk,
-} from "@/core/permission/checker";
+import { matchCommandPattern, classifyCommand, assessRisk } from "@/core/permission/checker";
 
 describe("matchCommandPattern", () => {
   it("exact match", () => {

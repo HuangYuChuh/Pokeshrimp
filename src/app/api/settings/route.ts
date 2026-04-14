@@ -1,8 +1,25 @@
+import { z } from "zod";
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import os from "os";
 import { getConfig, reloadConfig } from "@/core/config/loader";
+import {
+  ApiKeysSchema,
+  McpServerConfigSchema,
+  HookEntrySchema,
+  PermissionConfigSchema,
+  CustomProviderSchema,
+} from "@/core/config/schema";
+
+const SettingsUpdateSchema = z.object({
+  apiKeys: ApiKeysSchema.partial().optional(),
+  defaultModel: z.string().optional(),
+  customProviders: z.record(CustomProviderSchema).optional(),
+  mcpServers: z.record(McpServerConfigSchema).optional(),
+  hooks: z.record(z.array(HookEntrySchema)).optional(),
+  permissions: PermissionConfigSchema.partial().optional(),
+});
 
 const GLOBAL_CONFIG_PATH = path.join(os.homedir(), ".visagent", "config.json");
 
@@ -55,7 +72,15 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
-  const body = await req.json();
+  const raw = await req.json();
+  const parsed = SettingsUpdateSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Invalid settings payload", details: parsed.error.flatten() },
+      { status: 400 },
+    );
+  }
+  const body = parsed.data;
 
   let current: Record<string, unknown> = {};
   try {
@@ -77,6 +102,10 @@ export async function PUT(req: Request) {
 
   if (body.defaultModel !== undefined) {
     current.defaultModel = body.defaultModel;
+  }
+
+  if (body.customProviders !== undefined) {
+    current.customProviders = body.customProviders;
   }
 
   if (body.mcpServers !== undefined) {

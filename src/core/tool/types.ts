@@ -44,10 +44,7 @@ export interface Tool {
   isDestructive?(): boolean;
   isConcurrencySafe?(): boolean;
 
-  checkPermissions(
-    input: unknown,
-    context: ToolContext,
-  ): Promise<PermissionResult>;
+  checkPermissions(input: unknown, context: ToolContext): Promise<PermissionResult>;
   call(input: unknown, context: ToolContext): Promise<ToolResult>;
 
   userFacingName?(input?: unknown): string;
@@ -56,4 +53,3 @@ export interface Tool {
   isBuiltin?: boolean;
   serverName?: string;
 }
-

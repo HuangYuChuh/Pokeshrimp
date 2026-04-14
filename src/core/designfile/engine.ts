@@ -1,11 +1,5 @@
 import path from "path";
-import type {
-  Designfile,
-  AssetStatus,
-  AssetVersion,
-  BuildPlan,
-  BuildStep,
-} from "./types";
+import type { Designfile, AssetStatus, AssetVersion, BuildPlan, BuildStep } from "./types";
 import { parseDesignfile } from "./parser";
 import { DependencyGraph } from "./graph";
 import { StateTracker } from "./state";
@@ -159,11 +153,7 @@ export class DesignfileEngine {
     // Filter to only dirty ones
     const steps: BuildStep[] = [];
     for (const name of affected) {
-      const status = this.state.getStatus(
-        name,
-        this.designfile,
-        this.graph,
-      );
+      const status = this.state.getStatus(name, this.designfile, this.graph);
       if (status === "clean" && !force) continue;
 
       const config = this.designfile.assets[name];
@@ -247,11 +237,7 @@ export class DesignfileEngine {
    * Get the absolute path to a stored copy of an output file from a
    * specific version. Returns null if not found.
    */
-  getStoredFile(
-    assetName: string,
-    versionHash: string,
-    filename: string,
-  ): string | null {
+  getStoredFile(assetName: string, versionHash: string, filename: string): string | null {
     return this.history.getStoredFile(assetName, versionHash, filename);
   }
 

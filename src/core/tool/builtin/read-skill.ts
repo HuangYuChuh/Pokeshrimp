@@ -60,15 +60,10 @@ export const readSkillTool: Tool = {
       };
     }
 
-    const sections: string[] = [
-      `# ${skill.name} (${skill.command})`,
-      skill.description,
-    ];
+    const sections: string[] = [`# ${skill.name} (${skill.command})`, skill.description];
 
     if (skill.requiredTools.length > 0) {
-      sections.push(
-        `## Required Tools\n${skill.requiredTools.map((t) => `- ${t}`).join("\n")}`,
-      );
+      sections.push(`## Required Tools\n${skill.requiredTools.map((t) => `- ${t}`).join("\n")}`);
     }
 
     if (skill.inputParams.length > 0) {

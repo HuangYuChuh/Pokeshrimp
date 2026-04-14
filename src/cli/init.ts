@@ -56,9 +56,7 @@ export function runInit(options: InitOptions = {}): InitResult {
   const visagentDir = join(targetDir, ".visagent");
 
   if (existsSync(visagentDir)) {
-    throw new Error(
-      `.visagent/ already exists in ${targetDir}. Aborting to avoid overwriting.`,
-    );
+    throw new Error(`.visagent/ already exists in ${targetDir}. Aborting to avoid overwriting.`);
   }
 
   const created: string[] = [];
@@ -117,9 +115,7 @@ export function handleInit(projectName?: string, cwd?: string): void {
     for (const entry of result.created) {
       console.log(`  ${entry}`);
     }
-    console.log(
-      "\nEdit .visagent/config.json to configure your API keys and model.",
-    );
+    console.log("\nEdit .visagent/config.json to configure your API keys and model.");
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);

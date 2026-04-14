@@ -16,10 +16,7 @@ const markdownComponents: Components = {
     const isInline = !className;
     if (isInline) {
       return (
-        <code
-          className="rounded bg-muted px-1.5 py-0.5 text-[13px]"
-          {...props}
-        >
+        <code className="rounded bg-muted px-1.5 py-0.5 text-[13px]" {...props}>
           {children}
         </code>
       );
@@ -65,12 +62,7 @@ export function MessageBubble({
   return (
     <div className="group/msg relative mb-6">
       {message.content && (
-        <div
-          className={cn(
-            "flex",
-            message.role === "user" ? "justify-end" : "justify-start"
-          )}
-        >
+        <div className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
           {message.role === "user" ? (
             isEditing ? (
               <EditBubble
@@ -98,10 +90,7 @@ export function MessageBubble({
           ) : (
             <div className="relative max-w-[95%] sm:max-w-[85%]">
               <div className="prose prose-sm max-w-none text-[14px] leading-7 text-foreground dark:prose-invert">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={markdownComponents}
-                >
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                   {message.content}
                 </ReactMarkdown>
               </div>
@@ -119,12 +108,7 @@ export function MessageBubble({
         ?.filter((p) => p.type === "tool-invocation")
         .map((part) => {
           if (part.type !== "tool-invocation") return null;
-          return (
-            <ToolCard
-              key={part.toolInvocation.toolCallId}
-              invocation={part.toolInvocation}
-            />
-          );
+          return <ToolCard key={part.toolInvocation.toolCallId} invocation={part.toolInvocation} />;
         })}
     </div>
   );

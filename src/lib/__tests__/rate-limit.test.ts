@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit } from "@/core/http/rate-limit";
 
 describe("rateLimit", () => {
   afterEach(() => {

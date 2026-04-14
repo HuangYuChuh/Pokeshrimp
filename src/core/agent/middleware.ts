@@ -37,37 +37,23 @@ export interface Middleware {
    * Called before each LLM call within the loop. Used by
    * ContextCompactionMiddleware (docs/01 §3.2 #4).
    */
-  beforeLLMCall?(
-    messages: CoreMessage[],
-  ): Promise<CoreMessage[]> | CoreMessage[];
+  beforeLLMCall?(messages: CoreMessage[]): Promise<CoreMessage[]> | CoreMessage[];
   /**
    * Called before each tool invocation. May rewrite input or deny.
    * Used by CommandApprovalMiddleware, HooksMiddleware, LoopDetection.
    * The optional `context` param carries ToolContext (needed by the
    * approval channel in Task 2).
    */
-  before?(
-    toolName: string,
-    input: unknown,
-    context?: ToolContext,
-  ): Promise<MiddlewareAction>;
+  before?(toolName: string, input: unknown, context?: ToolContext): Promise<MiddlewareAction>;
   /**
    * Called after each tool invocation. Read-only — for logging.
    */
-  after?(
-    toolName: string,
-    input: unknown,
-    result: ToolResult,
-  ): Promise<void>;
+  after?(toolName: string, input: unknown, result: ToolResult): Promise<void>;
   /**
    * Called once after the AgentRuntime.run() loop completes.
    * Used by HooksMiddleware to emit session-end.
    */
-  onRunComplete?(context: {
-    sessionId?: string;
-    iterations: number;
-    cwd: string;
-  }): Promise<void>;
+  onRunComplete?(context: { sessionId?: string; iterations: number; cwd: string }): Promise<void>;
 }
 
 // ─── Runners ─────────────────────────────────────────────────
@@ -275,9 +261,7 @@ const LOOP_WINDOW = 6;
  * infinite loops. Counts occurrences of the same (tool, input)
  * within a sliding window so swapping a parameter doesn't bypass.
  */
-export function createLoopDetectionMiddleware(
-  maxRepeats: number = 3,
-): Middleware {
+export function createLoopDetectionMiddleware(maxRepeats: number = 3): Middleware {
   const history: string[] = [];
 
   return {
@@ -417,10 +401,7 @@ const SUMMARIZER_SYSTEM_PROMPT =
   "into a brief synopsis preserving facts, decisions, file paths, and " +
   "tool outcomes. Output plain text only, no preamble.";
 
-async function summarizeWithModel(
-  model: LanguageModel,
-  oldPart: CoreMessage[],
-): Promise<string> {
+async function summarizeWithModel(model: LanguageModel, oldPart: CoreMessage[]): Promise<string> {
   const transcript = serializeMessagesForSummary(oldPart);
   const result = await generateText({
     model,
@@ -470,8 +451,7 @@ function renderContentForSummary(content: CoreMessage["content"]): string {
     } else if (p.type === "tool-result") {
       const name = typeof p.toolName === "string" ? p.toolName : "tool";
       const outcome = p.isError ? "error" : "ok";
-      const payload =
-        typeof p.result === "string" ? p.result : safeJson(p.result);
+      const payload = typeof p.result === "string" ? p.result : safeJson(p.result);
       parts.push(`<tool-result ${name} ${outcome}: ${clip(payload, 500)}>`);
     }
   }
@@ -557,11 +537,7 @@ export function createHooksMiddleware(engine: HooksEngine): Middleware {
       });
 
       // post-generate: check if run_command produced visual assets
-      if (
-        toolName === "run_command" &&
-        result.success &&
-        typeof result.data === "string"
-      ) {
+      if (toolName === "run_command" && result.success && typeof result.data === "string") {
         const cmd = (input as { command?: string })?.command ?? "";
         const files = detectGeneratedFiles(cmd, result.data);
         if (files.length > 0) {
@@ -604,11 +580,5 @@ function stableStringify(v: unknown): string {
   if (Array.isArray(v)) return "[" + v.map(stableStringify).join(",") + "]";
   const obj = v as Record<string, unknown>;
   const keys = Object.keys(obj).sort();
-  return (
-    "{" +
-    keys
-      .map((k) => JSON.stringify(k) + ":" + stableStringify(obj[k]))
-      .join(",") +
-    "}"
-  );
+  return "{" + keys.map((k) => JSON.stringify(k) + ":" + stableStringify(obj[k])).join(",") + "}";
 }

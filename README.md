@@ -105,8 +105,8 @@ What exists but should still be treated as work in progress:
 
 | Requirement | Version |
 |------------|---------|
-| Node.js | 20+ |
-| npm | 9+ |
+| Node.js | >=20.17 |
+| npm | >=10 |
 | Git | 2.x |
 | macOS | Recommended for the current Electron packaging setup |
 

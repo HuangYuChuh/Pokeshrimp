@@ -40,9 +40,7 @@ export function useKeyboardShortcuts({
       // (except the chat textarea for Cmd+/ which focuses it)
       const target = e.target as HTMLElement | null;
       const isTyping =
-        target?.tagName === "INPUT" ||
-        target?.tagName === "TEXTAREA" ||
-        target?.isContentEditable;
+        target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable;
 
       if (!mod) return;
 

@@ -74,10 +74,7 @@ async function connectMCPServers(
   try {
     await registerMCPTools(getMCPClientManager(), reg);
   } catch (err) {
-    console.warn(
-      "[MCP] Failed to register MCP tools:",
-      err instanceof Error ? err.message : err,
-    );
+    console.warn("[MCP] Failed to register MCP tools:", err instanceof Error ? err.message : err);
   }
 }
 
@@ -162,8 +159,7 @@ function buildMiddlewares(): Middleware[] {
       // pick up keys added mid-session without restarting.
       summarizerModel: (): LanguageModel | undefined => {
         const cfg = getConfig();
-        const anthropicKey =
-          cfg.apiKeys?.anthropic || process.env.ANTHROPIC_API_KEY;
+        const anthropicKey = cfg.apiKeys?.anthropic || process.env.ANTHROPIC_API_KEY;
         const openaiKey = cfg.apiKeys?.openai || process.env.OPENAI_API_KEY;
         if (!anthropicKey && !openaiKey) return undefined;
         try {

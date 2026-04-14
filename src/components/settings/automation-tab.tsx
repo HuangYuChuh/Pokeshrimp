@@ -26,16 +26,9 @@ export function AutomationTab({
     <div className="space-y-5">
       <h3 className="text-[15px] font-semibold mb-4">Automation</h3>
 
-      <HooksSection
-        hooks={hooks}
-        conventionHooks={conventionHooks}
-        onChange={onHooksChange}
-      />
+      <HooksSection hooks={hooks} conventionHooks={conventionHooks} onChange={onHooksChange} />
 
-      <PermissionsSection
-        permissions={permissions}
-        onChange={onPermissionsChange}
-      />
+      <PermissionsSection permissions={permissions} onChange={onPermissionsChange} />
     </div>
   );
 }

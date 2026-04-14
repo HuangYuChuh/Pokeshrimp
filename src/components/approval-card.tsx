@@ -96,10 +96,10 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
   return (
     <Card variant="secondary" className="mt-2">
       <Card.Header className="flex flex-row items-start gap-3 px-4 pb-0 pt-4">
-        <RiskIcon size={18} className="mt-0.5 shrink-0 text-muted-foreground" />
+        <RiskIcon size={18} className="mt-0.5 shrink-0 text-muted" />
         <div className="min-w-0 flex-1">
           <Card.Title className="text-[13px]">Command Approval Required</Card.Title>
-          <code className="mt-1.5 block truncate rounded bg-muted px-2 py-1 font-mono text-[12px] text-muted-foreground">
+          <code className="mt-1.5 block truncate rounded bg-muted px-2 py-1 font-mono text-[12px] text-muted">
             $ {request.command}
           </code>
           <Chip
@@ -141,17 +141,13 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
                 Deny
               </Button>
             </div>
-            {error && (
-              <p className="mt-1.5 text-[11px] text-red-500">{error}</p>
-            )}
+            {error && <p className="mt-1.5 text-[11px] text-red-500">{error}</p>}
           </div>
         ) : (
           <div
             className={cn(
               "ml-[30px] text-[12px] font-medium",
-              state === "denied" || state === "expired"
-                ? "text-destructive"
-                : "text-green-500",
+              state === "denied" || state === "expired" ? "text-danger" : "text-green-500",
             )}
           >
             {state === "allowed" && "Allowed (once)"}

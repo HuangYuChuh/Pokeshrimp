@@ -14,9 +14,7 @@ export function initAppState(config: AppConfig): AppState {
 
 export function getAppState(): AppState {
   if (!state) {
-    throw new Error(
-      "App state not initialized. Call initAppState() first.",
-    );
+    throw new Error("App state not initialized. Call initAppState() first.");
   }
   return state;
 }
