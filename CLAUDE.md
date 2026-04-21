@@ -98,12 +98,19 @@ Format: `<type>(<scope>): <description>`
 **Review Before Commit** — code enters git history as a finished product, not a work-in-progress:
 
 ```
-Write code → Karpathy Review (simplicity, necessity, surgical) → Codex Review (if large change) → fix all issues → verify all checks pass → commit
+Write code + tests → Karpathy Review (simplicity, necessity, surgical) → Codex Review (if large change) → fix all issues → verify all checks pass → commit
 ```
 
+- Tests ship with the feature — not as an afterthought
 - Review is the last step of coding, not a post-commit patch
 - commit messages reflect the final deliverable (`feat`, not `fix` for review feedback)
 - No noise commits (`fix lint`, `fix type error`) in git history
+
+**Never commit**:
+- `.env`, `credentials.json`, API keys
+- `node_modules/`, `.next/`, `dist-electron/`, `dist-cli/`
+- IDE configs (`.vscode/`, `.idea/`)
+- OS files (`.DS_Store`, `Thumbs.db`)
 
 **Never push directly to `main`.** All changes go through Pull Requests:
 
