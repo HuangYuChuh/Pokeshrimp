@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Restore theme preference before first paint to prevent flash */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("pokeshrimp-theme");if(t==="light")document.documentElement.classList.remove("dark");else if(t==="system"&&!window.matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.classList.remove("dark")}catch(e){}})()`,
+            __html: `(function(){try{var d=document.documentElement,t=localStorage.getItem("pokeshrimp-theme"),light=t==="light"||(t==="system"&&!window.matchMedia("(prefers-color-scheme: dark)").matches);if(light){d.classList.remove("dark");d.classList.add("light")}}catch(e){}})()`,
           }}
         />
         {children}

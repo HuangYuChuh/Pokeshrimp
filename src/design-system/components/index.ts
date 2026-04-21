@@ -27,5 +27,5 @@ export { ScrollArea } from "./scroll-area";
 export { Skeleton } from "./skeleton";
 export { Separator } from "./separator";
 export { Switch } from "./switch";
-export { Accordion, AccordionItem } from "./accordion";
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "./accordion";
 export { ToastProvider, useToast } from "./toast";

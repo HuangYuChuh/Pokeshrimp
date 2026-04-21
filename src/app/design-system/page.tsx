@@ -34,6 +34,8 @@ import {
   Select,
   Accordion,
   AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
   ToastProvider,
   useToast,
 } from "@/design-system/components";
@@ -42,7 +44,9 @@ import { useState } from "react";
 /* ─── Theme toggle ── */
 
 function ThemeToggle() {
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(() =>
+    typeof document !== "undefined" ? document.documentElement.classList.contains("dark") : true,
+  );
   return (
     <button
       type="button"
@@ -421,15 +425,24 @@ export default function DesignSystemPreview() {
         {/* ── Accordion ── */}
         <Section title="Accordion">
           <div className="max-w-md">
-            <Accordion defaultValue="item-1">
-              <AccordionItem value="item-1" trigger="General Settings">
-                Configure API keys, default model, and workspace preferences.
+            <Accordion type="single" defaultValue="item-1" collapsible>
+              <AccordionItem value="item-1">
+                <AccordionTrigger>General Settings</AccordionTrigger>
+                <AccordionContent>
+                  Configure API keys, default model, and workspace preferences.
+                </AccordionContent>
               </AccordionItem>
-              <AccordionItem value="item-2" trigger="Permissions">
-                Control which CLI commands are auto-approved or blocked.
+              <AccordionItem value="item-2">
+                <AccordionTrigger>Permissions</AccordionTrigger>
+                <AccordionContent>
+                  Control which CLI commands are auto-approved or blocked.
+                </AccordionContent>
               </AccordionItem>
-              <AccordionItem value="item-3" trigger="Hooks">
-                Add shell scripts that trigger on agent lifecycle events.
+              <AccordionItem value="item-3">
+                <AccordionTrigger>Hooks</AccordionTrigger>
+                <AccordionContent>
+                  Add shell scripts that trigger on agent lifecycle events.
+                </AccordionContent>
               </AccordionItem>
             </Accordion>
           </div>
