@@ -1,0 +1,11 @@
+/* ─── Layout ──────────────────────────────────────────────────
+ * Three-panel desktop layout dimensions.
+ * ────────────────────────────────────────────────────────── */
+
+:root {
+  --width-sidebar:            260px;
+  --width-sidebar-collapsed:  48px;
+  --width-chat:               680px;
+  --width-preview:            380px;
+  --height-titlebar:          52px;
+}

@@ -1,0 +1,13 @@
+/* ─── Icons ───────────────────────────────────────────────────
+ * Iconify + Solar outline set. Sizes as CSS variables.
+ * ────────────────────────────────────────────────────────── */
+
+:root {
+  --icon-xs:  12px;
+  --icon-sm:  15px;
+  --icon-md:  18px;
+  --icon-lg:  24px;
+  --icon-xl:  32px;
+
+  --icon-stroke: 1.5px;
+}

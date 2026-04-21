@@ -1,0 +1,10 @@
+/* ─── Borders ─────────────────────────────────────────────────
+ * Semantic border shorthands referencing color tokens.
+ * ────────────────────────────────────────────────────────── */
+
+:root {
+  --border-thin:    1px solid var(--border);
+  --border-subtle:  1px solid var(--border-subtle);
+  --border-strong:  1px solid var(--border-strong);
+  --border-accent:  2px solid var(--accent);
+}

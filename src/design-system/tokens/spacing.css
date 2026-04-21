@@ -1,0 +1,24 @@
+/* ─── Spacing ─────────────────────────────────────────────────
+ * 4px base unit. Semantic aliases for common patterns.
+ * ────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Base scale ── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+
+  /* ── Semantic aliases ── */
+  --gap-inline:     var(--space-2);   /* 8px  — icon to text */
+  --gap-stack:      var(--space-3);   /* 12px — stacked elements */
+  --gap-message:    var(--space-6);   /* 24px — between chat messages */
+  --padding-card:   var(--space-3);   /* 12px — card inner padding */
+  --padding-input:  var(--space-4);   /* 16px — input area padding */
+  --padding-panel:  var(--space-4);   /* 16px — sidebar/preview padding */
+}

@@ -1,0 +1,18 @@
+/* ─── Shadows ─────────────────────────────────────────────────
+ * Near-zero philosophy. Layers via color & border, not shadow.
+ * Dark mode shadows are deeper to remain perceptible.
+ * ────────────────────────────────────────────────────────── */
+
+:root {
+  --shadow-xs:  0 1px 2px  oklch(0 0 0 / 0.12);
+  --shadow-sm:  0 2px 8px  oklch(0 0 0 / 0.16);
+  --shadow-md:  0 4px 16px oklch(0 0 0 / 0.20);
+  --shadow-lg:  0 8px 32px oklch(0 0 0 / 0.28);
+}
+
+.light {
+  --shadow-xs:  0 1px 2px  oklch(0 0 0 / 0.04);
+  --shadow-sm:  0 2px 8px  oklch(0 0 0 / 0.06);
+  --shadow-md:  0 4px 16px oklch(0 0 0 / 0.08);
+  --shadow-lg:  0 8px 32px oklch(0 0 0 / 0.12);
+}
