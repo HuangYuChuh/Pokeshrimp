@@ -81,8 +81,26 @@ These are non-negotiable. No PR may violate them:
 - Use `@/` path alias for imports from `src/`
 - All external input validated with Zod schemas (`.safeParse()`)
 - Config format defined in `src/core/config/schema.ts` (single source of truth)
-- Semantic color tokens only — no hardcoded colors (see [UI Design System](docs/ui-design-system.md))
 - One component per file, one logical change per commit
+
+## Design System (Mandatory)
+
+Any UI work MUST use `src/design-system/` components and tokens. No exceptions.
+
+1. **Use design system components** — `import { Button, Card } from "@/design-system/components"`, never build duplicates
+2. **Reference tokens only** — All colors, spacing, radius, shadows via CSS variables (`var(--canvas)`, `var(--space-4)`). No hardcoded values.
+3. **Extend before using** — If the design system doesn't cover a scenario, extend it first, then use in business code
+4. **No other UI libraries** — No HeroUI, shadcn, Ant Design. Radix UI headless only.
+5. **Icons** — Iconify + Solar (outline). No lucide-react, no other icon sets.
+
+```
+FONT    Serif titles + System sans body + Mono code
+STYLE   Warm Conversational (dark-first, warm undertones)
+ACCENT  oklch(0.62 0.14 45) — terracotta orange
+ICONS   Iconify + Solar (outline, 1.5px stroke)
+SHADOW  Near-zero (layers via color & border)
+BG      Never pure black/white — always oklch hue 60 warmth
+```
 
 ## Git Commit Convention
 
