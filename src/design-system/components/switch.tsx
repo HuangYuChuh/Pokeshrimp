@@ -2,14 +2,17 @@
 
 import { forwardRef, type InputHTMLAttributes } from "react";
 
-/* ─── Switch ── */
+/* ─── Switch ──
+ * Renders only the toggle track + thumb. No <label> inside.
+ * Wrap in <label> at the call site to associate text.
+ * ────────────────────────────────────────────────────────── */
 
 type SwitchProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "role">;
 
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(({ className, ...props }, ref) => (
-  <label className={`inline-flex items-center cursor-pointer ${className ?? ""}`}>
+  <span className={`inline-flex items-center cursor-pointer ${className ?? ""}`}>
     <input ref={ref} type="checkbox" role="switch" className="sr-only peer" {...props} />
-    <div
+    <span
       className={[
         "relative w-9 h-5 rounded-[var(--radius-full)]",
         "bg-[var(--border-strong)] peer-checked:bg-[var(--accent)]",
@@ -21,7 +24,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(({ className, ..
         "after:transition-transform peer-checked:after:translate-x-4",
       ].join(" ")}
     />
-  </label>
+  </span>
 ));
 
 Switch.displayName = "Switch";
