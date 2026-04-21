@@ -91,7 +91,7 @@ export default function DesignSystemPreview() {
   return (
     <TooltipProvider>
       <div
-        className="min-h-screen p-[var(--space-8)]"
+        className="min-h-screen p-[var(--space-8)] h-screen overflow-y-auto"
         style={{
           background: "var(--canvas)",
           color: "var(--ink)",
