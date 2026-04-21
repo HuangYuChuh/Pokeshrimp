@@ -1,90 +1,91 @@
 "use client";
 
-import {
-  useState,
-  useContext,
-  createContext,
-  forwardRef,
-  type ReactNode,
-  type HTMLAttributes,
-} from "react";
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
+import { forwardRef, type ComponentPropsWithoutRef } from "react";
 
-/* ─── Context ── */
+/* ─── Accordion ──
+ * Built on @radix-ui/react-accordion for correct ARIA:
+ * aria-expanded, aria-controls, panel id — all handled by Radix.
+ * ────────────────────────────────────────────────────────── */
 
-interface AccordionCtx {
-  openItem?: string;
-  toggle: (value: string | undefined) => void;
-}
-
-const Ctx = createContext<AccordionCtx>({ toggle: () => {} });
-
-/* ─── Accordion (single-open) ── */
-
-interface AccordionProps extends HTMLAttributes<HTMLDivElement> {
-  defaultValue?: string;
-}
-
-export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(
-  ({ defaultValue, className, children, ...props }, ref) => {
-    const [openItem, setOpenItem] = useState<string | undefined>(defaultValue);
-
-    return (
-      <Ctx.Provider value={{ openItem, toggle: setOpenItem }}>
-        <div ref={ref} className={`divide-y divide-[var(--border)] ${className ?? ""}`} {...props}>
-          {children}
-        </div>
-      </Ctx.Provider>
-    );
-  },
-);
+export const Accordion = forwardRef<
+  HTMLDivElement,
+  ComponentPropsWithoutRef<typeof AccordionPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <AccordionPrimitive.Root
+    ref={ref}
+    className={`divide-y divide-[var(--border)] ${className ?? ""}`}
+    {...props}
+  />
+));
 
 Accordion.displayName = "Accordion";
 
 /* ─── AccordionItem ── */
 
-interface AccordionItemProps extends HTMLAttributes<HTMLDivElement> {
-  value: string;
-  trigger: ReactNode;
-}
-
-export const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(
-  ({ value, trigger, className, children, ...props }, ref) => {
-    const { openItem, toggle } = useContext(Ctx);
-    const isOpen = openItem === value;
-
-    return (
-      <div ref={ref} className={className} {...props}>
-        <button
-          type="button"
-          onClick={() => toggle(isOpen ? undefined : value)}
-          className={[
-            "flex items-center justify-between w-full py-3",
-            "text-[var(--text-body-sm)] font-medium text-[var(--ink)]",
-            "hover:text-[var(--accent)] transition-colors",
-          ].join(" ")}
-          aria-expanded={isOpen}
-        >
-          {trigger}
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            className={`shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
-          >
-            <path d="M3 4.5L6 7.5L9 4.5" />
-          </svg>
-        </button>
-        {isOpen && (
-          <div className="pb-3 text-[var(--text-body-sm)] text-[var(--ink-secondary)]">
-            {children}
-          </div>
-        )}
-      </div>
-    );
-  },
-);
+export const AccordionItem = forwardRef<
+  HTMLDivElement,
+  ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
+>(({ className, ...props }, ref) => (
+  <AccordionPrimitive.Item ref={ref} className={className} {...props} />
+));
 
 AccordionItem.displayName = "AccordionItem";
+
+/* ─── AccordionTrigger ── */
+
+export const AccordionTrigger = forwardRef<
+  HTMLButtonElement,
+  ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => (
+  <AccordionPrimitive.Header className="flex">
+    <AccordionPrimitive.Trigger
+      ref={ref}
+      className={[
+        "flex flex-1 items-center justify-between py-3",
+        "text-[var(--text-body-sm)] font-medium text-[var(--ink)]",
+        "hover:text-[var(--accent)] transition-colors",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      {...props}
+    >
+      {children}
+      <svg
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="shrink-0 transition-transform duration-200 [[data-state=open]_&]:rotate-180"
+      >
+        <path d="M3 4.5L6 7.5L9 4.5" />
+      </svg>
+    </AccordionPrimitive.Trigger>
+  </AccordionPrimitive.Header>
+));
+
+AccordionTrigger.displayName = "AccordionTrigger";
+
+/* ─── AccordionContent ── */
+
+export const AccordionContent = forwardRef<
+  HTMLDivElement,
+  ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <AccordionPrimitive.Content
+    ref={ref}
+    className={[
+      "overflow-hidden text-[var(--text-body-sm)] text-[var(--ink-secondary)]",
+      "data-[state=open]:pb-3",
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ")}
+    {...props}
+  />
+));
+
+AccordionContent.displayName = "AccordionContent";

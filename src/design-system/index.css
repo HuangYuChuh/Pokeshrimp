@@ -10,7 +10,7 @@
 /* ─── Body base styles ── */
 
 body {
-  font-family: var(--ds-font-sans);
+  font-family: var(--font-sans-stack);
   font-size: var(--text-body);
   line-height: var(--leading-normal);
   color: var(--ink);

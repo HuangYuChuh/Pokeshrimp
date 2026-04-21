@@ -1,37 +1,33 @@
 /* ─── Typography ──────────────────────────────────────────────
  * Geist (body) + Playfair Display (titles) + JetBrains Mono (code).
- * Loaded via next/font/google in layout.tsx as CSS variables.
- * Chinese fallback: Noto Sans SC.
+ * --font-sans and --font-serif are injected by next/font in layout.tsx.
+ * These fallback stacks activate when the injected vars are absent.
  * ────────────────────────────────────────────────────────── */
 
 :root {
-  /* ── Font families ── */
-  /* Geist and Playfair Display are injected as CSS vars by Next.js */
-  --ds-font-sans:   "Geist", -apple-system, BlinkMacSystemFont,
-                    "Segoe UI", "Noto Sans SC", sans-serif;
-  --ds-font-serif:  "Playfair Display", "Georgia",
-                    "Noto Serif SC", serif;
-  --ds-font-mono:   "JetBrains Mono", "Fira Code", "SF Mono",
-                    ui-monospace, monospace;
+  /* ── Font family fallbacks ── */
+  --font-sans-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+  --font-serif-stack: "Georgia", "Noto Serif SC", serif;
+  --font-mono-stack: "JetBrains Mono", "Fira Code", "SF Mono", ui-monospace, monospace;
 
   /* ── Font sizes ── */
-  --text-hero:      32px;
-  --text-display:   24px;
-  --text-headline:  18px;
-  --text-title:     15px;
-  --text-body:      14px;
-  --text-body-sm:   13px;
-  --text-caption:   12px;
-  --text-micro:     11px;
+  --text-hero: 32px;
+  --text-display: 24px;
+  --text-headline: 18px;
+  --text-title: 15px;
+  --text-body: 14px;
+  --text-body-sm: 13px;
+  --text-caption: 12px;
+  --text-micro: 11px;
 
   /* ── Line heights ── */
-  --leading-tight:    1.2;
-  --leading-snug:     1.35;
-  --leading-normal:   1.5;
-  --leading-relaxed:  1.75;
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
 
   /* ── Letter spacing ── */
-  --tracking-tight:   -0.02em;
-  --tracking-normal:  0;
-  --tracking-wide:    0.03em;
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.03em;
 }

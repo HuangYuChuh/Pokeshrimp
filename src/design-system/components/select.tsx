@@ -1,9 +1,12 @@
 "use client";
 
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { forwardRef, useState } from "react";
+import * as SelectPrimitive from "@radix-ui/react-select";
+import { forwardRef } from "react";
 
-/* ─── Select ── */
+/* ─── Select ──
+ * Built on @radix-ui/react-select for correct listbox semantics,
+ * hidden input for forms, and full keyboard navigation.
+ * ────────────────────────────────────────────────────────── */
 
 interface SelectOption {
   value: string;
@@ -20,71 +23,69 @@ interface SelectProps {
 }
 
 export const Select = forwardRef<HTMLButtonElement, SelectProps>(
-  ({ options, value, onChange, placeholder = "Select...", className, disabled }, ref) => {
-    const [open, setOpen] = useState(false);
-    const selected = options.find((o) => o.value === value);
+  ({ options, value, onChange, placeholder = "Select...", className, disabled }, ref) => (
+    <SelectPrimitive.Root value={value} onValueChange={onChange} disabled={disabled}>
+      <SelectPrimitive.Trigger
+        ref={ref}
+        className={[
+          "inline-flex items-center justify-between gap-2",
+          "w-full h-9 px-3 rounded-[var(--radius-md)]",
+          "border border-[var(--border)] bg-[var(--surface)]",
+          "text-[var(--text-body-sm)] text-[var(--ink)]",
+          "hover:border-[var(--border-strong)] transition-colors",
+          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]",
+          "disabled:opacity-50 disabled:pointer-events-none",
+          "data-[placeholder]:text-[var(--ink-ghost)]",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <SelectPrimitive.Value placeholder={placeholder} />
+        <SelectPrimitive.Icon>
+          <ChevronIcon />
+        </SelectPrimitive.Icon>
+      </SelectPrimitive.Trigger>
 
-    return (
-      <DropdownMenu.Root open={open} onOpenChange={setOpen}>
-        <DropdownMenu.Trigger
-          ref={ref}
-          disabled={disabled}
+      <SelectPrimitive.Portal>
+        <SelectPrimitive.Content
+          position="popper"
+          sideOffset={4}
           className={[
-            "inline-flex items-center justify-between gap-2",
-            "w-full h-9 px-3 rounded-[var(--radius-md)]",
-            "border border-[var(--border)] bg-[var(--surface)]",
-            "text-[var(--text-body-sm)]",
-            selected ? "text-[var(--ink)]" : "text-[var(--ink-ghost)]",
-            "hover:border-[var(--border-strong)] transition-colors",
-            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]",
-            "disabled:opacity-50 disabled:pointer-events-none",
-            className,
-          ]
-            .filter(Boolean)
-            .join(" ")}
+            "z-[var(--z-dropdown)]",
+            "max-h-[240px] overflow-y-auto",
+            "rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]",
+            "p-1 shadow-[var(--shadow-sm)]",
+          ].join(" ")}
         >
-          <span className="truncate">{selected?.label ?? placeholder}</span>
-          <ChevronIcon open={open} />
-        </DropdownMenu.Trigger>
-
-        <DropdownMenu.Portal>
-          <DropdownMenu.Content
-            align="start"
-            sideOffset={4}
-            className={[
-              "z-[var(--z-dropdown)] w-[var(--radix-dropdown-menu-trigger-width)]",
-              "max-h-[240px] overflow-y-auto",
-              "rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]",
-              "p-1 shadow-[var(--shadow-sm)]",
-            ].join(" ")}
-          >
+          <SelectPrimitive.Viewport>
             {options.map((opt) => (
-              <DropdownMenu.Item
+              <SelectPrimitive.Item
                 key={opt.value}
-                onSelect={() => onChange?.(opt.value)}
+                value={opt.value}
                 className={[
                   "flex items-center px-2 py-1.5",
-                  "rounded-[var(--radius-sm)] text-[var(--text-body-sm)]",
+                  "rounded-[var(--radius-sm)] text-[var(--text-body-sm)] text-[var(--ink)]",
                   "cursor-pointer select-none outline-none",
                   "data-[highlighted]:bg-[var(--accent-subtle)] data-[highlighted]:text-[var(--accent)]",
-                  opt.value === value ? "text-[var(--accent)] font-medium" : "text-[var(--ink)]",
+                  "data-[state=checked]:font-medium data-[state=checked]:text-[var(--accent)]",
                 ].join(" ")}
               >
-                {opt.label}
-              </DropdownMenu.Item>
+                <SelectPrimitive.ItemText>{opt.label}</SelectPrimitive.ItemText>
+              </SelectPrimitive.Item>
             ))}
-          </DropdownMenu.Content>
-        </DropdownMenu.Portal>
-      </DropdownMenu.Root>
-    );
-  },
+          </SelectPrimitive.Viewport>
+        </SelectPrimitive.Content>
+      </SelectPrimitive.Portal>
+    </SelectPrimitive.Root>
+  ),
 );
 
 Select.displayName = "Select";
 
-/* ─── Chevron icon (inline) ── */
+/* ─── Chevron icon ── */
 
-function ChevronIcon({ open }: { open: boolean }) {
+function ChevronIcon() {
   return (
     <svg
       width="12"
@@ -93,7 +94,7 @@ function ChevronIcon({ open }: { open: boolean }) {
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"
-      className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+      className="shrink-0 opacity-60"
     >
       <path d="M3 4.5L6 7.5L9 4.5" />
     </svg>

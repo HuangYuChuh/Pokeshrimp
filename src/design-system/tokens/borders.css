@@ -1,10 +1,11 @@
 /* ─── Borders ─────────────────────────────────────────────────
- * Semantic border shorthands referencing color tokens.
+ * Semantic border shorthands. Names use --line- prefix to avoid
+ * colliding with the color tokens (--border, --border-subtle, etc).
  * ────────────────────────────────────────────────────────── */
 
 :root {
-  --border-thin:    1px solid var(--border);
-  --border-subtle:  1px solid var(--border-subtle);
-  --border-strong:  1px solid var(--border-strong);
-  --border-accent:  2px solid var(--accent);
+  --line-thin: 1px solid var(--border);
+  --line-subtle: 1px solid var(--border-subtle);
+  --line-strong: 1px solid var(--border-strong);
+  --line-accent: 2px solid var(--accent);
 }
