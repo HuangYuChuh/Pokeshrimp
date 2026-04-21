@@ -38,7 +38,7 @@ export const TabsTrigger = forwardRef<
       "border-b-2 border-transparent -mb-px",
       "data-[state=active]:text-[var(--ink)] data-[state=active]:border-[var(--accent)]",
       "transition-colors outline-none",
-      "focus-visible:ring-2 focus-visible:ring-[var(--accent)]",
+      "focus-visible:ring-1 focus-visible:ring-[var(--accent)]",
       className,
     ]
       .filter(Boolean)
@@ -59,7 +59,7 @@ export const TabsContent = forwardRef<
     ref={ref}
     className={[
       "mt-[var(--space-4)] outline-none",
-      "focus-visible:ring-2 focus-visible:ring-[var(--accent)]",
+      "focus-visible:ring-1 focus-visible:ring-[var(--accent)]",
       className,
     ]
       .filter(Boolean)

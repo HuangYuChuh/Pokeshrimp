@@ -11,7 +11,7 @@ const baseInput = [
   "placeholder:text-[var(--ink-ghost)]",
   "transition-colors",
   "hover:border-[var(--border-strong)]",
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:border-transparent",
+  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] focus-visible:border-transparent",
   "disabled:opacity-50 disabled:pointer-events-none",
 ].join(" ");
 

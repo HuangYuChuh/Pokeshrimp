@@ -20,7 +20,7 @@ const base = [
   "inline-flex items-center justify-center gap-[var(--gap-inline)]",
   "font-medium whitespace-nowrap select-none",
   "transition-colors",
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2",
+  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2",
   "disabled:opacity-50 disabled:pointer-events-none",
 ].join(" ");
 

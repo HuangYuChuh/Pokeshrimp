@@ -23,11 +23,19 @@ import {
   TooltipContent,
   TooltipProvider,
   Badge,
+  Chip,
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent,
   Skeleton,
+  Separator,
+  Switch,
+  Select,
+  Accordion,
+  AccordionItem,
+  ToastProvider,
+  useToast,
 } from "@/design-system/components";
 import { useState } from "react";
 
@@ -353,7 +361,128 @@ export default function DesignSystemPreview() {
             <Skeleton className="h-20 w-full" />
           </div>
         </Section>
+
+        {/* ── Chip ── */}
+        <Section title="Chip">
+          <div className="flex flex-wrap items-center gap-[var(--space-2)]">
+            <Chip>Default</Chip>
+            <Chip variant="accent">Accent</Chip>
+            <Chip variant="success">Success</Chip>
+            <Chip variant="warning">Warning</Chip>
+            <Chip variant="error">Error</Chip>
+            <Chip variant="accent" size="md">
+              Medium
+            </Chip>
+            <Chip variant="default" onClose={() => {}}>
+              Closeable
+            </Chip>
+          </div>
+        </Section>
+
+        {/* ── Separator ── */}
+        <Section title="Separator">
+          <div className="max-w-md space-y-[var(--space-3)]">
+            <p className="text-[var(--text-body-sm)] text-[var(--ink-secondary)]">Content above</p>
+            <Separator />
+            <p className="text-[var(--text-body-sm)] text-[var(--ink-secondary)]">Content below</p>
+          </div>
+        </Section>
+
+        {/* ── Switch ── */}
+        <Section title="Switch">
+          <div className="flex items-center gap-[var(--space-4)]">
+            <label className="flex items-center gap-[var(--space-2)] text-[var(--text-body-sm)] text-[var(--ink)]">
+              <Switch defaultChecked />
+              Dark mode
+            </label>
+            <label className="flex items-center gap-[var(--space-2)] text-[var(--text-body-sm)] text-[var(--ink)]">
+              <Switch />
+              Notifications
+            </label>
+            <label className="flex items-center gap-[var(--space-2)] text-[var(--text-body-sm)] text-[var(--ink-ghost)]">
+              <Switch disabled />
+              Disabled
+            </label>
+          </div>
+        </Section>
+
+        {/* ── Select ── */}
+        <Section title="Select">
+          <SelectDemo />
+        </Section>
+
+        {/* ── Accordion ── */}
+        <Section title="Accordion">
+          <div className="max-w-md">
+            <Accordion defaultValue="item-1">
+              <AccordionItem value="item-1" trigger="General Settings">
+                Configure API keys, default model, and workspace preferences.
+              </AccordionItem>
+              <AccordionItem value="item-2" trigger="Permissions">
+                Control which CLI commands are auto-approved or blocked.
+              </AccordionItem>
+              <AccordionItem value="item-3" trigger="Hooks">
+                Add shell scripts that trigger on agent lifecycle events.
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </Section>
+
+        {/* ── Toast ── */}
+        <Section title="Toast">
+          <ToastDemo />
+        </Section>
       </div>
     </TooltipProvider>
+  );
+}
+
+/* ─── Demo helpers (keep page.tsx clean) ── */
+
+function SelectDemo() {
+  const [value, setValue] = useState("sonnet");
+  return (
+    <div className="max-w-[240px]">
+      <Select
+        value={value}
+        onChange={setValue}
+        options={[
+          { value: "sonnet", label: "Claude Sonnet 4" },
+          { value: "haiku", label: "Claude Haiku 4.5" },
+          { value: "gpt5", label: "GPT-5.4" },
+          { value: "gpt4o", label: "GPT-4o" },
+        ]}
+        placeholder="Choose model..."
+      />
+    </div>
+  );
+}
+
+function ToastDemo() {
+  return (
+    <ToastProvider>
+      <ToastButtons />
+    </ToastProvider>
+  );
+}
+
+function ToastButtons() {
+  const { toast } = useToast();
+  return (
+    <div className="flex gap-[var(--space-2)]">
+      <Button variant="outline" size="sm" onClick={() => toast("Settings saved")}>
+        Default toast
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => toast("File generated successfully", "success")}
+      >
+        Success toast
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => toast("API key missing", "error")}>
+        Error toast
+      </Button>
+    </div>
   );
 }
