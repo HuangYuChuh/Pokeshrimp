@@ -28,4 +28,4 @@ export { Skeleton } from "./skeleton";
 export { Separator } from "./separator";
 export { Switch } from "./switch";
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "./accordion";
-export { ToastProvider, useToast } from "./toast";
+export { ToastProvider, Toaster, useToast } from "./toast";

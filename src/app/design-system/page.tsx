@@ -490,18 +490,43 @@ function ToastButtons() {
   const { toast } = useToast();
   return (
     <div className="flex gap-[var(--space-2)]">
-      <Button variant="outline" size="sm" onClick={() => toast("Settings saved")}>
-        Default toast
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => toast("Settings saved", { variant: "success" })}
+      >
+        Success
       </Button>
       <Button
         variant="outline"
         size="sm"
-        onClick={() => toast("File generated successfully", "success")}
+        onClick={() =>
+          toast("API key missing", {
+            variant: "error",
+            description: "Open Settings to add your key.",
+          })
+        }
       >
-        Success toast
+        Error
       </Button>
-      <Button variant="outline" size="sm" onClick={() => toast("API key missing", "error")}>
-        Error toast
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => toast("Rate limit reached", { variant: "warning" })}
+      >
+        Warning
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() =>
+          toast("New skill imported", {
+            variant: "info",
+            description: "ComfyUI workflow is now available.",
+          })
+        }
+      >
+        Info
       </Button>
     </div>
   );
