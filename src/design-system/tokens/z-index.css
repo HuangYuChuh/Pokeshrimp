@@ -1,0 +1,14 @@
+/* ─── Z-index ─────────────────────────────────────────────────
+ * Layering system. Never use magic numbers outside this scale.
+ * ────────────────────────────────────────────────────────── */
+
+:root {
+  --z-base:      0;
+  --z-dropdown:  10;
+  --z-sticky:    20;
+  --z-overlay:   30;
+  --z-modal:     40;
+  --z-popover:   50;
+  --z-toast:     60;
+  --z-tooltip:   70;
+}

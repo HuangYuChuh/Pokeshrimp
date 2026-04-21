@@ -1,0 +1,34 @@
+/* ─── Typography ──────────────────────────────────────────────
+ * Serif titles + system sans body + mono code.
+ * Chinese fallback: Noto Sans SC.
+ * ────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Font families ── */
+  --font-sans:   "Söhne", -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 "Noto Sans SC", sans-serif;
+  --font-serif:  "Tiempos Headline", "Georgia", "Noto Serif SC", serif;
+  --font-mono:   "Söhne Mono", "JetBrains Mono", "Fira Code", "SF Mono",
+                 ui-monospace, monospace;
+
+  /* ── Font sizes ── */
+  --text-hero:      32px;
+  --text-display:   24px;
+  --text-headline:  18px;
+  --text-title:     15px;
+  --text-body:      14px;
+  --text-body-sm:   13px;
+  --text-caption:   12px;
+  --text-micro:     11px;
+
+  /* ── Line heights ── */
+  --leading-tight:    1.2;
+  --leading-snug:     1.35;
+  --leading-normal:   1.5;
+  --leading-relaxed:  1.75;
+
+  /* ── Letter spacing ── */
+  --tracking-tight:   -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.03em;
+}
