@@ -55,7 +55,7 @@ export const DropdownItem = forwardRef<HTMLDivElement, DropdownItemProps>(
         "flex items-center gap-[var(--gap-inline)] px-2 py-1.5",
         "rounded-[var(--radius-sm)] text-[var(--text-body-sm)] text-[var(--ink)]",
         "cursor-pointer select-none outline-none",
-        "data-[highlighted]:bg-[var(--border-subtle)]",
+        "data-[highlighted]:bg-[var(--accent-subtle)] data-[highlighted]:text-[var(--accent)]",
         className,
       ]
         .filter(Boolean)

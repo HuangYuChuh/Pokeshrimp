@@ -18,8 +18,14 @@ export {
 } from "./dropdown";
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip";
 export { Badge } from "./badge";
+export { Chip } from "./chip";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
+export { Select } from "./select";
 
 /* P2 — Supporting */
 export { ScrollArea } from "./scroll-area";
 export { Skeleton } from "./skeleton";
+export { Separator } from "./separator";
+export { Switch } from "./switch";
+export { Accordion, AccordionItem } from "./accordion";
+export { ToastProvider, useToast } from "./toast";
