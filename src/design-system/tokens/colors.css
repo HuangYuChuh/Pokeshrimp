@@ -1,6 +1,8 @@
 /* ─── Colors ─────────────────────────────────────────────────
  * Role-based naming, oklch color space.
- * Dark theme = default. Light theme via .light on <html>.
+ * Dark theme = default (:root). Light theme via .light on <html>.
+ * Compatible with Tailwind's .dark class — when .dark is removed
+ * and .light is added, light tokens activate.
  * ────────────────────────────────────────────────────────── */
 
 :root {

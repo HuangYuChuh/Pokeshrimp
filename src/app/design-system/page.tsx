@@ -49,7 +49,14 @@ function ThemeToggle() {
       onClick={() => {
         const next = !dark;
         setDark(next);
-        document.documentElement.classList.toggle("light", !next);
+        const el = document.documentElement;
+        if (next) {
+          el.classList.add("dark");
+          el.classList.remove("light");
+        } else {
+          el.classList.remove("dark");
+          el.classList.add("light");
+        }
       }}
       className="fixed top-4 right-4 z-50 px-3 py-1.5 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] text-[var(--ink)] text-[var(--text-body-sm)]"
     >
@@ -99,7 +106,7 @@ export default function DesignSystemPreview() {
   return (
     <TooltipProvider>
       <div
-        className="min-h-screen p-[var(--space-8)] h-screen overflow-y-auto"
+        className="min-h-screen p-[var(--space-8)]"
         style={{
           background: "var(--canvas)",
           color: "var(--ink)",
