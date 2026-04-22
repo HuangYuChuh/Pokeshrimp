@@ -21,7 +21,7 @@ interface ModalContentProps {
 export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
   ({ children, className, title, description }, ref) => (
     <Dialog.Portal>
-      <Dialog.Overlay className="fixed inset-0 z-[var(--z-overlay)] bg-[var(--overlay)] data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+      <Dialog.Overlay className="fixed inset-0 z-[var(--z-overlay)] bg-[var(--overlay)]" />
       <Dialog.Content
         ref={ref}
         className={[
@@ -29,7 +29,7 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
           "w-full max-w-[480px] max-h-[85vh] overflow-y-auto",
           "rounded-[var(--radius-2xl)] border border-[var(--border)] bg-[var(--surface)]",
           "p-[var(--space-6)] shadow-[var(--shadow-md)]",
-          "focus-visible:outline-none",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]",
           className,
         ]
           .filter(Boolean)

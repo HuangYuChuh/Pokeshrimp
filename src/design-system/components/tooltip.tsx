@@ -33,7 +33,6 @@ export const TooltipContent = forwardRef<HTMLDivElement, TooltipContentProps>(
           "rounded-[var(--radius-sm)] bg-[var(--canvas-invert)] px-2.5 py-1.5",
           "text-[var(--text-caption)] text-[var(--canvas)]",
           "shadow-[var(--shadow-sm)]",
-          "animate-in fade-in-0 zoom-in-95",
           className,
         ]
           .filter(Boolean)

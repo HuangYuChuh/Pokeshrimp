@@ -48,8 +48,10 @@ function ThemeToggle() {
     typeof document !== "undefined" ? document.documentElement.classList.contains("dark") : true,
   );
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
+      size="sm"
+      aria-pressed={dark}
       onClick={() => {
         const next = !dark;
         setDark(next);
@@ -61,11 +63,14 @@ function ThemeToggle() {
           el.classList.remove("dark");
           el.classList.add("light");
         }
+        try {
+          localStorage.setItem("pokeshrimp-theme", next ? "dark" : "light");
+        } catch {}
       }}
-      className="fixed top-4 right-4 z-50 px-3 py-1.5 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] text-[var(--ink)] text-[var(--text-body-sm)]"
+      className="fixed top-4 right-4 z-50"
     >
       {dark ? "Light mode" : "Dark mode"}
-    </button>
+    </Button>
   );
 }
 
@@ -409,18 +414,9 @@ export default function DesignSystemPreview() {
           {/* ── Switch ── */}
           <Section title="Switch">
             <div className="flex items-center gap-[var(--space-4)]">
-              <label className="flex items-center gap-[var(--space-2)] text-[var(--text-body-sm)] text-[var(--ink)]">
-                <Switch defaultChecked />
-                Dark mode
-              </label>
-              <label className="flex items-center gap-[var(--space-2)] text-[var(--text-body-sm)] text-[var(--ink)]">
-                <Switch />
-                Notifications
-              </label>
-              <label className="flex items-center gap-[var(--space-2)] text-[var(--text-body-sm)] text-[var(--ink-ghost)]">
-                <Switch disabled />
-                Disabled
-              </label>
+              <Switch defaultChecked>Dark mode</Switch>
+              <Switch>Notifications</Switch>
+              <Switch disabled>Disabled</Switch>
             </div>
           </Section>
 

@@ -9,13 +9,15 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ interactive, className, ...props }, ref) => (
+  ({ interactive, className, tabIndex, ...props }, ref) => (
     <div
       ref={ref}
+      tabIndex={interactive ? (tabIndex ?? 0) : tabIndex}
       className={[
         "rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]",
         "p-[var(--padding-card)]",
-        interactive && "cursor-pointer transition-colors hover:bg-[var(--surface-raised)]",
+        interactive &&
+          "cursor-pointer transition-colors hover:bg-[var(--surface-raised)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]",
         className,
       ]
         .filter(Boolean)
