@@ -129,9 +129,12 @@ export function SkillsTab({ active }: SkillsTabProps) {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-[var(--text-title)] font-semibold">Skills</h3>
+        <div className="flex items-center gap-[var(--gap-inline)]">
+          <Icon icon="solar:widget-outline" width={18} className="text-[var(--ink-secondary)]" />
+          <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Skills</h3>
+        </div>
         <Button variant="outline" size="sm" onClick={handleImport}>
           <Icon icon="solar:upload-outline" width={13} className="mr-1.5" />
           Import
@@ -201,8 +204,8 @@ function SkillCard({
 }) {
   return (
     <Card>
-      <CardContent className="p-0">
-        <div className="flex items-center gap-[var(--gap-inline)] px-3 py-2.5">
+      <CardContent className="p-0 overflow-hidden">
+        <div className="flex items-center gap-[var(--gap-inline)] px-3 py-2.5 min-w-0">
           <button
             type="button"
             onClick={onToggle}

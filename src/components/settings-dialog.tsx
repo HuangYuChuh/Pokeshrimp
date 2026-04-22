@@ -168,7 +168,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
       <ModalContent
         title="Settings"
         hideHeader
-        className="nodrag w-[720px] max-w-[90vw] max-h-[80vh] p-0 flex flex-col overflow-hidden"
+        className="nodrag w-[780px] max-w-[90vw] max-h-[85vh] p-0 flex flex-col overflow-hidden"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">

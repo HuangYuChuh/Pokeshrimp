@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { Select } from "@/design-system/components";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
 
@@ -12,15 +13,19 @@ export function ModelsTab({ defaultModel, onDefaultModelChange }: ModelsTabProps
   const options = MODEL_OPTIONS.map((m) => ({ value: m.id, label: m.label }));
 
   return (
-    <div className="space-y-5">
-      <h3 className="text-[var(--text-title)] font-semibold mb-4">Models</h3>
+    <div className="space-y-6">
+      <div className="flex items-center gap-[var(--gap-inline)]">
+        <Icon icon="solar:cpu-bolt-outline" width={18} className="text-[var(--ink-secondary)]" />
+        <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Models</h3>
+      </div>
 
       <div>
-        <div className="mb-1.5">
-          <label className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
-            Default Model
-          </label>
-        </div>
+        <label className="mb-2 block text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+          Default Model
+        </label>
+        <p className="mb-3 text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+          Used for new conversations when no model is specified.
+        </p>
         <Select
           value={defaultModel}
           onChange={onDefaultModelChange}
