@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Card } from "@heroui/react";
+import { Card, CardContent } from "@/design-system/components";
 import { MessageActions } from "./message-actions";
 import { EditBubble } from "./edit-bubble";
 import { ToolCard } from "./tool-card";
@@ -16,13 +16,16 @@ const markdownComponents: Components = {
     const isInline = !className;
     if (isInline) {
       return (
-        <code className="rounded bg-muted px-1.5 py-0.5 text-[13px]" {...props}>
+        <code
+          className="rounded bg-[var(--border-subtle)] px-1.5 py-0.5 text-[var(--text-body-sm)]"
+          {...props}
+        >
           {children}
         </code>
       );
     }
     return (
-      <pre className="overflow-x-auto rounded-lg bg-surface p-4 text-[13px]">
+      <pre className="overflow-x-auto rounded-[var(--radius-lg)] bg-[var(--surface)] p-4 text-[var(--text-body-sm)]">
         <code className={className} {...props}>
           {children}
         </code>
@@ -60,7 +63,7 @@ export function MessageBubble({
   onRegenerate,
 }: MessageBubbleProps) {
   return (
-    <div className="group/msg relative mb-6">
+    <div className="group/msg relative mb-[var(--gap-message)]">
       {message.content && (
         <div className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
           {message.role === "user" ? (
@@ -73,12 +76,12 @@ export function MessageBubble({
               />
             ) : (
               <div className="relative max-w-[95%] sm:max-w-[85%]">
-                <Card variant="secondary" className="bg-primary text-primary-foreground">
-                  <Card.Content className="px-4 py-2.5">
-                    <div className="whitespace-pre-wrap break-words text-[14px] leading-7">
+                <Card className="bg-[var(--canvas-invert)] text-[var(--canvas)]">
+                  <CardContent className="px-4 py-2.5">
+                    <div className="whitespace-pre-wrap break-words text-[var(--text-body)] leading-[var(--leading-relaxed)]">
                       {message.content}
                     </div>
-                  </Card.Content>
+                  </CardContent>
                 </Card>
                 <MessageActions
                   role="user"
@@ -89,7 +92,7 @@ export function MessageBubble({
             )
           ) : (
             <div className="relative max-w-[95%] sm:max-w-[85%]">
-              <div className="prose prose-sm max-w-none text-[14px] leading-7 text-foreground dark:prose-invert">
+              <div className="prose prose-sm max-w-none text-[var(--text-body)] leading-[var(--leading-relaxed)] text-[var(--ink)] dark:prose-invert">
                 <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                   {message.content}
                 </ReactMarkdown>

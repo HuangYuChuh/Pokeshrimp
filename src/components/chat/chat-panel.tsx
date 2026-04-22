@@ -4,9 +4,16 @@ import { useChat } from "@ai-sdk/react";
 import { useRef, useEffect, useCallback, useState, type KeyboardEvent } from "react";
 import { useAppState, useAppDispatch, type OutputFile } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { PanelLeft, PanelRight, ClipboardList, ChevronUp } from "lucide-react";
-import { Button, Card, Chip, Skeleton, ScrollShadow } from "@heroui/react";
-import { MODEL_OPTIONS } from "@/core/ai/provider";
+import { Icon } from "@iconify/react";
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardContent,
+  Chip,
+  Skeleton,
+  ScrollArea,
+} from "@/design-system/components";
 import { MessageBubble } from "./message-bubble";
 import { ApprovalCards } from "./approval-cards";
 import { InputArea, type SkillInfo } from "./input-area";
@@ -32,8 +39,6 @@ function useSessionSummary(sessionId: string | null, hasMessages: boolean) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Only fetch summary when we have a session but no local messages yet
-    // (i.e. user just reopened an old session)
     if (!sessionId || hasMessages) {
       setData(null);
       return;
@@ -119,7 +124,6 @@ export function ChatPanel({
   const { currentSessionId, rerunRequested } = useAppState();
   const dispatch = useAppDispatch();
 
-  const currentModel = MODEL_OPTIONS.find((m) => m.id === modelId);
   const skills = useSkills();
 
   const {
@@ -309,7 +313,6 @@ export function ChatPanel({
   const { summary: sessionSummary } = useSessionSummary(currentSessionId, messages.length > 0);
   const [summaryCollapsed, setSummaryCollapsed] = useState(false);
 
-  // Auto-collapse summary when user sends a new message
   const prevMessageCount = useRef(0);
   useEffect(() => {
     if (messages.length > prevMessageCount.current && prevMessageCount.current === 0) {
@@ -318,7 +321,6 @@ export function ChatPanel({
     prevMessageCount.current = messages.length;
   }, [messages.length]);
 
-  // Reset collapsed state when session changes
   useEffect(() => {
     setSummaryCollapsed(false);
   }, [currentSessionId]);
@@ -342,7 +344,6 @@ export function ChatPanel({
       ref={textareaRef}
       input={input}
       isLoading={isLoading}
-      modelLabel={currentModel?.label ?? "Model"}
       modelId={modelId}
       onModelChange={onModelChange}
       skills={skills}
@@ -354,28 +355,26 @@ export function ChatPanel({
   );
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col bg-background">
+    <div className="flex min-w-0 flex-1 flex-col bg-[var(--canvas)]">
       {/* Drag region with toggle buttons */}
       <div className="drag flex h-13 shrink-0 items-center justify-between px-3">
         <Button
-          isIconOnly
           variant="ghost"
           size="sm"
-          onPress={onToggleSidebar}
-          className={cn("nodrag h-7 w-7 min-w-0", sidebarOpen && "invisible")}
+          onClick={onToggleSidebar}
+          className={cn("nodrag h-7 w-7 min-w-0 p-0", sidebarOpen && "invisible")}
           aria-label="Toggle sidebar"
         >
-          <PanelLeft size={16} strokeWidth={1.5} />
+          <Icon icon="solar:sidebar-minimalistic-outline" width={16} />
         </Button>
         <Button
-          isIconOnly
           variant="ghost"
           size="sm"
-          onPress={onTogglePreview}
-          className={cn("nodrag h-7 w-7 min-w-0", previewOpen && "invisible")}
+          onClick={onTogglePreview}
+          className={cn("nodrag h-7 w-7 min-w-0 p-0", previewOpen && "invisible")}
           aria-label="Toggle preview"
         >
-          <PanelRight size={16} strokeWidth={1.5} />
+          <Icon icon="solar:sidebar-minimalistic-outline" width={16} className="scale-x-[-1]" />
         </Button>
       </div>
 
@@ -384,19 +383,21 @@ export function ChatPanel({
         <div className="flex flex-1 flex-col">
           <div className="flex flex-1 items-center justify-center pb-32">
             <div className="text-center">
-              <h1 className="text-[28px] font-semibold tracking-tight text-foreground">
+              <h1
+                className="text-[var(--text-hero)] font-light tracking-tight text-[var(--ink)]"
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
                 What would you like to create?
               </h1>
-              <p className="mt-3 text-[15px] text-muted">
+              <p className="mt-3 text-[var(--text-title)] text-[var(--ink-secondary)]">
                 Describe what you want to create, and leave the rest to me
               </p>
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <div className="mt-5 flex flex-wrap justify-center gap-[var(--gap-inline)]">
                 {EXAMPLE_PROMPTS.map((prompt) => (
                   <Chip
                     key={prompt}
-                    variant="secondary"
                     size="md"
-                    className="cursor-pointer transition-colors hover:bg-muted"
+                    className="cursor-pointer transition-colors hover:bg-[var(--border-subtle)]"
                     onClick={() => handleExampleClick(prompt)}
                   >
                     {prompt}
@@ -409,51 +410,50 @@ export function ChatPanel({
         </div>
       ) : (
         <>
-          <ScrollShadow className="flex-1 overflow-y-auto">
-            <div className="selectable mx-auto max-w-[680px] px-3 pb-6 pt-4 sm:px-6">
+          <ScrollArea className="flex-1">
+            <div className="selectable mx-auto max-w-[var(--width-chat)] px-3 pb-6 pt-4 sm:px-6">
               {/* Session summary card */}
               {sessionSummary && !summaryCollapsed && (
-                <Card variant="secondary" className="mb-6">
-                  <Card.Header className="flex flex-row items-center justify-between px-4 pb-0 pt-3">
-                    <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
-                      <ClipboardList size={15} strokeWidth={1.5} />
+                <Card className="mb-[var(--gap-message)]">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-[var(--gap-inline)] text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+                      <Icon icon="solar:clipboard-list-outline" width={15} />
                       Session Summary
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onPress={() => setSummaryCollapsed(true)}
-                      className="h-6 min-w-0 gap-1 px-2 text-[12px]"
+                      onClick={() => setSummaryCollapsed(true)}
+                      className="h-6 min-w-0 gap-1 px-2 text-[var(--text-caption)]"
                     >
                       Collapse
-                      <ChevronUp size={12} strokeWidth={1.5} />
+                      <Icon icon="solar:alt-arrow-up-outline" width={12} />
                     </Button>
-                  </Card.Header>
-                  <Card.Content className="px-4 pb-3 pt-1">
-                    <Card.Description className="text-[12px]">
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
                       {sessionSummary.messageCount} messages
                       {sessionSummary.lastActiveAt &&
                         ` \u00B7 Last active ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
-                    </Card.Description>
-                    <div className="mt-2 space-y-1 text-[13px] leading-relaxed text-muted">
+                    </p>
+                    <div className="mt-2 space-y-1 text-[var(--text-body-sm)] leading-relaxed text-[var(--ink-secondary)]">
                       {sessionSummary.summary.split("\n").map((line, i) => (
                         <p key={i}>{line}</p>
                       ))}
                     </div>
-                  </Card.Content>
+                  </CardContent>
                 </Card>
               )}
 
-              {/* Collapsed summary — minimal inline hint */}
+              {/* Collapsed summary */}
               {sessionSummary && summaryCollapsed && (
                 <div className="mb-4 flex justify-center">
                   <Chip
-                    variant="secondary"
                     size="sm"
                     className="cursor-pointer"
                     onClick={() => setSummaryCollapsed(false)}
                   >
-                    <ClipboardList size={12} strokeWidth={1.5} />
+                    <Icon icon="solar:clipboard-list-outline" width={12} />
                     {sessionSummary.messageCount} messages
                     {sessionSummary.lastActiveAt &&
                       ` \u00B7 ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
@@ -478,16 +478,16 @@ export function ChatPanel({
 
               {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
                 <div className="flex flex-col gap-2.5 py-2">
-                  <Skeleton className="h-4 w-3/4 rounded-lg" />
-                  <Skeleton className="h-4 w-1/2 rounded-lg" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
                 </div>
               )}
 
               {error && (
-                <Card variant="default" className="border-danger/20 bg-danger/5">
-                  <Card.Content className="px-4 py-3 text-[13px] text-danger">
+                <Card className="border-[var(--error)] bg-[color-mix(in_oklch,var(--error),transparent_95%)]">
+                  <CardContent className="px-4 py-3 text-[var(--text-body-sm)] text-[var(--error)]">
                     {error.message || "Something went wrong"}
-                  </Card.Content>
+                  </CardContent>
                 </Card>
               )}
 
@@ -495,7 +495,7 @@ export function ChatPanel({
 
               <div ref={messagesEndRef} />
             </div>
-          </ScrollShadow>
+          </ScrollArea>
           {inputArea}
         </>
       )}
