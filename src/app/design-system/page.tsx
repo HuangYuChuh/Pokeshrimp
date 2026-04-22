@@ -156,6 +156,14 @@ export default function DesignSystemPreview() {
             </div>
           </Section>
 
+          {/* ── Accent Color Candidates ── */}
+          <Section title="Accent Color Candidates">
+            <p className="text-[var(--text-body-sm)] text-[var(--ink-secondary)] mb-[var(--space-4)]">
+              Click a candidate to apply it live. Current: oklch(0.62 0.14 45) terracotta.
+            </p>
+            <AccentPicker />
+          </Section>
+
           {/* ── Typography ── */}
           <Section title="Typography">
             <div className="space-y-[var(--space-3)]">
@@ -478,6 +486,94 @@ function SelectDemo() {
         ]}
         placeholder="Choose model..."
       />
+    </div>
+  );
+}
+
+const ACCENT_CANDIDATES = [
+  {
+    name: "Terracotta (current)",
+    value: "oklch(0.62 0.14 45)",
+    hover: "oklch(0.58 0.14 45)",
+    chroma: "0.14",
+  },
+  {
+    name: "Warm Copper",
+    value: "oklch(0.60 0.07 70)",
+    hover: "oklch(0.55 0.07 70)",
+    chroma: "0.07",
+  },
+  { name: "Soft Sand", value: "oklch(0.62 0.06 55)", hover: "oklch(0.57 0.06 55)", chroma: "0.06" },
+  {
+    name: "Quiet Sage",
+    value: "oklch(0.60 0.06 155)",
+    hover: "oklch(0.55 0.06 155)",
+    chroma: "0.06",
+  },
+  {
+    name: "Pale Coral",
+    value: "oklch(0.65 0.08 35)",
+    hover: "oklch(0.60 0.08 35)",
+    chroma: "0.08",
+  },
+];
+
+function AccentPicker() {
+  const [active, setActive] = useState(0);
+  return (
+    <div className="space-y-[var(--space-4)]">
+      {/* Swatches */}
+      <div className="flex gap-[var(--space-3)]">
+        {ACCENT_CANDIDATES.map((c, i) => (
+          <button
+            key={c.name}
+            type="button"
+            onClick={() => {
+              setActive(i);
+              document.documentElement.style.setProperty("--accent", c.value);
+              document.documentElement.style.setProperty("--accent-hover", c.hover);
+              document.documentElement.style.setProperty(
+                "--accent-subtle",
+                c.value.replace(")", " / 0.12)"),
+              );
+              document.documentElement.style.setProperty(
+                "--accent-muted",
+                c.value.replace(")", " / 0.20)"),
+              );
+            }}
+            className="flex flex-col items-center gap-[var(--space-2)]"
+          >
+            <div
+              className={[
+                "w-14 h-14 rounded-[var(--radius-lg)] border-2 transition-all",
+                active === i ? "border-[var(--ink)] scale-110" : "border-transparent",
+              ].join(" ")}
+              style={{ background: c.value }}
+            />
+            <span className="text-[var(--text-micro)] text-[var(--ink-secondary)] text-center max-w-[70px]">
+              {c.name}
+            </span>
+            <span className="text-[var(--text-micro)] text-[var(--ink-tertiary)] font-mono">
+              c={c.chroma}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Live preview with selected accent */}
+      <div className="flex items-center gap-[var(--space-3)] p-[var(--space-4)] rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]">
+        <Button variant="primary" size="sm">
+          Primary
+        </Button>
+        <Button variant="outline" size="sm">
+          Outline
+        </Button>
+        <Badge variant="accent">Accent badge</Badge>
+        <Chip variant="accent" size="md">
+          Accent chip
+        </Chip>
+        <span className="text-[var(--text-body-sm)] text-[var(--accent)]">Accent text</span>
+      </div>
     </div>
   );
 }
