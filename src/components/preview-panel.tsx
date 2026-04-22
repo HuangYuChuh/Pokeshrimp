@@ -3,13 +3,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppState, useAppDispatch, type PreviewTab } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { Tabs, TextArea, Button, Chip } from "@heroui/react";
-import { ZoomIn, ZoomOut, Maximize, Music, RefreshCw, Pencil, Columns } from "lucide-react";
+import { Icon } from "@iconify/react";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  Textarea,
+  Button,
+  Chip,
+} from "@/design-system/components";
 import { DesignfileGraph } from "@/components/designfile-graph";
 
 interface PreviewPanelProps {
   open: boolean;
-  onToggle: () => void;
 }
 
 export function PreviewPanel({ open }: PreviewPanelProps) {
@@ -17,8 +24,8 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
   const dispatch = useAppDispatch();
 
   const handleTabChange = useCallback(
-    (key: React.Key) => {
-      dispatch({ type: "SET_PREVIEW_TAB", tab: key as PreviewTab });
+    (value: string) => {
+      dispatch({ type: "SET_PREVIEW_TAB", tab: value as PreviewTab });
     },
     [dispatch],
   );
@@ -33,51 +40,48 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
   return (
     <aside
       className={cn(
-        "flex h-screen shrink-0 flex-col border-l border-border bg-surface-secondary overflow-hidden transition-all duration-200",
-        open ? "w-[380px] min-w-[380px]" : "w-0 min-w-0 border-l-0",
+        "flex h-screen shrink-0 flex-col border-l border-[var(--border)] bg-[var(--canvas-subtle)] overflow-hidden transition-all duration-200",
+        open ? "w-[var(--width-preview)] min-w-[var(--width-preview)]" : "w-0 min-w-0 border-l-0",
       )}
     >
-      {/* macOS traffic light spacer */}
       <div className="drag h-13 shrink-0" />
 
       <Tabs
-        selectedKey={previewTab}
-        onSelectionChange={handleTabChange}
+        value={previewTab}
+        onValueChange={handleTabChange}
         className="flex flex-1 flex-col overflow-hidden"
       >
-        <Tabs.List className="mx-4 shrink-0">
-          <Tabs.Tab id="preview">Preview</Tabs.Tab>
-          <Tabs.Tab id="editor">Editor</Tabs.Tab>
-          <Tabs.Tab id="output">Output</Tabs.Tab>
-          <Tabs.Tab id="designfile">Designfile</Tabs.Tab>
-        </Tabs.List>
+        <TabsList className="mx-4 shrink-0">
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="editor">Editor</TabsTrigger>
+          <TabsTrigger value="output">Output</TabsTrigger>
+          <TabsTrigger value="designfile">Designfile</TabsTrigger>
+        </TabsList>
 
-        <Tabs.Panel id="preview" className="flex-1 overflow-hidden">
+        <TabsContent value="preview" className="flex-1 overflow-hidden mt-0">
           <PreviewContent
             content={previewContent}
             previousPreview={previousPreview}
             onRerun={() => dispatch({ type: "REQUEST_RERUN" })}
             onEditRerun={() => dispatch({ type: "SET_PREVIEW_TAB", tab: "editor" })}
           />
-        </Tabs.Panel>
+        </TabsContent>
 
-        <Tabs.Panel id="editor" className="flex-1 overflow-hidden">
+        <TabsContent value="editor" className="flex-1 overflow-hidden mt-0">
           <EditorContent value={editorParams} onChange={handleEditorChange} />
-        </Tabs.Panel>
+        </TabsContent>
 
-        <Tabs.Panel id="output" className="flex-1 overflow-hidden">
+        <TabsContent value="output" className="flex-1 overflow-hidden mt-0">
           <OutputContent files={outputFiles} />
-        </Tabs.Panel>
+        </TabsContent>
 
-        <Tabs.Panel id="designfile" className="flex-1 overflow-hidden">
+        <TabsContent value="designfile" className="flex-1 overflow-hidden mt-0">
           <DesignfileGraph />
-        </Tabs.Panel>
+        </TabsContent>
       </Tabs>
     </aside>
   );
 }
-
-// --- Media type detection ---
 
 const VIDEO_EXTENSIONS = ["mp4", "mov", "webm", "avi", "mkv"];
 const AUDIO_EXTENSIONS = ["mp3", "wav", "flac", "ogg"];
@@ -91,13 +95,9 @@ function getMediaType(url: string): "image" | "video" | "audio" | "unknown" {
   return "unknown";
 }
 
-// --- Zoom constants ---
-
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 5;
 const ZOOM_STEP = 0.25;
-
-// --- Preview tab content ---
 
 function PreviewContent({
   content,
@@ -119,7 +119,6 @@ function PreviewContent({
   const containerRef = useRef<HTMLDivElement>(null);
   const prevUrl = useRef(content.url);
 
-  // Reset zoom/pan when a new image loads
   useEffect(() => {
     if (content.url !== prevUrl.current) {
       setZoom(1);
@@ -129,15 +128,8 @@ function PreviewContent({
   }, [content.url]);
 
   const clampZoom = useCallback((z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z)), []);
-
-  const handleZoomIn = useCallback(() => {
-    setZoom((z) => clampZoom(z + ZOOM_STEP));
-  }, [clampZoom]);
-
-  const handleZoomOut = useCallback(() => {
-    setZoom((z) => clampZoom(z - ZOOM_STEP));
-  }, [clampZoom]);
-
+  const handleZoomIn = useCallback(() => setZoom((z) => clampZoom(z + ZOOM_STEP)), [clampZoom]);
+  const handleZoomOut = useCallback(() => setZoom((z) => clampZoom(z - ZOOM_STEP)), [clampZoom]);
   const handleReset = useCallback(() => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
@@ -177,7 +169,6 @@ function PreviewContent({
     isDragging.current = false;
   }, []);
 
-  // Resolve effective media type: explicit type or detect from URL extension
   const effectiveType =
     content.type === "video" || content.type === "audio"
       ? content.type
@@ -185,7 +176,6 @@ function PreviewContent({
         ? getMediaType(content.url)
         : content.type;
 
-  // Video
   if (effectiveType === "video" && content.url) {
     return (
       <div className="flex h-full items-center justify-center p-4">
@@ -201,12 +191,11 @@ function PreviewContent({
     );
   }
 
-  // Audio
   if (effectiveType === "audio" && content.url) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 p-4">
-        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
-          <Music size={15} strokeWidth={1.5} className="h-10 w-10 text-muted" />
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[var(--border-subtle)]">
+          <Icon icon="solar:music-note-outline" width={40} className="text-[var(--ink-tertiary)]" />
         </div>
         <audio key={content.url} controls preload="metadata" className="w-full max-w-xs">
           <source src={content.url} />
@@ -215,47 +204,65 @@ function PreviewContent({
     );
   }
 
-  // Image with zoom/pan
   if (content.type === "image" && content.url) {
     const hasComparison = !!(previousPreview?.url && previousPreview.url !== content.url);
 
     return (
       <div className="flex h-full flex-col">
-        {/* Zoom toolbar */}
-        <div className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-1.5">
-          <Button isIconOnly variant="ghost" size="sm" onPress={handleZoomOut}>
-            <ZoomOut size={15} strokeWidth={1.5} />
+        <div className="flex shrink-0 items-center gap-1 border-b border-[var(--border)] px-3 py-1.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleZoomOut}
+            className="h-6 w-6 min-w-0 p-0"
+            aria-label="Zoom out"
+          >
+            <Icon icon="solar:magnifer-zoom-out-outline" width={15} />
           </Button>
-          <span className="min-w-[3.5rem] text-center text-[12px] tabular-nums text-muted">
+          <span className="min-w-[3.5rem] text-center text-[var(--text-caption)] tabular-nums text-[var(--ink-secondary)]">
             {Math.round(zoom * 100)}%
           </span>
-          <Button isIconOnly variant="ghost" size="sm" onPress={handleZoomIn}>
-            <ZoomIn size={15} strokeWidth={1.5} />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleZoomIn}
+            className="h-6 w-6 min-w-0 p-0"
+            aria-label="Zoom in"
+          >
+            <Icon icon="solar:magnifer-zoom-in-outline" width={15} />
           </Button>
-          <Button isIconOnly variant="ghost" size="sm" onPress={handleReset}>
-            <Maximize size={15} strokeWidth={1.5} />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            className="h-6 w-6 min-w-0 p-0"
+            aria-label="Reset zoom"
+          >
+            <Icon icon="solar:maximize-square-outline" width={15} />
           </Button>
           {hasComparison && (
             <>
-              <div className="mx-1 h-4 w-px bg-border" />
+              <div className="mx-1 h-4 w-px bg-[var(--border)]" />
               <Button
-                isIconOnly
-                variant={comparing ? "secondary" : "ghost"}
+                variant={comparing ? "outline" : "ghost"}
                 size="sm"
-                onPress={() => setComparing((v) => !v)}
+                onClick={() => setComparing((v) => !v)}
+                className="h-6 w-6 min-w-0 p-0"
+                aria-label="Compare"
               >
-                <Columns size={15} strokeWidth={1.5} />
+                <Icon icon="solar:tuning-2-outline" width={15} />
               </Button>
             </>
           )}
         </div>
 
-        {/* Compare view */}
         {comparing && hasComparison ? (
           <div className="flex flex-1 overflow-hidden">
-            <div className="flex flex-1 items-center justify-center overflow-hidden border-r border-border p-2">
+            <div className="flex flex-1 items-center justify-center overflow-hidden border-r border-[var(--border)] p-2">
               <div className="flex flex-col items-center gap-1">
-                <span className="text-[11px] font-medium text-muted">Before</span>
+                <span className="text-[var(--text-micro)] font-medium text-[var(--ink-secondary)]">
+                  Before
+                </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={previousPreview!.url}
@@ -267,7 +274,9 @@ function PreviewContent({
             </div>
             <div className="flex flex-1 items-center justify-center overflow-hidden p-2">
               <div className="flex flex-col items-center gap-1">
-                <span className="text-[11px] font-medium text-muted">After</span>
+                <span className="text-[var(--text-micro)] font-medium text-[var(--ink-secondary)]">
+                  After
+                </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={content.url}
@@ -279,13 +288,10 @@ function PreviewContent({
             </div>
           </div>
         ) : (
-          /* Normal image viewport */
           <div
             ref={containerRef}
             className="flex flex-1 items-center justify-center overflow-hidden"
-            style={{
-              cursor: zoom > 1 ? (isDragging.current ? "grabbing" : "grab") : "default",
-            }}
+            style={{ cursor: zoom > 1 ? (isDragging.current ? "grabbing" : "grab") : "default" }}
             onWheel={handleWheel}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
@@ -305,14 +311,13 @@ function PreviewContent({
           </div>
         )}
 
-        {/* Re-run action bar */}
-        <div className="flex shrink-0 items-center justify-center gap-2 border-t border-border px-3 py-2">
-          <Button variant="ghost" size="sm" onPress={onRerun}>
-            <RefreshCw size={15} strokeWidth={2} className="mr-1.5" />
+        <div className="flex shrink-0 items-center justify-center gap-[var(--gap-inline)] border-t border-[var(--border)] px-3 py-2">
+          <Button variant="ghost" size="sm" onClick={onRerun}>
+            <Icon icon="solar:refresh-outline" width={15} className="mr-1.5" />
             Re-run
           </Button>
-          <Button variant="ghost" size="sm" onPress={onEditRerun}>
-            <Pencil size={15} strokeWidth={2} className="mr-1.5" />
+          <Button variant="ghost" size="sm" onClick={onEditRerun}>
+            <Icon icon="solar:pen-outline" width={15} className="mr-1.5" />
             Edit & Re-run
           </Button>
         </div>
@@ -320,51 +325,44 @@ function PreviewContent({
     );
   }
 
-  // Text
   if (content.type === "text" && content.text) {
     return (
       <div className="h-full overflow-y-auto">
-        <div className="selectable whitespace-pre-wrap p-5 text-[14px] leading-7 text-foreground">
+        <div className="selectable whitespace-pre-wrap p-5 text-[var(--text-body)] leading-[var(--leading-relaxed)] text-[var(--ink)]">
           {content.text}
         </div>
       </div>
     );
   }
 
-  // Empty state
   return (
-    <div className="flex h-full items-center justify-center text-[13px] text-muted">
+    <div className="flex h-full items-center justify-center text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
       Generated content will appear here
     </div>
   );
 }
 
-// --- Editor tab content ---
-
 function EditorContent({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex h-full flex-col p-4">
-      <label className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted">
+      <label className="mb-2 text-[var(--text-micro)] font-medium uppercase tracking-wider text-[var(--ink-ghost)]">
         Parameters
       </label>
-      <TextArea
+      <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         spellCheck={false}
-        fullWidth
-        className="selectable flex-1 resize-none font-mono text-xs"
+        className="selectable flex-1 resize-none font-[var(--font-mono)] text-[var(--text-caption)] w-full"
         placeholder='{ "prompt": "..." }'
       />
     </div>
   );
 }
 
-// --- Output tab content ---
-
 function OutputContent({ files }: { files: { name: string; path: string; type: string }[] }) {
   if (files.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-[13px] text-muted">
+      <div className="flex h-full items-center justify-center text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
         Output files will appear here
       </div>
     );
@@ -373,11 +371,13 @@ function OutputContent({ files }: { files: { name: string; path: string; type: s
     <div className="h-full overflow-y-auto">
       <div className="space-y-1 p-4">
         {files.map((file, i) => (
-          <Button key={i} variant="ghost" fullWidth className="justify-start gap-2.5">
-            <Chip size="sm" variant="soft" className="font-mono">
+          <Button key={i} variant="ghost" className="w-full justify-start gap-2.5">
+            <Chip size="sm" className="font-[var(--font-mono)]">
               {file.type}
             </Chip>
-            <span className="flex-1 truncate text-[13px] text-foreground">{file.name}</span>
+            <span className="flex-1 truncate text-[var(--text-body-sm)] text-[var(--ink)]">
+              {file.name}
+            </span>
           </Button>
         ))}
       </div>

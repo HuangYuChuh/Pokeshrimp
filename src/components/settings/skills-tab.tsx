@@ -1,13 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Button, Skeleton, Chip, Card } from "@heroui/react";
-import { ChevronDown, ChevronRight, Trash2, Upload, Puzzle, Globe, FolderOpen } from "lucide-react";
+import { Button, Skeleton, Chip, Card, CardContent } from "@/design-system/components";
+import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
-
-/* ---------------------------------------------------------------------------
- * Types
- * --------------------------------------------------------------------------- */
 
 interface SkillInputParam {
   name: string;
@@ -35,23 +31,15 @@ interface SkillsTabProps {
   active: boolean;
 }
 
-/* ---------------------------------------------------------------------------
- * Component
- * --------------------------------------------------------------------------- */
-
 export function SkillsTab({ active }: SkillsTabProps) {
   const [skills, setSkills] = useState<SkillData[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedCommand, setExpandedCommand] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [toast, setToast] = useState<{
-    message: string;
-    isError: boolean;
-  } | null>(null);
+  const [toast, setToast] = useState<{ message: string; isError: boolean } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasFetched = useRef(false);
 
-  /* --- Fetch skills ------------------------------------------------------ */
   const fetchSkills = useCallback(async () => {
     setLoading(true);
     try {
@@ -61,7 +49,7 @@ export function SkillsTab({ active }: SkillsTabProps) {
         setSkills(data.skills ?? []);
       }
     } catch {
-      // ignore
+      /* ignore */
     } finally {
       setLoading(false);
     }
@@ -74,13 +62,11 @@ export function SkillsTab({ active }: SkillsTabProps) {
     }
   }, [active, fetchSkills]);
 
-  /* --- Toast helper ------------------------------------------------------ */
   const showToast = useCallback((message: string, isError: boolean) => {
     setToast({ message, isError });
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  /* --- Delete skill ------------------------------------------------------ */
   const handleDelete = useCallback(
     async (command: string) => {
       setDeleting(command);
@@ -103,7 +89,6 @@ export function SkillsTab({ active }: SkillsTabProps) {
     [expandedCommand, showToast],
   );
 
-  /* --- Import skill via file picker -------------------------------------- */
   const handleImport = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
@@ -139,7 +124,6 @@ export function SkillsTab({ active }: SkillsTabProps) {
     [fetchSkills, showToast],
   );
 
-  /* --- Toggle expand ----------------------------------------------------- */
   const toggleExpand = useCallback((command: string) => {
     setExpandedCommand((prev) => (prev === command ? null : command));
   }, []);
@@ -147,14 +131,13 @@ export function SkillsTab({ active }: SkillsTabProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-[15px] font-semibold">Skills</h3>
-        <Button variant="outline" size="sm" onPress={handleImport}>
-          <Upload size={13} strokeWidth={1.5} className="mr-1.5" />
+        <h3 className="text-[var(--text-title)] font-semibold">Skills</h3>
+        <Button variant="outline" size="sm" onClick={handleImport}>
+          <Icon icon="solar:upload-outline" width={13} className="mr-1.5" />
           Import
         </Button>
       </div>
 
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -166,9 +149,9 @@ export function SkillsTab({ active }: SkillsTabProps) {
 
       {loading ? (
         <div className="space-y-3">
-          <Skeleton className="h-[52px] w-full rounded-xl" />
-          <Skeleton className="h-[52px] w-full rounded-xl" />
-          <Skeleton className="h-[52px] w-full rounded-xl" />
+          <Skeleton className="h-[52px] w-full" />
+          <Skeleton className="h-[52px] w-full" />
+          <Skeleton className="h-[52px] w-full" />
         </div>
       ) : skills.length === 0 ? (
         <EmptyState />
@@ -187,26 +170,21 @@ export function SkillsTab({ active }: SkillsTabProps) {
         </div>
       )}
 
-      {/* Toast */}
       {toast && (
         <Card>
-          <Card.Content
+          <CardContent
             className={cn(
-              "px-3 py-2 text-[13px] font-medium",
-              toast.isError ? "text-danger" : "text-foreground",
+              "px-3 py-2 text-[var(--text-body-sm)] font-medium",
+              toast.isError ? "text-[var(--error)]" : "text-[var(--ink)]",
             )}
           >
             {toast.message}
-          </Card.Content>
+          </CardContent>
         </Card>
       )}
     </div>
   );
 }
-
-/* ---------------------------------------------------------------------------
- * Skill Card
- * --------------------------------------------------------------------------- */
 
 function SkillCard({
   skill,
@@ -215,15 +193,7 @@ function SkillCard({
   onToggle,
   onDelete,
 }: {
-  skill: {
-    name: string;
-    command: string;
-    description: string;
-    scope: "global" | "project";
-    requiredTools: string[];
-    inputParams: { name: string; type: string; description?: string; default?: string }[];
-    outputs: { type: string; description?: string }[];
-  };
+  skill: SkillData;
   expanded: boolean;
   deleting: boolean;
   onToggle: () => void;
@@ -231,30 +201,34 @@ function SkillCard({
 }) {
   return (
     <Card>
-      <Card.Content className="p-0">
-        <div className="flex items-center gap-2 px-3 py-2.5">
+      <CardContent className="p-0">
+        <div className="flex items-center gap-[var(--gap-inline)] px-3 py-2.5">
           <button
             type="button"
             onClick={onToggle}
-            className="flex flex-1 items-center gap-2 text-left"
+            className="flex flex-1 items-center gap-[var(--gap-inline)] text-left"
           >
-            {expanded ? (
-              <ChevronDown size={14} strokeWidth={1.5} className="shrink-0 text-muted" />
-            ) : (
-              <ChevronRight size={14} strokeWidth={1.5} className="shrink-0 text-muted" />
-            )}
-            <Puzzle size={14} strokeWidth={1.5} className="shrink-0 text-muted" />
+            <Icon
+              icon={expanded ? "solar:alt-arrow-down-outline" : "solar:alt-arrow-right-outline"}
+              width={14}
+              className="shrink-0 text-[var(--ink-tertiary)]"
+            />
+            <Icon
+              icon="solar:widget-outline"
+              width={14}
+              className="shrink-0 text-[var(--ink-tertiary)]"
+            />
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="truncate text-[13px] font-medium text-foreground">
+              <div className="flex items-center gap-[var(--gap-inline)]">
+                <span className="truncate text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
                   {skill.name}
                 </span>
-                <Chip size="sm" variant="soft">
-                  /{skill.command}
-                </Chip>
+                <Chip size="sm">/{skill.command}</Chip>
               </div>
               {skill.description && (
-                <p className="mt-0.5 truncate text-[12px] text-muted">{skill.description}</p>
+                <p className="mt-0.5 truncate text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+                  {skill.description}
+                </p>
               )}
             </div>
           </button>
@@ -263,28 +237,27 @@ function SkillCard({
             <ScopeBadge scope={skill.scope} />
             {skill.scope === "project" && (
               <Button
-                isIconOnly
-                variant="danger-soft"
+                variant="danger"
                 size="sm"
-                onPress={() => {
-                  onDelete();
-                }}
-                isDisabled={deleting}
+                onClick={onDelete}
+                disabled={deleting}
+                className="h-6 w-6 min-w-0 p-0"
+                aria-label={`Delete ${skill.command}`}
               >
-                <Trash2 size={13} strokeWidth={1.5} />
+                <Icon icon="solar:trash-bin-2-outline" width={13} />
               </Button>
             )}
           </div>
         </div>
 
         {expanded && (
-          <div className="border-t border-border px-3 py-3">
+          <div className="border-t border-[var(--border)] px-3 py-3">
             <div className="space-y-3">
               {skill.requiredTools.length > 0 && (
                 <DetailSection label="Required CLI tools">
                   <div className="flex flex-wrap gap-1.5">
                     {skill.requiredTools.map((tool) => (
-                      <Chip key={tool} size="sm" variant="soft" className="font-mono">
+                      <Chip key={tool} size="sm" className="font-[var(--font-mono)]">
                         {tool}
                       </Chip>
                     ))}
@@ -296,14 +269,20 @@ function SkillCard({
                 <DetailSection label="Input parameters">
                   <div className="space-y-1.5">
                     {skill.inputParams.map((param) => (
-                      <div key={param.name} className="text-[12px]">
-                        <span className="font-mono font-medium text-foreground">{param.name}</span>
-                        <span className="ml-1.5 text-muted">({param.type})</span>
+                      <div key={param.name} className="text-[var(--text-caption)]">
+                        <span className="font-[var(--font-mono)] font-medium text-[var(--ink)]">
+                          {param.name}
+                        </span>
+                        <span className="ml-1.5 text-[var(--ink-tertiary)]">({param.type})</span>
                         {param.description && (
-                          <span className="ml-1.5 text-muted">— {param.description}</span>
+                          <span className="ml-1.5 text-[var(--ink-tertiary)]">
+                            — {param.description}
+                          </span>
                         )}
                         {param.default !== undefined && (
-                          <span className="ml-1.5 text-muted/60">default: {param.default}</span>
+                          <span className="ml-1.5 text-[var(--ink-ghost)]">
+                            default: {param.default}
+                          </span>
                         )}
                       </div>
                     ))}
@@ -315,10 +294,14 @@ function SkillCard({
                 <DetailSection label="Outputs">
                   <div className="space-y-1">
                     {skill.outputs.map((output, i) => (
-                      <div key={i} className="text-[12px]">
-                        <span className="font-mono font-medium text-foreground">{output.type}</span>
+                      <div key={i} className="text-[var(--text-caption)]">
+                        <span className="font-[var(--font-mono)] font-medium text-[var(--ink)]">
+                          {output.type}
+                        </span>
                         {output.description && (
-                          <span className="ml-1.5 text-muted">— {output.description}</span>
+                          <span className="ml-1.5 text-[var(--ink-tertiary)]">
+                            — {output.description}
+                          </span>
                         )}
                       </div>
                     ))}
@@ -329,31 +312,26 @@ function SkillCard({
               {skill.requiredTools.length === 0 &&
                 skill.inputParams.length === 0 &&
                 skill.outputs.length === 0 && (
-                  <p className="text-[12px] text-muted">
-                    No additional details available for this skill.
+                  <p className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+                    No additional details available.
                   </p>
                 )}
             </div>
           </div>
         )}
-      </Card.Content>
+      </CardContent>
     </Card>
   );
 }
 
-/* ---------------------------------------------------------------------------
- * Small helpers
- * --------------------------------------------------------------------------- */
-
 function ScopeBadge({ scope }: { scope: "global" | "project" }) {
   return (
-    <Chip size="sm" variant="soft">
+    <Chip size="sm">
       <span className="flex items-center gap-1">
-        {scope === "global" ? (
-          <Globe size={10} strokeWidth={1.5} />
-        ) : (
-          <FolderOpen size={10} strokeWidth={1.5} />
-        )}
+        <Icon
+          icon={scope === "global" ? "solar:globe-outline" : "solar:folder-open-outline"}
+          width={10}
+        />
         {scope}
       </span>
     </Chip>
@@ -363,7 +341,9 @@ function ScopeBadge({ scope }: { scope: "global" | "project" }) {
 function DetailSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted/60">{label}</p>
+      <p className="mb-1 text-[var(--text-micro)] font-medium uppercase tracking-wider text-[var(--ink-ghost)]">
+        {label}
+      </p>
       {children}
     </div>
   );
@@ -372,9 +352,11 @@ function DetailSection({ label, children }: { label: string; children: React.Rea
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      <Puzzle size={32} strokeWidth={1} className="mb-3 text-muted/40" />
-      <p className="text-[13px] font-medium text-muted">No skills installed</p>
-      <p className="mt-1 text-[12px] text-muted/60">
+      <Icon icon="solar:widget-outline" width={32} className="mb-3 text-[var(--ink-ghost)]" />
+      <p className="text-[var(--text-body-sm)] font-medium text-[var(--ink-secondary)]">
+        No skills installed
+      </p>
+      <p className="mt-1 text-[var(--text-caption)] text-[var(--ink-ghost)]">
         Drag a .skill.md file onto the app or click Import.
       </p>
     </div>

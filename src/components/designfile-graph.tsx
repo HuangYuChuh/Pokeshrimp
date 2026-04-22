@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@heroui/react";
+import { Skeleton } from "@/design-system/components";
 import type { AssetStatus } from "@/core/designfile/types";
 
 // --- Types ---
@@ -66,9 +66,9 @@ function computeDepths(assets: AssetOverview[]): Map<string, number> {
 // --- Status colors ---
 
 const STATUS_COLOR: Record<AssetStatus, string> = {
-  clean: "bg-green-400",
-  dirty: "bg-warning",
-  "never-built": "bg-muted",
+  clean: "bg-[var(--success)]",
+  dirty: "bg-[var(--warning)]",
+  "never-built": "bg-[var(--border-strong)]",
 };
 
 const STATUS_LABEL: Record<AssetStatus, string> = {
@@ -135,7 +135,7 @@ export function DesignfileGraph() {
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center px-4 text-center text-[13px] text-muted">
+      <div className="flex h-full items-center justify-center px-4 text-center text-[13px] text-[var(--ink-secondary)]">
         {error}
       </div>
     );
@@ -146,10 +146,12 @@ export function DesignfileGraph() {
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-4">
-        <h2 className="mb-1 text-[15px] font-semibold text-foreground">{data.brand}</h2>
-        {data.description && <p className="mb-3 text-[12px] text-muted">{data.description}</p>}
+        <h2 className="mb-1 text-[15px] font-semibold text-[var(--ink)]">{data.brand}</h2>
+        {data.description && (
+          <p className="mb-3 text-[12px] text-[var(--ink-secondary)]">{data.description}</p>
+        )}
         {data.cycle && (
-          <div className="mb-3 rounded-lg border border-danger/50 bg-danger/10 px-3 py-2 text-[12px] text-danger">
+          <div className="mb-3 rounded-lg border border-[var(--error)] bg-[color-mix(in_oklch,var(--error),transparent_90%)] px-3 py-2 text-[12px] text-[var(--error)]">
             Cycle detected: {data.cycle}
           </div>
         )}
@@ -211,7 +213,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
   }
 
   if (assets.length === 0) {
-    return <div className="text-[13px] text-muted">No assets defined.</div>;
+    return <div className="text-[13px] text-[var(--ink-secondary)]">No assets defined.</div>;
   }
 
   return (
@@ -225,7 +227,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
         {/* Arrow marker definition */}
         <defs>
           <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-            <path d="M 0 0 L 8 3 L 0 6 Z" className="fill-border" />
+            <path d="M 0 0 L 8 3 L 0 6 Z" className="fill-[var(--border)]" />
           </marker>
         </defs>
 
@@ -244,7 +246,7 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
               key={`${from}->${to}`}
               d={`M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`}
               fill="none"
-              className="stroke-border"
+              className="stroke-[var(--border)]"
               strokeWidth={1.5}
               markerEnd="url(#arrowhead)"
             />
@@ -271,8 +273,8 @@ function AssetCard({ asset, x, y }: { asset: AssetOverview; x: number; y: number
       <button
         type="button"
         className={cn(
-          "flex h-full w-full items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2",
-          "transition-colors hover:bg-muted focus:outline-none focus:ring-1 focus:ring-focus",
+          "flex h-full w-full items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2",
+          "transition-colors hover:bg-[var(--border-subtle)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]",
         )}
         title={`${asset.name} (${asset.skill}) — ${STATUS_LABEL[asset.status]}`}
       >
@@ -280,7 +282,7 @@ function AssetCard({ asset, x, y }: { asset: AssetOverview; x: number; y: number
           className={cn("h-2 w-2 shrink-0 rounded-full", STATUS_COLOR[asset.status])}
           aria-hidden="true"
         />
-        <span className="truncate text-[12px] text-foreground">{asset.name}</span>
+        <span className="truncate text-[12px] text-[var(--ink)]">{asset.name}</span>
       </button>
     </foreignObject>
   );

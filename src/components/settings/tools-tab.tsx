@@ -15,7 +15,7 @@ export function ToolsTab({ active, mcpServers, onMcpServersChange }: ToolsTabPro
       <h3 className="text-[15px] font-semibold mb-4">Tools & Integrations</h3>
 
       <div>
-        <label className="mb-2 block text-[13px] font-medium text-foreground">CLI Tools</label>
+        <label className="mb-2 block text-[13px] font-medium text-[var(--ink)]">CLI Tools</label>
         <ToolStatusList open={active} />
       </div>
 

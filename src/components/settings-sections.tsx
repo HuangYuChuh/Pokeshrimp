@@ -1,8 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Chip, Accordion, Input, Select, ListBox, Switch, Card } from "@heroui/react";
-import { Plus, Trash2, X, Server, Webhook, Shield } from "lucide-react";
+import {
+  Button,
+  Chip,
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+  Input,
+  Select,
+  Switch,
+  Card,
+  CardContent,
+} from "@/design-system/components";
+import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -50,9 +62,7 @@ export function McpServersSection({
 }) {
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newServer, setNewServer] = useState<McpServerConfig>({
-    ...EMPTY_SERVER,
-  });
+  const [newServer, setNewServer] = useState<McpServerConfig>({ ...EMPTY_SERVER });
 
   const entries = Object.entries(servers);
 
@@ -71,10 +81,7 @@ export function McpServersSection({
   function handleAdd() {
     if (!newName.trim() || !newServer.command.trim()) return;
     const updated = { ...servers };
-    updated[newName.trim()] = {
-      ...newServer,
-      args: newServer.args,
-    };
+    updated[newName.trim()] = { ...newServer };
     onChange(updated);
     setNewName("");
     setNewServer({ ...EMPTY_SERVER });
@@ -82,67 +89,68 @@ export function McpServersSection({
   }
 
   return (
-    <Accordion>
-      <Accordion.Item id="mcp-servers">
-        <Accordion.Heading>
-          <Accordion.Trigger>
-            <Accordion.Indicator />
-            <Server size={14} strokeWidth={1.5} />
+    <Accordion type="single" collapsible>
+      <AccordionItem value="mcp-servers">
+        <AccordionTrigger>
+          <span className="flex items-center gap-[var(--gap-inline)]">
+            <Icon icon="solar:server-outline" width={14} />
             MCP Servers
-          </Accordion.Trigger>
-        </Accordion.Heading>
-        <Accordion.Panel>
-          <Accordion.Body className="mt-2 space-y-3">
+          </span>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="mt-2 space-y-3">
             {entries.length === 0 && !adding && (
-              <p className="text-[12px] text-muted">No MCP servers configured.</p>
+              <p className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+                No MCP servers configured.
+              </p>
             )}
             {entries.map(([name, server]) => (
               <Card key={name}>
-                <Card.Content className="flex items-center gap-2 px-3 py-2">
+                <CardContent className="flex items-center gap-[var(--gap-inline)] px-3 py-2">
                   <span
                     className={cn(
                       "h-2 w-2 shrink-0 rounded-full",
-                      server.enabled ? "bg-green-400" : "bg-muted/40",
+                      server.enabled ? "bg-[var(--success)]" : "bg-[var(--border-strong)]",
                     )}
                   />
                   <div className="min-w-0 flex-1">
-                    <span className="text-[13px] font-medium">{name}</span>
-                    <p className="truncate text-[12px] font-mono text-muted">
+                    <span className="text-[var(--text-body-sm)] font-medium">{name}</span>
+                    <p className="truncate text-[var(--text-caption)] font-[var(--font-mono)] text-[var(--ink-tertiary)]">
                       {server.command} {server.args.join(" ")}
                     </p>
                   </div>
-                  <Switch size="sm" isSelected={server.enabled} onChange={() => handleToggle(name)}>
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
-                  </Switch>
+                  <Switch
+                    checked={server.enabled}
+                    onChange={() => handleToggle(name)}
+                    aria-label={`Toggle ${name}`}
+                  />
                   <Button
-                    isIconOnly
-                    variant="danger-soft"
+                    variant="danger"
                     size="sm"
-                    onPress={() => handleRemove(name)}
+                    onClick={() => handleRemove(name)}
+                    className="h-6 w-6 min-w-0 p-0"
+                    aria-label={`Remove ${name}`}
                   >
-                    <Trash2 size={13} strokeWidth={1.5} />
+                    <Icon icon="solar:trash-bin-2-outline" width={13} />
                   </Button>
-                </Card.Content>
+                </CardContent>
               </Card>
             ))}
 
             {adding && (
               <Card>
-                <Card.Content className="space-y-2 p-3">
+                <CardContent className="space-y-2 p-3">
                   <Input
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="Server name"
-                    fullWidth
+                    className="w-full"
                   />
                   <Input
                     value={newServer.command}
                     onChange={(e) => setNewServer({ ...newServer, command: e.target.value })}
                     placeholder="Command (e.g. npx -y @modelcontextprotocol/server)"
-                    fullWidth
-                    className="font-mono"
+                    className="w-full font-[var(--font-mono)]"
                   />
                   <Input
                     value={newServer.args.join(" ")}
@@ -153,8 +161,7 @@ export function McpServersSection({
                       })
                     }
                     placeholder="Args (space separated)"
-                    fullWidth
-                    className="font-mono"
+                    className="w-full font-[var(--font-mono)]"
                   />
                   <Input
                     value={Object.entries(newServer.env)
@@ -172,14 +179,13 @@ export function McpServersSection({
                       setNewServer({ ...newServer, env });
                     }}
                     placeholder="Env vars (KEY=VALUE KEY2=VALUE2)"
-                    fullWidth
-                    className="font-mono"
+                    className="w-full font-[var(--font-mono)]"
                   />
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-[var(--gap-inline)]">
                     <Button
                       variant="outline"
                       size="sm"
-                      onPress={() => {
+                      onClick={() => {
                         setAdding(false);
                         setNewName("");
                         setNewServer({ ...EMPTY_SERVER });
@@ -190,25 +196,25 @@ export function McpServersSection({
                     <Button
                       variant="primary"
                       size="sm"
-                      onPress={handleAdd}
-                      isDisabled={!newName.trim() || !newServer.command.trim()}
+                      onClick={handleAdd}
+                      disabled={!newName.trim() || !newServer.command.trim()}
                     >
                       Add
                     </Button>
                   </div>
-                </Card.Content>
+                </CardContent>
               </Card>
             )}
 
             {!adding && (
-              <Button variant="outline" size="sm" onPress={() => setAdding(true)}>
-                <Plus size={13} strokeWidth={2} className="mr-1" />
+              <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
+                <Icon icon="solar:add-circle-outline" width={13} className="mr-1" />
                 Add Server
               </Button>
             )}
-          </Accordion.Body>
-        </Accordion.Panel>
-      </Accordion.Item>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   );
 }
@@ -272,100 +278,85 @@ export function HooksSection({
   }
 
   const allEvents = new Set([...Object.keys(hooks), ...conventionHooks]);
+  const eventOptions = HOOK_EVENTS.map((ev) => ({ value: ev, label: ev }));
 
   return (
-    <Accordion>
-      <Accordion.Item id="hooks">
-        <Accordion.Heading>
-          <Accordion.Trigger>
-            <Accordion.Indicator />
-            <Webhook size={14} strokeWidth={1.5} />
+    <Accordion type="single" collapsible>
+      <AccordionItem value="hooks">
+        <AccordionTrigger>
+          <span className="flex items-center gap-[var(--gap-inline)]">
+            <Icon icon="solar:link-circle-outline" width={14} />
             Hooks
-          </Accordion.Trigger>
-        </Accordion.Heading>
-        <Accordion.Panel>
-          <Accordion.Body className="mt-2 space-y-3">
+          </span>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="mt-2 space-y-3">
             {allEvents.size === 0 && !adding && (
-              <p className="text-[12px] text-muted">No hooks configured.</p>
+              <p className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+                No hooks configured.
+              </p>
             )}
 
-            {/* Convention hooks */}
             {conventionHooks.map((event) => (
               <Card key={`conv-${event}`}>
-                <Card.Content className="flex items-center gap-2 px-3 py-2">
+                <CardContent className="flex items-center gap-[var(--gap-inline)] px-3 py-2">
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-medium">{event}</span>
-                      <Chip size="sm" variant="soft" className="text-[10px]">
-                        convention
-                      </Chip>
+                    <div className="flex items-center gap-[var(--gap-inline)]">
+                      <span className="text-[var(--text-body-sm)] font-medium">{event}</span>
+                      <Chip size="sm">convention</Chip>
                     </div>
-                    <p className="text-[12px] font-mono text-muted">.visagent/hooks/{event}</p>
+                    <p className="text-[var(--text-caption)] font-[var(--font-mono)] text-[var(--ink-tertiary)]">
+                      .visagent/hooks/{event}
+                    </p>
                   </div>
-                </Card.Content>
+                </CardContent>
               </Card>
             ))}
 
-            {/* Config hooks */}
             {Object.entries(hooks).map(([event, entries]) =>
               entries.map((entry, i) => (
                 <Card key={`${event}-${i}`}>
-                  <Card.Content className="flex items-center gap-2 px-3 py-2">
+                  <CardContent className="flex items-center gap-[var(--gap-inline)] px-3 py-2">
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[13px] font-medium">{event}</span>
-                      </div>
-                      <p className="truncate text-[12px] font-mono text-muted">{entry.command}</p>
-                      <div className="mt-0.5 flex gap-3 text-[11px] text-muted">
+                      <span className="text-[var(--text-body-sm)] font-medium">{event}</span>
+                      <p className="truncate text-[var(--text-caption)] font-[var(--font-mono)] text-[var(--ink-tertiary)]">
+                        {entry.command}
+                      </p>
+                      <div className="mt-0.5 flex gap-3 text-[var(--text-micro)] text-[var(--ink-tertiary)]">
                         <span>timeout: {entry.timeout}ms</span>
                         {entry.matcher && <span>matcher: {entry.matcher}</span>}
                       </div>
                     </div>
                     <Button
-                      isIconOnly
-                      variant="danger-soft"
+                      variant="danger"
                       size="sm"
-                      onPress={() => handleRemove(event, i)}
+                      onClick={() => handleRemove(event, i)}
+                      className="h-6 w-6 min-w-0 p-0"
+                      aria-label={`Remove ${event} hook`}
                     >
-                      <Trash2 size={13} strokeWidth={1.5} />
+                      <Icon icon="solar:trash-bin-2-outline" width={13} />
                     </Button>
-                  </Card.Content>
+                  </CardContent>
                 </Card>
               )),
             )}
 
             {adding && (
               <Card>
-                <Card.Content className="space-y-2 p-3">
+                <CardContent className="space-y-2 p-3">
                   <Select
-                    selectedKey={newEvent}
-                    onSelectionChange={(key) => {
-                      if (key) setNewEvent(String(key));
-                    }}
-                    fullWidth
-                  >
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        {HOOK_EVENTS.map((ev) => (
-                          <ListBox.Item key={ev} id={ev} textValue={ev}>
-                            {ev}
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
+                    value={newEvent}
+                    onChange={setNewEvent}
+                    options={eventOptions}
+                    className="w-full"
+                  />
                   <Input
                     value={newCommand}
                     onChange={(e) => setNewCommand(e.target.value)}
                     placeholder="Command (e.g. ./scripts/validate.sh)"
-                    fullWidth
-                    className="font-mono"
+                    className="w-full font-[var(--font-mono)]"
                   />
-                  <div className="flex gap-2">
+                  <div className="flex gap-[var(--gap-inline)]">
                     <Input
                       value={newTimeout}
                       onChange={(e) => setNewTimeout(e.target.value)}
@@ -379,11 +370,11 @@ export function HooksSection({
                       className="w-1/2"
                     />
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-[var(--gap-inline)]">
                     <Button
                       variant="outline"
                       size="sm"
-                      onPress={() => {
+                      onClick={() => {
                         setAdding(false);
                         setNewCommand("");
                       }}
@@ -393,27 +384,29 @@ export function HooksSection({
                     <Button
                       variant="primary"
                       size="sm"
-                      onPress={handleAdd}
-                      isDisabled={!newCommand.trim()}
+                      onClick={handleAdd}
+                      disabled={!newCommand.trim()}
                     >
                       Add
                     </Button>
                   </div>
-                </Card.Content>
+                </CardContent>
               </Card>
             )}
 
             {!adding && (
-              <Button variant="outline" size="sm" onPress={() => setAdding(true)}>
-                <Plus size={13} strokeWidth={2} className="mr-1" />
+              <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
+                <Icon icon="solar:add-circle-outline" width={13} className="mr-1" />
                 Add Hook
               </Button>
             )}
 
-            <p className="text-[11px] text-muted">See docs/hook-events.md for event reference.</p>
-          </Accordion.Body>
-        </Accordion.Panel>
-      </Accordion.Item>
+            <p className="text-[var(--text-micro)] text-[var(--ink-tertiary)]">
+              See docs/hook-events.md for event reference.
+            </p>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   );
 }
@@ -453,31 +446,32 @@ function PatternList({
 
   return (
     <div>
-      <label className="mb-1.5 block text-[12px] font-medium text-foreground">{label}</label>
+      <label className="mb-1.5 block text-[var(--text-caption)] font-medium text-[var(--ink)]">
+        {label}
+      </label>
       <div className="flex flex-wrap gap-1.5">
         {patterns.map((p, i) => (
-          <Chip key={`${p}-${i}`} size="sm" variant="soft" className="font-mono">
+          <Chip key={`${p}-${i}`} size="sm" className="font-[var(--font-mono)]">
             {p}
             <button
               type="button"
-              className="ml-1 text-muted transition-colors hover:text-danger"
+              className="ml-1 text-[var(--ink-tertiary)] transition-colors hover:text-[var(--error)]"
               onClick={() => handleRemove(i)}
             >
-              <X size={11} strokeWidth={2} />
+              <Icon icon="solar:close-circle-outline" width={11} />
             </button>
           </Chip>
         ))}
       </div>
-      <div className="mt-1.5 flex gap-2">
+      <div className="mt-1.5 flex gap-[var(--gap-inline)]">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="comfyui-cli *"
-          fullWidth
-          className="font-mono"
+          className="w-full font-[var(--font-mono)]"
         />
-        <Button variant="outline" size="sm" onPress={handleAdd} isDisabled={!input.trim()}>
+        <Button variant="outline" size="sm" onClick={handleAdd} disabled={!input.trim()}>
           Add
         </Button>
       </div>
@@ -493,17 +487,16 @@ export function PermissionsSection({
   onChange: (permissions: PermissionConfig) => void;
 }) {
   return (
-    <Accordion>
-      <Accordion.Item id="permissions">
-        <Accordion.Heading>
-          <Accordion.Trigger>
-            <Accordion.Indicator />
-            <Shield size={14} strokeWidth={1.5} />
+    <Accordion type="single" collapsible>
+      <AccordionItem value="permissions">
+        <AccordionTrigger>
+          <span className="flex items-center gap-[var(--gap-inline)]">
+            <Icon icon="solar:shield-outline" width={14} />
             Permissions
-          </Accordion.Trigger>
-        </Accordion.Heading>
-        <Accordion.Panel>
-          <Accordion.Body className="mt-2 space-y-4">
+          </span>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="mt-2 space-y-4">
             <PatternList
               label="Always Allow"
               patterns={permissions.alwaysAllow}
@@ -519,9 +512,9 @@ export function PermissionsSection({
               patterns={permissions.alwaysAsk}
               onChange={(alwaysAsk) => onChange({ ...permissions, alwaysAsk })}
             />
-          </Accordion.Body>
-        </Accordion.Panel>
-      </Accordion.Item>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   );
 }

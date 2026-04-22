@@ -2,8 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
-import { Button, Card, Chip } from "@heroui/react";
+import { Icon } from "@iconify/react";
+import { Button, Card, CardHeader, CardContent, Chip } from "@/design-system/components";
 
 export interface ApprovalRequestData {
   type: "approval-request";
@@ -28,10 +28,16 @@ interface ApprovalCardProps {
   resolved?: ApprovalResolvedData;
 }
 
-const RISK_CHIP_COLOR = {
+const RISK_CHIP_VARIANT = {
   safe: "success",
   moderate: "warning",
-  dangerous: "danger",
+  dangerous: "error",
+} as const;
+
+const RISK_ICON = {
+  safe: "solar:shield-check-outline",
+  moderate: "solar:shield-warning-outline",
+  dangerous: "solar:shield-cross-outline",
 } as const;
 
 export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
@@ -78,7 +84,6 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
     [request.id],
   );
 
-  // If the server already resolved this (e.g. timeout), respect that
   if (resolved && state === "pending") {
     const s = mapDecisionToState(resolved.decision, resolved.reason);
     if (s !== "pending") setState(s);
@@ -86,68 +91,66 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
 
   const isPending = state === "pending";
 
-  const RiskIcon =
-    request.riskLevel === "dangerous"
-      ? ShieldX
-      : request.riskLevel === "safe"
-        ? ShieldCheck
-        : ShieldAlert;
-
   return (
-    <Card variant="secondary" className="mt-2">
-      <Card.Header className="flex flex-row items-start gap-3 px-4 pb-0 pt-4">
-        <RiskIcon size={18} className="mt-0.5 shrink-0 text-muted" />
+    <Card className="mt-[var(--space-2)]">
+      <CardHeader className="flex flex-row items-start gap-[var(--space-3)]">
+        <Icon
+          icon={RISK_ICON[request.riskLevel]}
+          width={18}
+          className="mt-0.5 shrink-0 text-[var(--ink-secondary)]"
+        />
         <div className="min-w-0 flex-1">
-          <Card.Title className="text-[13px]">Command Approval Required</Card.Title>
-          <code className="mt-1.5 block truncate rounded bg-muted px-2 py-1 font-mono text-[12px] text-muted">
+          <span className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+            Command Approval Required
+          </span>
+          <code className="mt-1.5 block truncate rounded-[var(--radius-sm)] bg-[var(--border-subtle)] px-2 py-1 font-[var(--font-mono)] text-[var(--text-caption)] text-[var(--ink-secondary)]">
             $ {request.command}
           </code>
-          <Chip
-            size="sm"
-            color={RISK_CHIP_COLOR[request.riskLevel]}
-            variant="soft"
-            className="mt-2"
-          >
+          <Chip size="sm" variant={RISK_CHIP_VARIANT[request.riskLevel]} className="mt-2">
             Risk: {request.riskLevel}
           </Chip>
         </div>
-      </Card.Header>
-      <Card.Content className="px-4 pb-4 pt-3">
+      </CardHeader>
+      <CardContent className="px-4 pb-4 pt-[var(--space-3)]">
         {isPending ? (
           <div className="ml-[30px]">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-[var(--gap-inline)]">
               <Button
                 size="sm"
                 variant="primary"
-                onPress={() => handleDecision("allow-once")}
-                isDisabled={loading}
+                onClick={() => handleDecision("allow-once")}
+                disabled={loading}
               >
                 Allow Once
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                onPress={() => handleDecision("always-allow")}
-                isDisabled={loading}
+                onClick={() => handleDecision("always-allow")}
+                disabled={loading}
               >
                 Always Allow
               </Button>
               <Button
                 size="sm"
-                variant="danger-soft"
-                onPress={() => handleDecision("deny")}
-                isDisabled={loading}
+                variant="danger"
+                onClick={() => handleDecision("deny")}
+                disabled={loading}
               >
                 Deny
               </Button>
             </div>
-            {error && <p className="mt-1.5 text-[11px] text-danger">{error}</p>}
+            {error && (
+              <p className="mt-1.5 text-[var(--text-micro)] text-[var(--error)]">{error}</p>
+            )}
           </div>
         ) : (
           <div
             className={cn(
-              "ml-[30px] text-[12px] font-medium",
-              state === "denied" || state === "expired" ? "text-danger" : "text-green-500",
+              "ml-[30px] text-[var(--text-caption)] font-medium",
+              state === "denied" || state === "expired"
+                ? "text-[var(--error)]"
+                : "text-[var(--success)]",
             )}
           >
             {state === "allowed" && "Allowed (once)"}
@@ -156,7 +159,7 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
             {state === "expired" && "Expired — auto-denied after timeout"}
           </div>
         )}
-      </Card.Content>
+      </CardContent>
     </Card>
   );
 }
@@ -169,10 +172,6 @@ function mapDecisionToState(decision: string, reason?: string): CardState {
   return "pending";
 }
 
-/**
- * Parse the useChat `data` array for approval events.
- * Returns maps keyed by request ID for easy lookup.
- */
 export function parseApprovalEvents(data: unknown[]): {
   requests: Map<string, ApprovalRequestData>;
   resolved: Map<string, ApprovalResolvedData>;

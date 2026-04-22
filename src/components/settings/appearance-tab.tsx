@@ -1,6 +1,6 @@
 "use client";
 
-import { Select, ListBox } from "@heroui/react";
+import { Select } from "@/design-system/components";
 
 interface AppearanceTabProps {
   theme: "dark" | "light" | "system";
@@ -8,41 +8,26 @@ interface AppearanceTabProps {
 }
 
 const THEME_OPTIONS = [
-  { id: "dark", label: "Dark" },
-  { id: "light", label: "Light" },
-  { id: "system", label: "System" },
-] as const;
+  { value: "dark", label: "Dark" },
+  { value: "light", label: "Light" },
+  { value: "system", label: "System" },
+];
 
 export function AppearanceTab({ theme, onThemeChange }: AppearanceTabProps) {
   return (
     <div className="space-y-5">
-      <h3 className="text-[15px] font-semibold mb-4">Appearance</h3>
+      <h3 className="text-[var(--text-title)] font-semibold mb-4">Appearance</h3>
 
       <div>
         <div className="mb-1.5">
-          <label className="text-[13px] font-medium text-foreground">Theme</label>
+          <label className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">Theme</label>
         </div>
         <Select
-          selectedKey={theme}
-          onSelectionChange={(key) => {
-            if (key) onThemeChange(String(key) as "dark" | "light" | "system");
-          }}
-          fullWidth
-        >
-          <Select.Trigger>
-            <Select.Value />
-            <Select.Indicator />
-          </Select.Trigger>
-          <Select.Popover>
-            <ListBox>
-              {THEME_OPTIONS.map((opt) => (
-                <ListBox.Item key={opt.id} id={opt.id} textValue={opt.label}>
-                  {opt.label}
-                </ListBox.Item>
-              ))}
-            </ListBox>
-          </Select.Popover>
-        </Select>
+          value={theme}
+          onChange={(v) => onThemeChange(v as "dark" | "light" | "system")}
+          options={THEME_OPTIONS}
+          className="w-full"
+        />
       </div>
     </div>
   );
