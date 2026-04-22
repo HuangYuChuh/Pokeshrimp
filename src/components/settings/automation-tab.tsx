@@ -1,6 +1,5 @@
 "use client";
 
-import { Icon } from "@iconify/react";
 import {
   HooksSection,
   PermissionsSection,
@@ -24,15 +23,16 @@ export function AutomationTab({
   onPermissionsChange,
 }: AutomationTabProps) {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-[var(--gap-inline)]">
-        <Icon icon="solar:bolt-outline" width={18} className="text-[var(--ink-secondary)]" />
-        <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Automation</h3>
+    <div>
+      <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Automation</h3>
+      <p className="mt-1 text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
+        Hook scripts and command permission rules.
+      </p>
+
+      <div className="mt-8 space-y-6">
+        <HooksSection hooks={hooks} conventionHooks={conventionHooks} onChange={onHooksChange} />
+        <PermissionsSection permissions={permissions} onChange={onPermissionsChange} />
       </div>
-
-      <HooksSection hooks={hooks} conventionHooks={conventionHooks} onChange={onHooksChange} />
-
-      <PermissionsSection permissions={permissions} onChange={onPermissionsChange} />
     </div>
   );
 }

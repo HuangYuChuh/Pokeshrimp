@@ -129,55 +129,59 @@ export function SkillsTab({ active }: SkillsTabProps) {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-[var(--gap-inline)]">
-          <Icon icon="solar:widget-outline" width={18} className="text-[var(--ink-secondary)]" />
+        <div>
           <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Skills</h3>
+          <p className="mt-1 text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
+            Installed .skill.md files that teach the agent CLI tools.
+          </p>
         </div>
         <Button variant="outline" size="sm" onClick={handleImport}>
-          <Icon icon="solar:upload-outline" width={13} className="mr-1.5" />
+          <Icon icon="solar:upload-outline" width={13} className="mr-[var(--space-2)]" />
           Import
         </Button>
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".skill.md"
-        multiple
-        className="hidden"
-        onChange={handleFileChange}
-      />
+      <div className="mt-8 space-y-[var(--space-3)]">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".skill.md"
+          multiple
+          className="hidden"
+          onChange={handleFileChange}
+        />
 
-      {loading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-[52px] w-full" />
-          <Skeleton className="h-[52px] w-full" />
-          <Skeleton className="h-[52px] w-full" />
-        </div>
-      ) : skills.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className="space-y-2">
-          {skills.map((skill) => (
-            <SkillCard
-              key={skill.command}
-              skill={skill}
-              expanded={expandedCommand === skill.command}
-              deleting={deleting === skill.command}
-              onToggle={() => toggleExpand(skill.command)}
-              onDelete={() => handleDelete(skill.command)}
-            />
-          ))}
-        </div>
-      )}
+        {loading ? (
+          <div className="space-y-[var(--space-3)]">
+            <Skeleton className="h-[52px] w-full" />
+            <Skeleton className="h-[52px] w-full" />
+            <Skeleton className="h-[52px] w-full" />
+          </div>
+        ) : skills.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="space-y-[var(--space-2)]">
+            {skills.map((skill) => (
+              <SkillCard
+                key={skill.command}
+                skill={skill}
+                expanded={expandedCommand === skill.command}
+                deleting={deleting === skill.command}
+                onToggle={() => toggleExpand(skill.command)}
+                onDelete={() => handleDelete(skill.command)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       {toast && (
         <Card>
           <CardContent
             className={cn(
-              "px-3 py-2 text-[var(--text-body-sm)] font-medium",
+              "px-[var(--space-3)] py-2 text-[var(--text-body-sm)] font-medium",
               toast.isError ? "text-[var(--error)]" : "text-[var(--ink)]",
             )}
           >
@@ -205,7 +209,7 @@ function SkillCard({
   return (
     <Card>
       <CardContent className="p-0 overflow-hidden">
-        <div className="flex items-center gap-[var(--gap-inline)] px-3 py-2.5 min-w-0">
+        <div className="flex items-center gap-[var(--gap-inline)] px-[var(--space-3)] py-2.5 min-w-0">
           <button
             type="button"
             onClick={onToggle}
@@ -236,7 +240,7 @@ function SkillCard({
             </div>
           </button>
 
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-[var(--space-2)]">
             <ScopeBadge scope={skill.scope} />
             {skill.scope === "project" && (
               <Button
@@ -254,11 +258,11 @@ function SkillCard({
         </div>
 
         {expanded && (
-          <div className="border-t border-[var(--border)] px-3 py-3">
-            <div className="space-y-3">
+          <div className="border-t border-[var(--border)] px-[var(--space-3)] py-3">
+            <div className="space-y-[var(--space-3)]">
               {skill.requiredTools.length > 0 && (
                 <DetailSection label="Required CLI tools">
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-[var(--space-2)]">
                     {skill.requiredTools.map((tool) => (
                       <Chip key={tool} size="sm" className="font-[var(--font-mono)]">
                         {tool}
@@ -295,7 +299,7 @@ function SkillCard({
 
               {skill.outputs.length > 0 && (
                 <DetailSection label="Outputs">
-                  <div className="space-y-1">
+                  <div className="space-y-[var(--space-1)]">
                     {skill.outputs.map((output, i) => (
                       <div key={i} className="text-[var(--text-caption)]">
                         <span className="font-[var(--font-mono)] font-medium text-[var(--ink)]">
@@ -330,7 +334,7 @@ function SkillCard({
 function ScopeBadge({ scope }: { scope: "global" | "project" }) {
   return (
     <Chip size="sm">
-      <span className="flex items-center gap-1">
+      <span className="flex items-center gap-[var(--space-1)]">
         <Icon
           icon={scope === "global" ? "solar:globe-outline" : "solar:folder-open-outline"}
           width={10}

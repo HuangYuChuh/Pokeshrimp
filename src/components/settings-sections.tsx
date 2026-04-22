@@ -98,7 +98,7 @@ export function McpServersSection({
           </span>
         </AccordionTrigger>
         <AccordionContent>
-          <div className="mt-2 space-y-3">
+          <div className="mt-2 space-y-[var(--space-3)]">
             {entries.length === 0 && !adding && (
               <p className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
                 No MCP servers configured.
@@ -106,7 +106,7 @@ export function McpServersSection({
             )}
             {entries.map(([name, server]) => (
               <Card key={name}>
-                <CardContent className="flex items-center gap-[var(--gap-inline)] px-3 py-2">
+                <CardContent className="flex items-center gap-[var(--gap-inline)] px-[var(--space-3)] py-2">
                   <span
                     className={cn(
                       "h-2 w-2 shrink-0 rounded-full",
@@ -139,7 +139,7 @@ export function McpServersSection({
 
             {adding && (
               <Card>
-                <CardContent className="space-y-2 p-3">
+                <CardContent className="space-y-[var(--space-2)] p-3">
                   <Input
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
@@ -290,7 +290,7 @@ export function HooksSection({
           </span>
         </AccordionTrigger>
         <AccordionContent>
-          <div className="mt-2 space-y-3">
+          <div className="mt-2 space-y-[var(--space-3)]">
             {allEvents.size === 0 && !adding && (
               <p className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
                 No hooks configured.
@@ -299,7 +299,7 @@ export function HooksSection({
 
             {conventionHooks.map((event) => (
               <Card key={`conv-${event}`}>
-                <CardContent className="flex items-center gap-[var(--gap-inline)] px-3 py-2">
+                <CardContent className="flex items-center gap-[var(--gap-inline)] px-[var(--space-3)] py-2">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-[var(--gap-inline)]">
                       <span className="text-[var(--text-body-sm)] font-medium">{event}</span>
@@ -316,7 +316,7 @@ export function HooksSection({
             {Object.entries(hooks).map(([event, entries]) =>
               entries.map((entry, i) => (
                 <Card key={`${event}-${i}`}>
-                  <CardContent className="flex items-center gap-[var(--gap-inline)] px-3 py-2">
+                  <CardContent className="flex items-center gap-[var(--gap-inline)] px-[var(--space-3)] py-2">
                     <div className="min-w-0 flex-1">
                       <span className="text-[var(--text-body-sm)] font-medium">{event}</span>
                       <p className="truncate text-[var(--text-caption)] font-[var(--font-mono)] text-[var(--ink-tertiary)]">
@@ -343,7 +343,7 @@ export function HooksSection({
 
             {adding && (
               <Card>
-                <CardContent className="space-y-2 p-3">
+                <CardContent className="space-y-[var(--space-2)] p-3">
                   <Select
                     value={newEvent}
                     onChange={setNewEvent}
@@ -449,7 +449,7 @@ function PatternList({
       <label className="mb-1.5 block text-[var(--text-caption)] font-medium text-[var(--ink)]">
         {label}
       </label>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-[var(--space-2)]">
         {patterns.map((p, i) => (
           <Chip key={`${p}-${i}`} size="sm" className="font-[var(--font-mono)]">
             {p}

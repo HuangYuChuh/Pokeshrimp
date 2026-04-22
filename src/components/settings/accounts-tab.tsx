@@ -37,7 +37,6 @@ export function AccountsTab({
 }: AccountsTabProps) {
   const [oauthLoading, setOauthLoading] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
-
   const isElectron = typeof window !== "undefined" && !!window.pokeshrimp?.auth;
 
   const handleOpenAIOAuth = useCallback(async () => {
@@ -51,90 +50,90 @@ export function AccountsTab({
       onAutoSave(accessToken);
     } catch (err) {
       const message = err instanceof Error ? err.message : "OAuth failed";
-      if (!message.includes("User closed")) {
-        setOauthError(message);
-      }
+      if (!message.includes("User closed")) setOauthError(message);
     } finally {
       setOauthLoading(false);
     }
   }, [onOpenaiKeyChange, onOauthConnected, onAutoSave]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-[var(--gap-inline)]">
-        <Icon icon="solar:key-outline" width={18} className="text-[var(--ink-secondary)]" />
-        <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Accounts</h3>
-      </div>
+    <div>
+      <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Accounts</h3>
+      <p className="mt-1 text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
+        API keys for connecting to LLM providers.
+      </p>
 
-      <Field
-        label="Anthropic API Key"
-        hint="Required for Claude models"
-        getKeyUrl="https://console.anthropic.com/settings/keys"
-      >
-        <Input
-          type="password"
-          value={anthropicKey}
-          onChange={(e) => onAnthropicKeyChange(e.target.value)}
-          placeholder="sk-ant-..."
-          onFocus={(e) => {
-            if ((e.target as HTMLInputElement).value.includes("****")) onAnthropicKeyChange("");
-          }}
-          className="w-full font-[var(--font-mono)]"
-        />
-        <EnvKeyHint
-          envAvailable={envKeys?.anthropic}
-          hasConfigKey={!!apiKeys?.anthropic}
-          envVarName="ANTHROPIC_API_KEY"
-        />
-      </Field>
-
-      <Field
-        label="OpenAI API Key"
-        hint="Required for GPT models"
-        getKeyUrl="https://platform.openai.com/api-keys"
-      >
-        <div className="flex gap-[var(--gap-inline)]">
+      <div className="mt-8 space-y-8">
+        {/* Anthropic */}
+        <FieldGroup
+          label="Anthropic"
+          hint="Required for Claude models"
+          getKeyUrl="https://console.anthropic.com/settings/keys"
+        >
           <Input
             type="password"
-            value={openaiKey}
-            onChange={(e) => onOpenaiKeyChange(e.target.value)}
-            placeholder="sk-..."
+            value={anthropicKey}
+            onChange={(e) => onAnthropicKeyChange(e.target.value)}
+            placeholder="sk-ant-..."
             onFocus={(e) => {
-              if ((e.target as HTMLInputElement).value.includes("****")) onOpenaiKeyChange("");
+              if ((e.target as HTMLInputElement).value.includes("****")) onAnthropicKeyChange("");
             }}
             className="w-full font-[var(--font-mono)]"
           />
-          {isElectron && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="shrink-0"
-              disabled={oauthLoading}
-              onClick={handleOpenAIOAuth}
-            >
-              {oauthLoading ? "Logging in..." : "Login with OpenAI"}
-            </Button>
+          <EnvHint
+            env={envKeys?.anthropic}
+            config={!!apiKeys?.anthropic}
+            name="ANTHROPIC_API_KEY"
+          />
+        </FieldGroup>
+
+        {/* OpenAI */}
+        <FieldGroup
+          label="OpenAI"
+          hint="Required for GPT models"
+          getKeyUrl="https://platform.openai.com/api-keys"
+        >
+          <div className="flex gap-[var(--space-2)]">
+            <Input
+              type="password"
+              value={openaiKey}
+              onChange={(e) => onOpenaiKeyChange(e.target.value)}
+              placeholder="sk-..."
+              onFocus={(e) => {
+                if ((e.target as HTMLInputElement).value.includes("****")) onOpenaiKeyChange("");
+              }}
+              className="w-full font-[var(--font-mono)]"
+            />
+            {isElectron && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                disabled={oauthLoading}
+                onClick={handleOpenAIOAuth}
+              >
+                {oauthLoading ? "Connecting..." : "Login with OpenAI"}
+              </Button>
+            )}
+          </div>
+          {oauthConnected && !oauthError && (
+            <p className="mt-2 text-[var(--text-caption)] text-[var(--success)]">
+              Connected — token auto-refreshes
+            </p>
           )}
-        </div>
-        {oauthConnected && !oauthError && (
-          <p className="mt-1 text-[var(--text-micro)] text-[var(--success)]">
-            OpenAI OAuth connected (token auto-refreshes)
-          </p>
-        )}
-        {oauthError && (
-          <p className="mt-1 text-[var(--text-micro)] text-[var(--error)]">{oauthError}</p>
-        )}
-        <EnvKeyHint
-          envAvailable={envKeys?.openai}
-          hasConfigKey={!!apiKeys?.openai}
-          envVarName="OPENAI_API_KEY"
-        />
-      </Field>
+          {oauthError && (
+            <p className="mt-2 text-[var(--text-caption)] text-[var(--error)]">{oauthError}</p>
+          )}
+          <EnvHint env={envKeys?.openai} config={!!apiKeys?.openai} name="OPENAI_API_KEY" />
+        </FieldGroup>
+      </div>
     </div>
   );
 }
 
-function Field({
+/* ─── Field group ── */
+
+function FieldGroup({
   label,
   hint,
   getKeyUrl,
@@ -147,43 +146,40 @@ function Field({
 }) {
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between">
-        <label className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">{label}</label>
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <label className="text-[var(--text-title)] font-medium text-[var(--ink)]">{label}</label>
+          {hint && (
+            <p className="mt-0.5 text-[var(--text-caption)] text-[var(--ink-tertiary)]">{hint}</p>
+          )}
+        </div>
         {getKeyUrl && (
-          <Button variant="ghost" size="sm" onClick={() => openKeyUrl(getKeyUrl)}>
-            Get key
-            <Icon icon="solar:arrow-right-outline" width={12} />
-          </Button>
+          <button
+            type="button"
+            onClick={() => openKeyUrl(getKeyUrl)}
+            className="text-[var(--text-caption)] text-[var(--accent)] hover:underline"
+          >
+            Get key{" "}
+            <Icon
+              icon="solar:arrow-right-outline"
+              width={10}
+              className="inline ml-[var(--space-1)]"
+            />
+          </button>
         )}
       </div>
-      {hint && (
-        <p className="mb-2 text-[var(--text-caption)] text-[var(--ink-secondary)]">{hint}</p>
-      )}
       {children}
     </div>
   );
 }
 
-function EnvKeyHint({
-  envAvailable,
-  hasConfigKey,
-  envVarName,
-}: {
-  envAvailable?: boolean;
-  hasConfigKey: boolean;
-  envVarName: string;
-}) {
-  if (!envAvailable) return null;
-  if (hasConfigKey) {
-    return (
-      <p className="mt-1.5 text-[var(--text-micro)] text-[var(--ink-secondary)]">
-        Config key takes priority over env var
-      </p>
-    );
-  }
+/* ─── Env hint ── */
+
+function EnvHint({ env, config, name }: { env?: boolean; config: boolean; name: string }) {
+  if (!env) return null;
   return (
-    <p className="mt-1.5 text-[var(--text-micro)] text-[var(--success)]">
-      Using {envVarName} from environment
+    <p className="mt-2 text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+      {config ? "Config key takes priority over env" : `Using ${name} from environment`}
     </p>
   );
 }
