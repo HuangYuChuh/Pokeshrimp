@@ -1,7 +1,5 @@
 "use client";
 
-import "../../design-system/index.css";
-
 import {
   Button,
   Input,

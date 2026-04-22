@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { Button, Card, TextArea } from "@heroui/react";
+import { Button, Card, CardContent, Textarea } from "@/design-system/components";
 
 interface EditBubbleProps {
   content: string;
@@ -25,8 +25,8 @@ export function EditBubble({ content, onChange, onSave, onCancel }: EditBubblePr
   return (
     <div className="w-full max-w-[85%]">
       <Card>
-        <Card.Content className="p-3">
-          <TextArea
+        <CardContent className="p-3">
+          <Textarea
             ref={editRef}
             value={content}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -44,19 +44,18 @@ export function EditBubble({ content, onChange, onSave, onCancel }: EditBubblePr
                 onCancel();
               }
             }}
-            variant="secondary"
-            className="block w-full resize-none border-none text-[14px] leading-7 shadow-none focus:outline-none"
+            className="block w-full resize-none border-none bg-transparent text-[var(--text-body)] leading-[var(--leading-relaxed)] shadow-none focus:outline-none focus:ring-0"
             rows={1}
           />
-        </Card.Content>
-        <Card.Footer className="flex justify-end gap-2 px-3 pb-3 pt-0">
-          <Button variant="ghost" size="sm" onPress={onCancel}>
+        </CardContent>
+        <div className="flex justify-end gap-[var(--gap-inline)] px-3 pb-3 pt-0">
+          <Button variant="ghost" size="sm" onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant="primary" size="sm" onPress={onSave}>
+          <Button variant="primary" size="sm" onClick={onSave}>
             Save
           </Button>
-        </Card.Footer>
+        </div>
       </Card>
     </div>
   );

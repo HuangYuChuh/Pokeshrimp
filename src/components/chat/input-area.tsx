@@ -2,9 +2,9 @@
 
 import { forwardRef, useState, useRef, useCallback, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils";
-import { ArrowUp, Paperclip, X, FileIcon, Slash } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
-import { Button, Card, Select, ListBox, TextArea } from "@heroui/react";
+import { Button, Card, CardContent, Select, Textarea } from "@/design-system/components";
 
 /* --- Skill type --- */
 
@@ -56,7 +56,6 @@ const ACCEPTED_TYPES =
 interface InputAreaProps {
   input: string;
   isLoading: boolean;
-  modelLabel: string;
   modelId: string;
   skills: SkillInfo[];
   onModelChange: (id: string) => void;
@@ -73,7 +72,6 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
   {
     input,
     isLoading,
-    modelLabel,
     modelId,
     skills,
     onModelChange,
@@ -184,9 +182,11 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
     [attachments, input, isLoading, onKeyDown, handleFormSubmit],
   );
 
+  const modelOptions = MODEL_OPTIONS.map((m) => ({ value: m.id, label: m.label }));
+
   return (
     <div className="shrink-0 px-3 pb-4 sm:px-6 sm:pb-6">
-      <form onSubmit={handleFormSubmit} className="relative mx-auto max-w-[680px]">
+      <form onSubmit={handleFormSubmit} className="relative mx-auto max-w-[var(--width-chat)]">
         {/* Slash command popup */}
         {isSlashMode && (
           <Card className="absolute bottom-full left-0 z-10 mb-2 w-full p-1">
@@ -194,15 +194,19 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
               <button
                 key={skill.command}
                 type="button"
-                className="nodrag flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent"
+                className="nodrag flex w-full items-start gap-[var(--space-3)] rounded-[var(--radius-lg)] px-3 py-2.5 text-left transition-colors hover:bg-[var(--accent-subtle)]"
                 onClick={() => onSelectSkill(skill.command)}
               >
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-muted text-muted">
-                  <Slash size={11} strokeWidth={2} />
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[var(--border-subtle)] text-[var(--ink-tertiary)]">
+                  <Icon icon="solar:slash-circle-outline" width={11} />
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[13px] font-medium text-foreground">{skill.command}</div>
-                  <div className="truncate text-[12px] text-muted">{skill.description}</div>
+                  <div className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+                    {skill.command}
+                  </div>
+                  <div className="truncate text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+                    {skill.description}
+                  </div>
                 </div>
               </button>
             ))}
@@ -212,20 +216,20 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
         <Card
           className={cn(
             "overflow-hidden transition-colors",
-            isDragOver && "border-primary bg-primary/5",
+            isDragOver && "border-[var(--accent)] bg-[var(--accent-subtle)]",
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <Card.Content className="p-0">
+          <CardContent className="p-0">
             {/* Attachment previews */}
             {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-2 px-4 pt-3">
+              <div className="flex flex-wrap gap-[var(--space-2)] px-4 pt-3">
                 {attachments.map((att) => (
                   <div
                     key={att.id}
-                    className="group/att relative flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-2.5 py-1.5"
+                    className="group/att relative flex items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-2.5 py-1.5"
                   >
                     {att.previewUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
@@ -235,29 +239,35 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                         className="h-10 w-10 rounded object-cover"
                       />
                     ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-muted">
-                        <FileIcon size={16} className="text-muted" />
+                      <div className="flex h-10 w-10 items-center justify-center rounded bg-[var(--border-subtle)]">
+                        <Icon
+                          icon="solar:file-outline"
+                          width={16}
+                          className="text-[var(--ink-tertiary)]"
+                        />
                       </div>
                     )}
                     <div className="min-w-0 max-w-[120px]">
-                      <div className="truncate text-[12px] font-medium text-foreground">
+                      <div className="truncate text-[var(--text-caption)] font-medium text-[var(--ink)]">
                         {att.name}
                       </div>
-                      <div className="text-[11px] text-muted">{formatFileSize(att.size)}</div>
+                      <div className="text-[var(--text-micro)] text-[var(--ink-tertiary)]">
+                        {formatFileSize(att.size)}
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeAttachment(att.id)}
-                      className="nodrag absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-background opacity-0 transition-opacity group-hover/att:opacity-100"
+                      className="nodrag absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--canvas)] opacity-0 transition-opacity group-hover/att:opacity-100"
                     >
-                      <X size={10} strokeWidth={2.5} />
+                      <Icon icon="solar:close-circle-outline" width={10} />
                     </button>
                   </div>
                 ))}
               </div>
             )}
 
-            <TextArea
+            <Textarea
               ref={ref}
               value={input}
               onChange={onChange}
@@ -265,8 +275,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
               placeholder="Describe what you want to create, type / for skills..."
               rows={1}
               disabled={isLoading}
-              variant="secondary"
-              className="selectable nodrag block w-full resize-none border-none px-4 pb-2 pt-4 text-[14px] leading-6 shadow-none focus:outline-none disabled:opacity-50"
+              className="selectable nodrag block w-full resize-none border-none bg-transparent px-4 pb-2 pt-4 text-[var(--text-body)] leading-6 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
             />
 
             <div className="flex items-center justify-between px-3 pb-2.5">
@@ -280,53 +289,35 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                   className="hidden"
                 />
                 <Button
-                  isIconOnly
                   variant="ghost"
                   size="sm"
-                  onPress={() => fileInputRef.current?.click()}
-                  isDisabled={isLoading}
-                  className="nodrag h-7 w-7 min-w-0"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading}
+                  className="nodrag h-7 w-7 min-w-0 p-0"
                   aria-label="Attach files"
                 >
-                  <Paperclip size={15} strokeWidth={1.5} />
+                  <Icon icon="solar:paperclip-outline" width={15} />
                 </Button>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-[var(--gap-inline)]">
                 <Select
-                  aria-label="Model selection"
-                  selectedKey={modelId}
-                  onSelectionChange={(key) => {
-                    if (key) onModelChange(String(key));
-                  }}
-                  className="nodrag w-auto min-w-0"
-                >
-                  <Select.Trigger className="flex h-7 items-center gap-1 rounded-lg border-none bg-transparent px-2 text-[12px] text-muted shadow-none transition-colors hover:bg-muted hover:text-foreground">
-                    <Select.Value>{modelLabel}</Select.Value>
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox className="text-[13px]">
-                      {MODEL_OPTIONS.map((m) => (
-                        <ListBox.Item key={m.id} id={m.id}>
-                          {m.label}
-                        </ListBox.Item>
-                      ))}
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
+                  value={modelId}
+                  onChange={onModelChange}
+                  options={modelOptions}
+                  className="nodrag"
+                />
                 <Button
-                  isIconOnly
                   variant="primary"
                   size="sm"
                   type="submit"
-                  isDisabled={(!input.trim() && attachments.length === 0) || isLoading}
-                  className="nodrag h-7 w-7 min-w-0"
+                  disabled={(!input.trim() && attachments.length === 0) || isLoading}
+                  className="nodrag h-7 w-7 min-w-0 p-0"
                 >
-                  <ArrowUp size={15} strokeWidth={2} />
+                  <Icon icon="solar:arrow-up-outline" width={15} />
                 </Button>
               </div>
             </div>
-          </Card.Content>
+          </CardContent>
         </Card>
       </form>
     </div>

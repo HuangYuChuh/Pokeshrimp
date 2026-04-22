@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
-import { Card, Chip } from "@heroui/react";
+import { Icon } from "@iconify/react";
+import { Card, CardHeader, CardContent, Chip } from "@/design-system/components";
 
 interface ToolInvocation {
   toolCallId: string;
@@ -31,24 +31,19 @@ export function ToolCard({ invocation }: ToolCardProps) {
   const label = invocation.toolName.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <div className="mt-2">
+    <div className="mt-[var(--space-2)]">
       <Card
-        variant="default"
-        className={cn(
-          "cursor-default transition-colors",
-          canExpand && "cursor-pointer hover:bg-muted",
-        )}
+        interactive={canExpand}
+        className={cn("cursor-default", canExpand && "cursor-pointer")}
+        onClick={() => canExpand && setExpanded(!expanded)}
       >
-        <Card.Header
-          className="flex flex-row items-center gap-2 px-3 py-2"
-          onClick={() => canExpand && setExpanded(!expanded)}
-        >
-          <Chip size="sm" color={isDone ? "success" : "warning"} variant="soft">
+        <CardHeader className="flex flex-row items-center gap-[var(--gap-inline)] mb-0">
+          <Chip size="sm" variant={isDone ? "success" : "warning"}>
             {isDone ? "Done" : "Running"}
           </Chip>
-          <Card.Title className="text-[12px] font-medium">{label}</Card.Title>
+          <span className="text-[var(--text-caption)] font-medium text-[var(--ink)]">{label}</span>
           {hasArgs && (
-            <span className="max-w-[200px] truncate text-[12px] text-muted opacity-50">
+            <span className="max-w-[200px] truncate text-[var(--text-caption)] text-[var(--ink-tertiary)]">
               {(() => {
                 const entries = Object.entries(invocation.args as Record<string, unknown>);
                 if (!entries.length) return "";
@@ -59,18 +54,19 @@ export function ToolCard({ invocation }: ToolCardProps) {
             </span>
           )}
           {canExpand && (
-            <ChevronDown
-              size={12}
+            <Icon
+              icon="solar:alt-arrow-down-outline"
+              width={12}
               className={cn("ml-auto shrink-0 transition-transform", expanded && "rotate-180")}
             />
           )}
-        </Card.Header>
+        </CardHeader>
 
         {expanded && (
-          <Card.Content className="max-h-[300px] overflow-y-auto px-3 pb-3 pt-0 font-mono text-[11px] leading-relaxed text-muted">
+          <CardContent className="max-h-[300px] overflow-y-auto px-3 pb-3 pt-0 font-[var(--font-mono)] text-[var(--text-micro)] leading-relaxed text-[var(--ink-secondary)]">
             {hasArgs && (
               <>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted/50">
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-ghost)]">
                   Input
                 </div>
                 <pre className="mb-3 whitespace-pre-wrap break-all">
@@ -80,13 +76,13 @@ export function ToolCard({ invocation }: ToolCardProps) {
             )}
             {hasResult && (
               <>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted/50">
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-ghost)]">
                   Result
                 </div>
                 <pre className="whitespace-pre-wrap break-all">{formatVal(invocation.result)}</pre>
               </>
             )}
-          </Card.Content>
+          </CardContent>
         )}
       </Card>
     </div>
