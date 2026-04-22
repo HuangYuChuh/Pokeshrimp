@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Skeleton, Card } from "@heroui/react";
+import { Skeleton, Card, CardContent } from "@/design-system/components";
 
 interface ToolStatus {
   name: string;
@@ -40,22 +40,26 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
   }
 
   if (error) {
-    return <p className="text-[13px] text-danger">{error}</p>;
+    return <p className="text-[13px] text-[var(--error)]">{error}</p>;
   }
 
   if (tools.length === 0) {
-    return <p className="text-[13px] text-muted">No CLI tools required by installed skills.</p>;
+    return (
+      <p className="text-[13px] text-[var(--ink-secondary)]">
+        No CLI tools required by installed skills.
+      </p>
+    );
   }
 
   return (
     <div className="space-y-2">
       {tools.map((tool) => (
         <Card key={tool.name}>
-          <Card.Content className="flex items-start gap-2.5 px-3 py-2">
+          <CardContent className="flex items-start gap-2.5 px-3 py-2">
             <span
               className={cn(
                 "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                tool.status === "available" ? "bg-green-400" : "bg-danger",
+                tool.status === "available" ? "bg-[var(--success)]" : "bg-[var(--error)]",
               )}
               aria-hidden="true"
             />
@@ -65,15 +69,17 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
                 <span
                   className={cn(
                     "text-[11px]",
-                    tool.status === "available" ? "text-green-400" : "text-danger",
+                    tool.status === "available" ? "text-[var(--success)]" : "text-[var(--error)]",
                   )}
                 >
                   {tool.status === "available" ? "Available" : "Not installed"}
                 </span>
               </div>
-              <p className="mt-0.5 text-[12px] text-muted">Used by: {tool.skills.join(", ")}</p>
+              <p className="mt-0.5 text-[12px] text-[var(--ink-secondary)]">
+                Used by: {tool.skills.join(", ")}
+              </p>
             </div>
-          </Card.Content>
+          </CardContent>
         </Card>
       ))}
     </div>

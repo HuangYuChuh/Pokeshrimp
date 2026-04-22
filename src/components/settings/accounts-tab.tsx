@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Button, Input } from "@heroui/react";
+import { Button, Input } from "@/design-system/components";
 
 interface AccountsTabProps {
   anthropicKey: string;
@@ -10,7 +10,6 @@ interface AccountsTabProps {
   onOpenaiKeyChange: (key: string) => void;
   envKeys?: { anthropic: boolean; openai: boolean };
   apiKeys?: { anthropic: string; openai: string };
-  defaultModel: string;
   oauthConnected: boolean;
   onOauthConnected: (connected: boolean) => void;
   onAutoSave: (openaiToken: string) => void;
@@ -61,7 +60,7 @@ export function AccountsTab({
 
   return (
     <div className="space-y-5">
-      <h3 className="text-[15px] font-semibold mb-4">Accounts</h3>
+      <h3 className="text-[var(--text-title)] font-semibold mb-4">Accounts</h3>
 
       <Field
         label="Anthropic API Key"
@@ -76,8 +75,7 @@ export function AccountsTab({
           onFocus={(e) => {
             if ((e.target as HTMLInputElement).value.includes("****")) onAnthropicKeyChange("");
           }}
-          fullWidth
-          className="font-mono"
+          className="w-full font-[var(--font-mono)]"
         />
         <EnvKeyHint
           envAvailable={envKeys?.anthropic}
@@ -91,7 +89,7 @@ export function AccountsTab({
         hint="Required for GPT models"
         getKeyUrl="https://platform.openai.com/api-keys"
       >
-        <div className="flex gap-2">
+        <div className="flex gap-[var(--gap-inline)]">
           <Input
             type="password"
             value={openaiKey}
@@ -100,27 +98,28 @@ export function AccountsTab({
             onFocus={(e) => {
               if ((e.target as HTMLInputElement).value.includes("****")) onOpenaiKeyChange("");
             }}
-            fullWidth
-            className="font-mono"
+            className="w-full font-[var(--font-mono)]"
           />
           {isElectron && (
             <Button
               variant="outline"
               size="sm"
               className="shrink-0"
-              isDisabled={oauthLoading}
-              onPress={handleOpenAIOAuth}
+              disabled={oauthLoading}
+              onClick={handleOpenAIOAuth}
             >
               {oauthLoading ? "Logging in..." : "Login with OpenAI"}
             </Button>
           )}
         </div>
         {oauthConnected && !oauthError && (
-          <p className="mt-1 text-[11px] text-green-400">
+          <p className="mt-1 text-[var(--text-micro)] text-[var(--success)]">
             OpenAI OAuth connected (token auto-refreshes)
           </p>
         )}
-        {oauthError && <p className="mt-1 text-[11px] text-danger">{oauthError}</p>}
+        {oauthError && (
+          <p className="mt-1 text-[var(--text-micro)] text-[var(--error)]">{oauthError}</p>
+        )}
         <EnvKeyHint
           envAvailable={envKeys?.openai}
           hasConfigKey={!!apiKeys?.openai}
@@ -145,14 +144,16 @@ function Field({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <label className="text-[13px] font-medium text-foreground">{label}</label>
+        <label className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">{label}</label>
         {getKeyUrl && (
-          <Button variant="ghost" size="sm" onPress={() => openKeyUrl(getKeyUrl)}>
+          <Button variant="ghost" size="sm" onClick={() => openKeyUrl(getKeyUrl)}>
             Get key &rarr;
           </Button>
         )}
       </div>
-      {hint && <p className="mb-2 text-[12px] text-muted">{hint}</p>}
+      {hint && (
+        <p className="mb-2 text-[var(--text-caption)] text-[var(--ink-secondary)]">{hint}</p>
+      )}
       {children}
     </div>
   );
@@ -169,7 +170,15 @@ function EnvKeyHint({
 }) {
   if (!envAvailable) return null;
   if (hasConfigKey) {
-    return <p className="mt-1.5 text-[11px] text-muted">Config key takes priority over env var</p>;
+    return (
+      <p className="mt-1.5 text-[var(--text-micro)] text-[var(--ink-secondary)]">
+        Config key takes priority over env var
+      </p>
+    );
   }
-  return <p className="mt-1.5 text-[11px] text-green-400">Using {envVarName} from environment</p>;
+  return (
+    <p className="mt-1.5 text-[var(--text-micro)] text-[var(--success)]">
+      Using {envVarName} from environment
+    </p>
+  );
 }

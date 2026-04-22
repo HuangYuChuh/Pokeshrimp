@@ -8,7 +8,7 @@ import { PreviewPanel } from "@/components/preview-panel";
 import { SettingsDialog, type SettingsTabId } from "@/components/settings-dialog";
 import { SkillDropOverlay } from "@/components/skill-drop-overlay";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
-import { Chip } from "@heroui/react";
+import { Chip } from "@/design-system/components";
 
 /* ---------------------------------------------------------------------------
  * Constants
@@ -216,7 +216,7 @@ function HomeInner() {
     <>
       {/* Three-panel layout: sidebar (260px) + chat (flex-1) + preview (380px) */}
       <div
-        className="flex h-screen w-screen overflow-hidden bg-background"
+        className="flex h-screen w-screen overflow-hidden bg-[var(--canvas)]"
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
@@ -225,7 +225,6 @@ function HomeInner() {
         {/* Left: Sidebar */}
         <Sidebar
           open={sidebarOpen}
-          onToggle={toggleSidebar}
           onOpenSettings={() => {
             setSettingsTab("accounts");
             setSettingsOpen(true);
@@ -248,7 +247,7 @@ function HomeInner() {
         />
 
         {/* Right: Preview panel */}
-        <PreviewPanel open={previewOpen} onToggle={togglePreview} />
+        <PreviewPanel open={previewOpen} />
 
         {/* Skill drag-and-drop overlay */}
         <SkillDropOverlay visible={dragOver} />
@@ -256,7 +255,7 @@ function HomeInner() {
         {/* Drop result toast */}
         {dropToast && (
           <div className="fixed bottom-6 left-1/2 z-[200] -translate-x-1/2">
-            <Chip size="lg" color={dropToast.isError ? "danger" : "success"} variant="primary">
+            <Chip size="md" variant={dropToast.isError ? "error" : "success"}>
               {dropToast.message}
             </Chip>
           </div>

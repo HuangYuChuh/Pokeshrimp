@@ -1,6 +1,6 @@
 "use client";
 
-import { Select, ListBox } from "@heroui/react";
+import { Select } from "@/design-system/components";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
 
 interface ModelsTabProps {
@@ -9,35 +9,24 @@ interface ModelsTabProps {
 }
 
 export function ModelsTab({ defaultModel, onDefaultModelChange }: ModelsTabProps) {
+  const options = MODEL_OPTIONS.map((m) => ({ value: m.id, label: m.label }));
+
   return (
     <div className="space-y-5">
-      <h3 className="text-[15px] font-semibold mb-4">Models</h3>
+      <h3 className="text-[var(--text-title)] font-semibold mb-4">Models</h3>
 
       <div>
         <div className="mb-1.5">
-          <label className="text-[13px] font-medium text-foreground">Default Model</label>
+          <label className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+            Default Model
+          </label>
         </div>
         <Select
-          selectedKey={defaultModel}
-          onSelectionChange={(key) => {
-            if (key) onDefaultModelChange(String(key));
-          }}
-          fullWidth
-        >
-          <Select.Trigger>
-            <Select.Value />
-            <Select.Indicator />
-          </Select.Trigger>
-          <Select.Popover>
-            <ListBox>
-              {MODEL_OPTIONS.map((m) => (
-                <ListBox.Item key={m.id} id={m.id} textValue={m.label}>
-                  {m.label}
-                </ListBox.Item>
-              ))}
-            </ListBox>
-          </Select.Popover>
-        </Select>
+          value={defaultModel}
+          onChange={onDefaultModelChange}
+          options={options}
+          className="w-full"
+        />
       </div>
     </div>
   );
