@@ -1,6 +1,5 @@
 "use client";
 
-import { Icon } from "@iconify/react";
 import { Select } from "@/design-system/components";
 
 interface AppearanceTabProps {
@@ -16,19 +15,16 @@ const THEME_OPTIONS = [
 
 export function AppearanceTab({ theme, onThemeChange }: AppearanceTabProps) {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-[var(--gap-inline)]">
-        <Icon icon="solar:palette-outline" width={18} className="text-[var(--ink-secondary)]" />
-        <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Appearance</h3>
-      </div>
+    <div>
+      <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Appearance</h3>
+      <p className="mt-1 text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
+        Customize the visual style of the application.
+      </p>
 
-      <div>
-        <label className="mb-2 block text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+      <div className="mt-8">
+        <label className="block text-[var(--text-title)] font-medium text-[var(--ink)] mb-2">
           Theme
         </label>
-        <p className="mb-3 text-[var(--text-caption)] text-[var(--ink-tertiary)]">
-          Choose your preferred color scheme.
-        </p>
         <Select
           value={theme}
           onChange={(v) => onThemeChange(v as "dark" | "light" | "system")}

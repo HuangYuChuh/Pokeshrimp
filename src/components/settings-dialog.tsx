@@ -168,99 +168,110 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
       <ModalContent
         title="Settings"
         hideHeader
-        className="nodrag w-[780px] max-w-[90vw] max-h-[85vh] p-0 flex flex-col overflow-hidden"
+        className="nodrag w-[800px] max-w-[92vw] max-h-[88vh] min-h-[520px] p-0 flex flex-col overflow-hidden"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
-          <h2 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Settings</h2>
-        </div>
-
-        {/* Body: sidebar + content */}
+        {/* ── Sidebar + Content ── */}
         <div className="flex min-h-0 flex-1 overflow-hidden">
           {/* Sidebar nav */}
-          <nav className="w-[180px] shrink-0 border-r border-[var(--border)] py-3 overflow-y-auto">
-            <div className="flex flex-col gap-0.5 px-3">
+          <nav className="w-[200px] shrink-0 bg-[var(--canvas-subtle)] py-5 overflow-y-auto">
+            <div className="px-[var(--space-4)] mb-5">
+              <h2 className="text-[var(--text-title)] font-semibold text-[var(--ink)]">Settings</h2>
+            </div>
+            <div className="flex flex-col gap-px px-3">
               {NAV_ITEMS.map((item) => {
                 const isActive = activeTab === item.id;
                 return (
-                  <Button
+                  <button
                     key={item.id}
-                    variant={isActive ? "outline" : "ghost"}
-                    size="sm"
+                    type="button"
                     onClick={() => setActiveTab(item.id)}
-                    className="w-full justify-start gap-[var(--gap-inline)]"
+                    className={[
+                      "flex items-center gap-[var(--space-3)] w-full px-[var(--space-3)] py-2 rounded-[var(--radius-md)]",
+                      "text-[var(--text-body-sm)] transition-colors text-left",
+                      isActive
+                        ? "bg-[var(--surface)] text-[var(--ink)] font-medium shadow-[var(--shadow-xs)]"
+                        : "text-[var(--ink-secondary)] hover:text-[var(--ink)] hover:bg-[var(--border-subtle)]",
+                    ].join(" ")}
                   >
-                    <Icon icon={item.icon} width={15} />
+                    <Icon
+                      icon={item.icon}
+                      width={16}
+                      className={isActive ? "text-[var(--accent)]" : ""}
+                    />
                     {item.label}
-                  </Button>
+                  </button>
                 );
               })}
             </div>
           </nav>
 
           {/* Content area */}
-          <div className="flex-1 overflow-y-auto px-6 py-5">
-            {!settings ? (
-              <div className="space-y-5">
-                <Skeleton className="h-[60px] w-full" />
-                <Skeleton className="h-[60px] w-full" />
-                <Skeleton className="h-[80px] w-full" />
-              </div>
-            ) : (
-              <>
-                {activeTab === "accounts" && (
-                  <AccountsTab
-                    anthropicKey={anthropicKey}
-                    openaiKey={openaiKey}
-                    onAnthropicKeyChange={setAnthropicKey}
-                    onOpenaiKeyChange={setOpenaiKey}
-                    envKeys={settings.envKeys}
-                    apiKeys={settings.apiKeys}
-                    oauthConnected={oauthConnected}
-                    onOauthConnected={setOauthConnected}
-                    onAutoSave={handleOauthAutoSave}
-                  />
-                )}
-                {activeTab === "models" && (
-                  <ModelsTab defaultModel={defaultModel} onDefaultModelChange={setDefaultModel} />
-                )}
-                {activeTab === "skills" && <SkillsTab active={activeTab === "skills"} />}
-                {activeTab === "tools" && (
-                  <ToolsTab
-                    active={activeTab === "tools"}
-                    mcpServers={mcpServers}
-                    onMcpServersChange={setMcpServers}
-                  />
-                )}
-                {activeTab === "automation" && (
-                  <AutomationTab
-                    hooks={hooks}
-                    conventionHooks={conventionHooks}
-                    onHooksChange={setHooks}
-                    permissions={permissions}
-                    onPermissionsChange={setPermissions}
-                  />
-                )}
-                {activeTab === "appearance" && (
-                  <AppearanceTab theme={theme} onThemeChange={handleThemeChange} />
-                )}
-              </>
-            )}
-          </div>
-        </div>
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-[520px] px-8 py-6">
+              {!settings ? (
+                <div className="space-y-6">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-5 w-40 mt-4" />
+                  <Skeleton className="h-9 w-full" />
+                </div>
+              ) : (
+                <>
+                  {activeTab === "accounts" && (
+                    <AccountsTab
+                      anthropicKey={anthropicKey}
+                      openaiKey={openaiKey}
+                      onAnthropicKeyChange={setAnthropicKey}
+                      onOpenaiKeyChange={setOpenaiKey}
+                      envKeys={settings.envKeys}
+                      apiKeys={settings.apiKeys}
+                      oauthConnected={oauthConnected}
+                      onOauthConnected={setOauthConnected}
+                      onAutoSave={handleOauthAutoSave}
+                    />
+                  )}
+                  {activeTab === "models" && (
+                    <ModelsTab defaultModel={defaultModel} onDefaultModelChange={setDefaultModel} />
+                  )}
+                  {activeTab === "skills" && <SkillsTab active={activeTab === "skills"} />}
+                  {activeTab === "tools" && (
+                    <ToolsTab
+                      active={activeTab === "tools"}
+                      mcpServers={mcpServers}
+                      onMcpServersChange={setMcpServers}
+                    />
+                  )}
+                  {activeTab === "automation" && (
+                    <AutomationTab
+                      hooks={hooks}
+                      conventionHooks={conventionHooks}
+                      onHooksChange={setHooks}
+                      permissions={permissions}
+                      onPermissionsChange={setPermissions}
+                    />
+                  )}
+                  {activeTab === "appearance" && (
+                    <AppearanceTab theme={theme} onThemeChange={handleThemeChange} />
+                  )}
+                </>
+              )}
+            </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-3 border-t border-[var(--border)]">
-          <p className="text-[var(--text-micro)] text-[var(--ink-ghost)]">
-            Saved to ~/.visagent/config.json
-          </p>
-          <div className="flex gap-[var(--gap-inline)]">
-            <Button variant="outline" size="sm" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
-              {saved ? "Saved!" : saving ? "Saving..." : "Save"}
-            </Button>
+            {/* Footer — inside scroll area so it doesn't eat space */}
+            <div className="sticky bottom-0 flex items-center justify-between px-8 py-4 bg-[var(--surface)] border-t border-[var(--border)]">
+              <p className="text-[var(--text-caption)] text-[var(--ink-ghost)]">
+                ~/.visagent/config.json
+              </p>
+              <div className="flex gap-[var(--space-3)]">
+                <Button variant="ghost" size="sm" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
+                  {saved ? "Saved!" : saving ? "Saving..." : "Save"}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </ModalContent>
