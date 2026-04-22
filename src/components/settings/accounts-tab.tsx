@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Button, Input } from "@/design-system/components";
+import { Icon } from "@iconify/react";
 
 interface AccountsTabProps {
   anthropicKey: string;
@@ -59,8 +60,11 @@ export function AccountsTab({
   }, [onOpenaiKeyChange, onOauthConnected, onAutoSave]);
 
   return (
-    <div className="space-y-5">
-      <h3 className="text-[var(--text-title)] font-semibold mb-4">Accounts</h3>
+    <div className="space-y-6">
+      <div className="flex items-center gap-[var(--gap-inline)]">
+        <Icon icon="solar:key-outline" width={18} className="text-[var(--ink-secondary)]" />
+        <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Accounts</h3>
+      </div>
 
       <Field
         label="Anthropic API Key"
@@ -147,7 +151,8 @@ function Field({
         <label className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">{label}</label>
         {getKeyUrl && (
           <Button variant="ghost" size="sm" onClick={() => openKeyUrl(getKeyUrl)}>
-            Get key &rarr;
+            Get key
+            <Icon icon="solar:arrow-right-outline" width={12} />
           </Button>
         )}
       </div>
