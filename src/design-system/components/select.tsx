@@ -33,7 +33,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
           "border border-[var(--border)] bg-[var(--surface)]",
           "text-[var(--text-body-sm)] text-[var(--ink)]",
           "hover:border-[var(--border-strong)] transition-colors",
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]",
           "disabled:opacity-50 disabled:pointer-events-none",
           "data-[placeholder]:text-[var(--ink-ghost)]",
           className,

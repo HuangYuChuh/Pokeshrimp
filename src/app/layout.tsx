@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={cn("dark font-sans", geist.variable, playfair.variable)}
       suppressHydrationWarning
     >
-      <body className="h-full overflow-hidden bg-background text-foreground">
+      <body className="h-full overflow-hidden bg-[var(--canvas)] text-[var(--ink)]">
         {/* Restore theme preference before first paint to prevent flash */}
         <script
           dangerouslySetInnerHTML={{
