@@ -92,7 +92,7 @@ Any UI work MUST use `src/design-system/` components and tokens. No exceptions.
 ```
 FONT    Serif titles + System sans body + Mono code
 STYLE   Warm Conversational (dark-first, warm undertones)
-ACCENT  oklch(0.62 0.14 45) — terracotta orange
+ACCENT  oklch(0.60 0.07 70) — warm copper (low saturation)
 ICONS   Iconify + Solar (outline, 1.5px stroke)
 SHADOW  Near-zero (layers via color & border)
 BG      Never pure black/white — always oklch hue 60 warmth
