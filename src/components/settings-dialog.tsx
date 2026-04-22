@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Modal, ModalContent, Button, Separator, Skeleton } from "@/design-system/components";
+import { Modal, ModalContent, Button, Skeleton } from "@/design-system/components";
 import { Icon } from "@iconify/react";
 import {
   type McpServerConfig,
@@ -37,7 +37,7 @@ const NAV_ITEMS: { id: SettingsTabId; label: string; icon: string }[] = [
   { id: "accounts", label: "Accounts", icon: "solar:key-outline" },
   { id: "models", label: "Models", icon: "solar:cpu-bolt-outline" },
   { id: "skills", label: "Skills", icon: "solar:widget-outline" },
-  { id: "tools", label: "Tools & Integrations", icon: "solar:wrench-outline" },
+  { id: "tools", label: "Tools", icon: "solar:wrench-outline" },
   { id: "automation", label: "Automation", icon: "solar:bolt-outline" },
   { id: "appearance", label: "Appearance", icon: "solar:palette-outline" },
 ];
@@ -165,10 +165,20 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
 
   return (
     <Modal open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <ModalContent title="Settings" className="nodrag w-[720px] max-w-[90vw] max-h-[80vh] p-0">
+      <ModalContent
+        title="Settings"
+        hideHeader
+        className="nodrag w-[720px] max-w-[90vw] max-h-[80vh] p-0 flex flex-col overflow-hidden"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+          <h2 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Settings</h2>
+        </div>
+
+        {/* Body: sidebar + content */}
         <div className="flex min-h-0 flex-1 overflow-hidden">
           {/* Sidebar nav */}
-          <nav className="w-[180px] shrink-0 border-r border-[var(--border)] py-3">
+          <nav className="w-[180px] shrink-0 border-r border-[var(--border)] py-3 overflow-y-auto">
             <div className="flex flex-col gap-0.5 px-3">
               {NAV_ITEMS.map((item) => {
                 const isActive = activeTab === item.id;
@@ -239,10 +249,8 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
           </div>
         </div>
 
-        <Separator />
-
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-3">
+        <div className="flex items-center justify-between px-6 py-3 border-t border-[var(--border)]">
           <p className="text-[var(--text-micro)] text-[var(--ink-ghost)]">
             Saved to ~/.visagent/config.json
           </p>

@@ -25,7 +25,7 @@ export const DropdownContent = forwardRef<HTMLDivElement, DropdownContentProps>(
         align={align}
         sideOffset={sideOffset}
         className={[
-          "z-[var(--z-dropdown)] min-w-[160px] overflow-hidden",
+          "z-50 min-w-[160px] overflow-hidden",
           "rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]",
           "p-1 shadow-[var(--shadow-sm)]",
           className,

@@ -3,11 +3,6 @@
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { forwardRef } from "react";
 
-/* ─── Select ──
- * Built on @radix-ui/react-select for correct listbox semantics,
- * hidden input for forms, and full keyboard navigation.
- * ────────────────────────────────────────────────────────── */
-
 interface SelectOption {
   value: string;
   label: string;
@@ -51,25 +46,14 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
         <SelectPrimitive.Content
           position="popper"
           sideOffset={4}
-          className={[
-            "z-[var(--z-dropdown)]",
-            "max-h-[240px] overflow-y-auto",
-            "rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]",
-            "p-1 shadow-[var(--shadow-sm)]",
-          ].join(" ")}
+          className="z-50 w-[var(--radix-select-trigger-width)] max-h-[240px] overflow-y-auto rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[var(--shadow-sm)]"
         >
           <SelectPrimitive.Viewport>
             {options.map((opt) => (
               <SelectPrimitive.Item
                 key={opt.value}
                 value={opt.value}
-                className={[
-                  "flex items-center px-2 py-1.5",
-                  "rounded-[var(--radius-sm)] text-[var(--text-body-sm)] text-[var(--ink)]",
-                  "cursor-pointer select-none outline-none",
-                  "data-[highlighted]:bg-[var(--accent-subtle)] data-[highlighted]:text-[var(--accent)]",
-                  "data-[state=checked]:font-medium data-[state=checked]:text-[var(--accent)]",
-                ].join(" ")}
+                className="flex items-center px-2 py-1.5 rounded-[var(--radius-sm)] text-[var(--text-body-sm)] text-[var(--ink)] cursor-pointer select-none outline-none data-[highlighted]:bg-[var(--accent-subtle)] data-[highlighted]:text-[var(--accent)] data-[state=checked]:font-medium data-[state=checked]:text-[var(--accent)]"
               >
                 <SelectPrimitive.ItemText>{opt.label}</SelectPrimitive.ItemText>
               </SelectPrimitive.Item>
@@ -82,8 +66,6 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
 );
 
 Select.displayName = "Select";
-
-/* ─── Chevron icon ── */
 
 function ChevronIcon() {
   return (

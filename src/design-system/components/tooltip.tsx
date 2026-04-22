@@ -29,7 +29,7 @@ export const TooltipContent = forwardRef<HTMLDivElement, TooltipContentProps>(
         side={side}
         sideOffset={sideOffset}
         className={[
-          "z-[var(--z-tooltip)]",
+          "z-50",
           "rounded-[var(--radius-sm)] bg-[var(--canvas-invert)] px-2.5 py-1.5",
           "text-[var(--text-caption)] text-[var(--canvas)]",
           "shadow-[var(--shadow-sm)]",
