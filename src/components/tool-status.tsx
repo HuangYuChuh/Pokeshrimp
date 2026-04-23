@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { Icon } from "@iconify/react";
 import { Skeleton, Card, CardContent } from "@/design-system/components";
 
 interface ToolStatus {
@@ -32,50 +33,57 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
 
   if (loading) {
     return (
-      <div className="space-y-2">
-        <Skeleton className="h-[52px] w-full rounded-lg" />
-        <Skeleton className="h-[52px] w-full rounded-lg" />
+      <div className="space-y-[var(--space-2)]">
+        <Skeleton className="h-[52px] w-full" />
+        <Skeleton className="h-[52px] w-full" />
       </div>
     );
   }
 
   if (error) {
-    return <p className="text-[13px] text-[var(--error)]">{error}</p>;
+    return <p className="text-[var(--text-body-sm)] text-[var(--error)]">{error}</p>;
   }
 
   if (tools.length === 0) {
     return (
-      <p className="text-[13px] text-[var(--ink-secondary)]">
+      <p className="text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
         No CLI tools required by installed skills.
       </p>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-[var(--space-2)]">
       {tools.map((tool) => (
         <Card key={tool.name}>
-          <CardContent className="flex items-start gap-2.5 px-3 py-2">
-            <span
+          <CardContent className="flex items-center gap-[var(--space-3)] px-[var(--space-3)] py-[var(--space-2)]">
+            <Icon
+              icon={
+                tool.status === "available"
+                  ? "solar:check-circle-outline"
+                  : "solar:close-circle-outline"
+              }
+              width={16}
               className={cn(
-                "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                tool.status === "available" ? "bg-[var(--success)]" : "bg-[var(--error)]",
+                "shrink-0",
+                tool.status === "available" ? "text-[var(--success)]" : "text-[var(--error)]",
               )}
-              aria-hidden="true"
             />
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[13px] font-medium">{tool.name}</span>
+              <div className="flex items-center gap-[var(--space-2)]">
+                <span className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+                  {tool.name}
+                </span>
                 <span
                   className={cn(
-                    "text-[11px]",
+                    "text-[var(--text-micro)]",
                     tool.status === "available" ? "text-[var(--success)]" : "text-[var(--error)]",
                   )}
                 >
                   {tool.status === "available" ? "Available" : "Not installed"}
                 </span>
               </div>
-              <p className="mt-0.5 text-[12px] text-[var(--ink-secondary)]">
+              <p className="mt-[var(--space-1)] text-[var(--text-caption)] text-[var(--ink-tertiary)]">
                 Used by: {tool.skills.join(", ")}
               </p>
             </div>
