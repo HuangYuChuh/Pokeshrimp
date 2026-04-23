@@ -168,16 +168,17 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
       <ModalContent
         title="Settings"
         hideHeader
-        className="nodrag w-[800px] max-w-[92vw] max-h-[88vh] min-h-[520px] p-0 flex flex-col overflow-hidden"
+        size="lg"
+        className="nodrag w-[780px] max-w-[92vw] min-h-[520px] p-0 flex flex-col overflow-hidden"
       >
         {/* ── Sidebar + Content ── */}
         <div className="flex min-h-0 flex-1 overflow-hidden">
           {/* Sidebar nav */}
-          <nav className="w-[200px] shrink-0 bg-[var(--canvas-subtle)] py-5 overflow-y-auto">
-            <div className="px-[var(--space-4)] mb-5">
+          <nav className="w-[200px] shrink-0 bg-[var(--canvas-subtle)] py-[var(--space-5)] overflow-y-auto">
+            <div className="px-[var(--space-4)] mb-[var(--space-5)]">
               <h2 className="text-[var(--text-title)] font-semibold text-[var(--ink)]">Settings</h2>
             </div>
-            <div className="flex flex-col gap-px px-3">
+            <div className="flex flex-col gap-px px-[var(--space-3)]">
               {NAV_ITEMS.map((item) => {
                 const isActive = activeTab === item.id;
                 return (
@@ -186,7 +187,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
                     type="button"
                     onClick={() => setActiveTab(item.id)}
                     className={[
-                      "flex items-center gap-[var(--space-3)] w-full px-[var(--space-3)] py-2 rounded-[var(--radius-md)]",
+                      "flex items-center gap-[var(--space-3)] w-full px-[var(--space-3)] py-[var(--space-2)] rounded-[var(--radius-md)]",
                       "text-[var(--text-body-sm)] transition-colors text-left",
                       isActive
                         ? "bg-[var(--surface)] text-[var(--ink)] font-medium shadow-[var(--shadow-xs)]"
@@ -206,8 +207,17 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
           </nav>
 
           {/* Content area */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="max-w-[520px] px-8 py-6">
+          <div className="relative flex-1 overflow-y-auto">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-[var(--space-4)] top-[var(--space-4)] rounded-[var(--radius-sm)] p-[var(--space-1)] text-[var(--ink-secondary)] hover:text-[var(--ink)] transition-colors"
+              aria-label="Close settings"
+            >
+              <Icon icon="solar:close-circle-outline" width={18} />
+            </button>
+            <div className="px-[var(--space-8)] py-[var(--space-6)]">
               {!settings ? (
                 <div className="space-y-6">
                   <Skeleton className="h-5 w-40" />
@@ -259,7 +269,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
             </div>
 
             {/* Footer — inside scroll area so it doesn't eat space */}
-            <div className="sticky bottom-0 flex items-center justify-between px-8 py-4 bg-[var(--surface)] border-t border-[var(--border)]">
+            <div className="sticky bottom-0 flex items-center justify-between px-[var(--space-8)] py-[var(--space-4)] bg-[var(--surface)] border-t border-[var(--border)]">
               <p className="text-[var(--text-caption)] text-[var(--ink-ghost)]">
                 ~/.visagent/config.json
               </p>
