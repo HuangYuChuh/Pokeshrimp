@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, Modal, ModalContent, Skeleton } from "@/design-system/components";
 import { Icon } from "@iconify/react";
+import { useT } from "@/lib/i18n";
 import {
   type HookEntryConfig,
   type McpServerConfig,
@@ -33,18 +34,28 @@ interface SettingsData {
 
 type SettingsTabId = "accounts" | "models" | "skills" | "tools" | "automation" | "appearance";
 
-const NAV_ITEMS: { id: SettingsTabId; label: string; icon: string }[] = [
-  { id: "accounts", label: "Accounts", icon: "solar:key-outline" },
-  { id: "models", label: "Models", icon: "solar:cpu-bolt-outline" },
-  { id: "skills", label: "Skills", icon: "solar:widget-outline" },
-  { id: "tools", label: "Tools", icon: "solar:wrench-outline" },
-  { id: "automation", label: "Automation", icon: "solar:bolt-outline" },
-  { id: "appearance", label: "Appearance", icon: "solar:palette-outline" },
+const NAV_ICONS: Record<SettingsTabId, string> = {
+  accounts: "solar:key-outline",
+  models: "solar:cpu-bolt-outline",
+  skills: "solar:widget-outline",
+  tools: "solar:wrench-outline",
+  automation: "solar:bolt-outline",
+  appearance: "solar:palette-outline",
+};
+
+const TAB_IDS: SettingsTabId[] = [
+  "accounts",
+  "models",
+  "skills",
+  "tools",
+  "automation",
+  "appearance",
 ];
 
 export type { SettingsTabId };
 
 export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProps) {
+  const t = useT();
   const [activeTab, setActiveTab] = useState<SettingsTabId>(initialTab ?? "accounts");
   const [settings, setSettings] = useState<SettingsData | null>(null);
   const [anthropicKey, setAnthropicKey] = useState("");
@@ -166,7 +177,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
   return (
     <Modal open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <ModalContent
-        title="Settings"
+        title={t.settingsTitle}
         hideHeader
         size="lg"
         className="nodrag flex h-[min(640px,88vh)] w-[780px] max-w-[92vw] flex-col overflow-hidden p-0 max-[720px]:max-w-[96vw]"
@@ -179,19 +190,20 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
             <div className="flex h-full flex-col gap-[var(--space-5)] py-[var(--space-5)] max-[720px]:gap-[var(--space-3)] max-[720px]:py-[var(--space-3)]">
               <div className="px-[var(--space-4)]">
                 <h2 className="text-[var(--text-title)] font-semibold text-[var(--ink)]">
-                  Settings
+                  {t.settingsTitle}
                 </h2>
               </div>
 
               <div className="flex flex-col gap-[var(--space-1)] px-[var(--space-3)] max-[720px]:flex-row max-[720px]:overflow-x-auto max-[720px]:pb-[var(--space-1)]">
-                {NAV_ITEMS.map((item) => {
-                  const isActive = activeTab === item.id;
+                {TAB_IDS.map((id) => {
+                  const isActive = activeTab === id;
+                  const label = t[id as keyof typeof t] as string;
 
                   return (
                     <button
-                      key={item.id}
+                      key={id}
                       type="button"
-                      onClick={() => setActiveTab(item.id)}
+                      onClick={() => setActiveTab(id)}
                       aria-current={isActive ? "page" : undefined}
                       className={[
                         "flex w-full min-w-0 items-center gap-[var(--space-3)] whitespace-nowrap rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[var(--text-body-sm)] transition-colors max-[720px]:w-auto max-[720px]:shrink-0",
@@ -199,14 +211,14 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
                           ? "bg-[var(--surface)] font-medium text-[var(--ink)] shadow-[var(--shadow-xs)]"
                           : "text-[var(--ink-secondary)] hover:bg-[var(--border-subtle)] hover:text-[var(--ink)]",
                       ].join(" ")}
-                      title={item.label}
+                      title={label}
                     >
                       <Icon
-                        icon={item.icon}
+                        icon={NAV_ICONS[id]}
                         width={16}
                         className={isActive ? "shrink-0 text-[var(--accent)]" : "shrink-0"}
                       />
-                      <span className="truncate">{item.label}</span>
+                      <span className="truncate">{label}</span>
                     </button>
                   );
                 })}
@@ -286,7 +298,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
               </p>
               <div className="flex flex-wrap items-center gap-[var(--space-3)] max-[520px]:w-full">
                 <Button variant="ghost" size="sm" onClick={onClose} className="max-[520px]:flex-1">
-                  Cancel
+                  {t.cancel}
                 </Button>
                 <Button
                   variant="primary"
@@ -295,7 +307,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
                   disabled={saving}
                   className="max-[520px]:flex-1"
                 >
-                  {saved ? "Saved!" : saving ? "Saving..." : "Save"}
+                  {saved ? t.saved : saving ? t.saving : t.save}
                 </Button>
               </div>
             </div>
