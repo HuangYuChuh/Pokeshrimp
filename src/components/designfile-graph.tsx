@@ -151,7 +151,7 @@ export function DesignfileGraph() {
           <p className="mb-3 text-[12px] text-[var(--ink-secondary)]">{data.description}</p>
         )}
         {data.cycle && (
-          <div className="mb-3 rounded-lg border border-[var(--error)] bg-[color-mix(in_oklch,var(--error),transparent_90%)] px-3 py-2 text-[12px] text-[var(--error)]">
+          <div className="mb-3 rounded-lg border border-[var(--error)] bg-[var(--error-subtle)] px-3 py-2 text-[12px] text-[var(--error)]">
             Cycle detected: {data.cycle}
           </div>
         )}
