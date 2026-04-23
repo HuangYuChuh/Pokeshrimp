@@ -75,8 +75,8 @@ export function MessageBubble({
                 onCancel={onCancelEdit}
               />
             ) : (
-              <div className="relative max-w-[95%] sm:max-w-[85%]">
-                <Card className="bg-[var(--canvas-invert)] text-[var(--canvas)]">
+              <div className="max-w-[95%] sm:max-w-[85%]">
+                <Card className="bg-[var(--surface-raised)] text-[var(--ink)]">
                   <CardContent className="px-4 py-2.5">
                     <div className="whitespace-pre-wrap break-words text-[var(--text-body)] leading-[var(--leading-relaxed)]">
                       {message.content}
@@ -91,8 +91,8 @@ export function MessageBubble({
               </div>
             )
           ) : (
-            <div className="relative max-w-[95%] sm:max-w-[85%]">
-              <div className="prose prose-sm max-w-none text-[var(--text-body)] leading-[var(--leading-relaxed)] text-[var(--ink)] dark:prose-invert">
+            <div className="max-w-[95%] sm:max-w-[85%]">
+              <div className="prose prose-sm max-w-[72ch] text-[var(--text-body)] leading-[var(--leading-relaxed)] text-[var(--ink)] dark:prose-invert">
                 <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                   {message.content}
                 </ReactMarkdown>

@@ -21,9 +21,9 @@ const base = [
 const variants: Record<Variant, string> = {
   default: "bg-[var(--border-subtle)] text-[var(--ink-secondary)]",
   accent: "bg-[var(--accent-subtle)] text-[var(--accent)]",
-  success: "bg-[color-mix(in_oklch,var(--success),transparent_85%)] text-[var(--success)]",
-  warning: "bg-[color-mix(in_oklch,var(--warning),transparent_85%)] text-[var(--warning)]",
-  error: "bg-[color-mix(in_oklch,var(--error),transparent_85%)] text-[var(--error)]",
+  success: "bg-[var(--success-subtle)] text-[var(--success)]",
+  warning: "bg-[var(--warning-subtle)] text-[var(--warning)]",
+  error: "bg-[var(--error-subtle)] text-[var(--error)]",
 };
 
 /* ─── Component ── */

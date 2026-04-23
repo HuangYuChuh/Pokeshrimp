@@ -484,7 +484,7 @@ export function ChatPanel({
               )}
 
               {error && (
-                <Card className="border-[var(--error)] bg-[color-mix(in_oklch,var(--error),transparent_95%)]">
+                <Card className="border-[var(--error)] bg-[var(--error-subtle)]">
                   <CardContent className="px-4 py-3 text-[var(--text-body-sm)] text-[var(--error)]">
                     {error.message || "Something went wrong"}
                   </CardContent>
