@@ -210,34 +210,16 @@ function PreviewContent({
     return (
       <div className="flex h-full flex-col">
         <div className="flex shrink-0 items-center gap-1 border-b border-[var(--border)] px-3 py-1.5">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleZoomOut}
-            className="h-6 w-6 min-w-0 p-0"
-            aria-label="Zoom out"
-          >
+          <Button variant="ghost" size="icon-sm" onClick={handleZoomOut} aria-label="Zoom out">
             <Icon icon="solar:magnifer-zoom-out-outline" width={15} />
           </Button>
           <span className="min-w-[3.5rem] text-center text-[var(--text-caption)] tabular-nums text-[var(--ink-secondary)]">
             {Math.round(zoom * 100)}%
           </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleZoomIn}
-            className="h-6 w-6 min-w-0 p-0"
-            aria-label="Zoom in"
-          >
+          <Button variant="ghost" size="icon-sm" onClick={handleZoomIn} aria-label="Zoom in">
             <Icon icon="solar:magnifer-zoom-in-outline" width={15} />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            className="h-6 w-6 min-w-0 p-0"
-            aria-label="Reset zoom"
-          >
+          <Button variant="ghost" size="icon-sm" onClick={handleReset} aria-label="Reset zoom">
             <Icon icon="solar:maximize-square-outline" width={15} />
           </Button>
           {hasComparison && (
@@ -245,9 +227,8 @@ function PreviewContent({
               <div className="mx-1 h-4 w-px bg-[var(--border)]" />
               <Button
                 variant={comparing ? "outline" : "ghost"}
-                size="sm"
+                size="icon-sm"
                 onClick={() => setComparing((v) => !v)}
-                className="h-6 w-6 min-w-0 p-0"
                 aria-label="Compare"
               >
                 <Icon icon="solar:tuning-2-outline" width={15} />

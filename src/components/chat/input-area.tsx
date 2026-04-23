@@ -290,10 +290,10 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                 />
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon-sm"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isLoading}
-                  className="nodrag h-7 w-7 min-w-0 p-0"
+                  className="nodrag"
                   aria-label="Attach files"
                 >
                   <Icon icon="solar:paperclip-outline" width={15} />
@@ -308,10 +308,10 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                 />
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="icon-sm"
                   type="submit"
                   disabled={(!input.trim() && attachments.length === 0) || isLoading}
-                  className="nodrag h-7 w-7 min-w-0 p-0"
+                  className="nodrag"
                 >
                   <Icon icon="solar:arrow-up-outline" width={15} />
                 </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useAppState, useAppDispatch } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -80,29 +80,15 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         <div className="flex flex-col gap-px px-3">
-          {sessions.map((session) => {
-            const isActive = session.id === currentSessionId;
-            return (
-              <div key={session.id} className="nodrag group relative">
-                <Button
-                  variant={isActive ? "outline" : "ghost"}
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => handleSelectSession(session.id)}
-                >
-                  <span className="truncate">{session.title}</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 top-1/2 hidden h-6 w-6 min-w-0 -translate-y-1/2 p-0 group-hover:flex"
-                  onClick={() => handleDeleteSession(session.id)}
-                >
-                  <Icon icon="solar:close-circle-outline" width={12} />
-                </Button>
-              </div>
-            );
-          })}
+          {sessions.map((session) => (
+            <SessionItem
+              key={session.id}
+              session={session}
+              isActive={session.id === currentSessionId}
+              onSelect={handleSelectSession}
+              onDelete={handleDeleteSession}
+            />
+          ))}
         </div>
       </div>
 
@@ -134,5 +120,66 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
         </div>
       )}
     </aside>
+  );
+}
+
+/* ─── Session item with confirm-to-delete ── */
+
+function SessionItem({
+  session,
+  isActive,
+  onSelect,
+  onDelete,
+}: {
+  session: { id: string; title: string };
+  isActive: boolean;
+  onSelect: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+
+  // Reset confirm state after 3s
+  useEffect(() => {
+    if (!confirming) return;
+    const t = setTimeout(() => setConfirming(false), 3000);
+    return () => clearTimeout(t);
+  }, [confirming]);
+
+  return (
+    <div className="nodrag group relative flex items-center">
+      <Button
+        variant={isActive ? "outline" : "ghost"}
+        size="sm"
+        className="w-full justify-start pr-8"
+        onClick={() => onSelect(session.id)}
+      >
+        <span className="truncate">{session.title}</span>
+      </Button>
+      <Button
+        variant={confirming ? "danger" : "ghost"}
+        size="icon-sm"
+        className={cn(
+          "absolute right-1 shrink-0 transition-opacity",
+          confirming
+            ? "opacity-100"
+            : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
+        )}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (confirming) {
+            onDelete(session.id);
+          } else {
+            setConfirming(true);
+          }
+        }}
+        aria-label={confirming ? `Confirm delete ${session.title}` : `Delete ${session.title}`}
+        title={confirming ? "Click again to confirm" : "Delete"}
+      >
+        <Icon
+          icon={confirming ? "solar:trash-bin-2-outline" : "solar:close-circle-outline"}
+          width={12}
+        />
+      </Button>
+    </div>
   );
 }
