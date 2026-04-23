@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { Button, Skeleton, Chip, Card, CardContent } from "@/design-system/components";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
+import { Button, Card, CardContent, Chip, Skeleton } from "@/design-system/components";
+import { SettingsTabHeader } from "@/components/settings-sections";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 
@@ -74,7 +75,7 @@ export function SkillsTab({ active }: SkillsTabProps) {
         const res = await fetch(`/api/skills/${encodeURIComponent(command)}`, { method: "DELETE" });
         const data = await res.json();
         if (res.ok) {
-          setSkills((prev) => prev.filter((s) => s.command !== command));
+          setSkills((prev) => prev.filter((skill) => skill.command !== command));
           if (expandedCommand === command) setExpandedCommand(null);
           showToast(`Skill '${command}' deleted`, false);
         } else {
@@ -94,8 +95,8 @@ export function SkillsTab({ active }: SkillsTabProps) {
   }, []);
 
   const handleFileChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files ?? []);
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(event.target.files ?? []);
       for (const file of files) {
         if (!file.name.endsWith(".skill.md")) {
           showToast("Only .skill.md files can be imported", true);
@@ -129,21 +130,19 @@ export function SkillsTab({ active }: SkillsTabProps) {
   }, []);
 
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Skills</h3>
-          <p className="mt-1 text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
-            Installed .skill.md files that teach the agent CLI tools.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={handleImport}>
-          <Icon icon="solar:upload-outline" width={13} className="mr-[var(--space-2)]" />
-          Import
-        </Button>
-      </div>
+    <div className="flex min-w-0 flex-col gap-[var(--space-6)]">
+      <SettingsTabHeader
+        title="Skills"
+        description="Installed .skill.md files that teach the agent CLI tools."
+        action={
+          <Button variant="outline" size="sm" onClick={handleImport} className="max-[520px]:w-full">
+            <Icon icon="solar:upload-outline" width={13} />
+            Import
+          </Button>
+        }
+      />
 
-      <div className="mt-8 space-y-[var(--space-3)]">
+      <div className="flex min-w-0 flex-col gap-[var(--space-3)]">
         <input
           ref={fileInputRef}
           type="file"
@@ -177,18 +176,20 @@ export function SkillsTab({ active }: SkillsTabProps) {
         )}
       </div>
 
-      {toast && (
-        <Card>
+      {toast ? (
+        <Card className="overflow-hidden">
           <CardContent
+            role={toast.isError ? "alert" : "status"}
+            aria-live={toast.isError ? "assertive" : "polite"}
             className={cn(
-              "px-[var(--space-3)] py-2 text-[var(--text-body-sm)] font-medium",
+              "px-[var(--space-3)] py-[var(--space-2)] text-[var(--text-body-sm)] font-medium leading-[var(--leading-normal)]",
               toast.isError ? "text-[var(--error)]" : "text-[var(--ink)]",
             )}
           >
             {toast.message}
           </CardContent>
         </Card>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -206,126 +207,157 @@ function SkillCard({
   onToggle: () => void;
   onDelete: () => void;
 }) {
+  const detailsId = `skill-details-${skill.command.replace(/[^a-zA-Z0-9_-]+/g, "-")}`;
+  const commandLabel = `/${skill.command}`;
+
   return (
-    <Card>
-      <CardContent className="p-0 overflow-hidden">
-        <div className="flex items-center gap-[var(--gap-inline)] px-[var(--space-3)] py-2.5 min-w-0">
+    <Card className="overflow-hidden">
+      <CardContent className="overflow-hidden p-0 text-[var(--text-body-sm)] leading-[var(--leading-normal)]">
+        <div className="flex min-w-0 flex-wrap items-start gap-[var(--space-3)] px-[var(--space-3)] py-[var(--space-3)] max-[560px]:flex-col">
           <button
             type="button"
             onClick={onToggle}
-            className="flex flex-1 items-center gap-[var(--gap-inline)] text-left"
+            aria-expanded={expanded}
+            aria-controls={detailsId}
+            className="flex min-w-0 flex-1 items-start gap-[var(--gap-inline)] text-left"
           >
             <Icon
               icon={expanded ? "solar:alt-arrow-down-outline" : "solar:alt-arrow-right-outline"}
               width={14}
-              className="shrink-0 text-[var(--ink-tertiary)]"
+              className="mt-[var(--space-1)] shrink-0 text-[var(--ink-tertiary)]"
             />
             <Icon
               icon="solar:widget-outline"
               width={14}
-              className="shrink-0 text-[var(--ink-tertiary)]"
+              className="mt-[var(--space-1)] shrink-0 text-[var(--ink-tertiary)]"
             />
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-[var(--gap-inline)]">
-                <span className="truncate text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+              <div className="flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
+                <span
+                  className="truncate text-[var(--text-body-sm)] font-medium text-[var(--ink)]"
+                  title={skill.name}
+                >
                   {skill.name}
                 </span>
-                <Chip size="sm">/{skill.command}</Chip>
+                <Chip size="sm" className="max-w-full font-[var(--font-mono)]" title={commandLabel}>
+                  <span className="block max-w-[18rem] truncate max-[640px]:max-w-[12rem]">
+                    {commandLabel}
+                  </span>
+                </Chip>
               </div>
-              {skill.description && (
-                <p className="mt-0.5 truncate text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+              {skill.description ? (
+                <p
+                  className="mt-[var(--space-1)] truncate text-[var(--text-caption)] text-[var(--ink-tertiary)]"
+                  title={skill.description}
+                >
                   {skill.description}
                 </p>
-              )}
+              ) : null}
             </div>
           </button>
 
-          <div className="flex shrink-0 items-center gap-[var(--space-2)]">
+          <div className="ml-auto flex shrink-0 items-center gap-[var(--space-2)] max-[560px]:ml-0">
             <ScopeBadge scope={skill.scope} />
-            {skill.scope === "project" && (
+            {skill.scope === "project" ? (
               <Button
                 variant="danger"
                 size="sm"
                 onClick={onDelete}
                 disabled={deleting}
-                className="h-6 w-6 min-w-0 p-0"
+                className="h-[var(--space-6)] w-[var(--space-6)] min-w-0 p-0"
                 aria-label={`Delete ${skill.command}`}
               >
                 <Icon icon="solar:trash-bin-2-outline" width={13} />
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
 
-        {expanded && (
-          <div className="border-t border-[var(--border)] px-[var(--space-3)] py-3">
+        {expanded ? (
+          <div
+            id={detailsId}
+            className="border-t border-[var(--border)] px-[var(--space-3)] py-[var(--space-3)]"
+          >
             <div className="space-y-[var(--space-3)]">
-              {skill.requiredTools.length > 0 && (
+              {skill.requiredTools.length > 0 ? (
                 <DetailSection label="Required CLI tools">
                   <div className="flex flex-wrap gap-[var(--space-2)]">
                     {skill.requiredTools.map((tool) => (
-                      <Chip key={tool} size="sm" className="font-[var(--font-mono)]">
-                        {tool}
+                      <Chip
+                        key={tool}
+                        size="sm"
+                        className="max-w-full font-[var(--font-mono)]"
+                        title={tool}
+                      >
+                        <span className="block max-w-[18rem] truncate">{tool}</span>
                       </Chip>
                     ))}
                   </div>
                 </DetailSection>
-              )}
+              ) : null}
 
-              {skill.inputParams.length > 0 && (
+              {skill.inputParams.length > 0 ? (
                 <DetailSection label="Input parameters">
-                  <div className="space-y-1.5">
+                  <div className="space-y-[var(--space-2)]">
                     {skill.inputParams.map((param) => (
-                      <div key={param.name} className="text-[var(--text-caption)]">
+                      <div
+                        key={param.name}
+                        className="break-words text-[var(--text-caption)] leading-[var(--leading-normal)]"
+                      >
                         <span className="font-[var(--font-mono)] font-medium text-[var(--ink)]">
                           {param.name}
                         </span>
-                        <span className="ml-1.5 text-[var(--ink-tertiary)]">({param.type})</span>
-                        {param.description && (
-                          <span className="ml-1.5 text-[var(--ink-tertiary)]">
+                        <span className="ml-[var(--space-1)] text-[var(--ink-tertiary)]">
+                          ({param.type})
+                        </span>
+                        {param.description ? (
+                          <span className="ml-[var(--space-1)] text-[var(--ink-tertiary)]">
                             — {param.description}
                           </span>
-                        )}
-                        {param.default !== undefined && (
-                          <span className="ml-1.5 text-[var(--ink-ghost)]">
+                        ) : null}
+                        {param.default !== undefined ? (
+                          <span className="ml-[var(--space-1)] text-[var(--ink-ghost)]">
                             default: {param.default}
                           </span>
-                        )}
+                        ) : null}
                       </div>
                     ))}
                   </div>
                 </DetailSection>
-              )}
+              ) : null}
 
-              {skill.outputs.length > 0 && (
+              {skill.outputs.length > 0 ? (
                 <DetailSection label="Outputs">
                   <div className="space-y-[var(--space-1)]">
-                    {skill.outputs.map((output, i) => (
-                      <div key={i} className="text-[var(--text-caption)]">
+                    {skill.outputs.map((output, index) => (
+                      <div
+                        key={`${output.type}-${index}`}
+                        className="break-words text-[var(--text-caption)] leading-[var(--leading-normal)]"
+                      >
                         <span className="font-[var(--font-mono)] font-medium text-[var(--ink)]">
                           {output.type}
                         </span>
-                        {output.description && (
-                          <span className="ml-1.5 text-[var(--ink-tertiary)]">
+                        {output.description ? (
+                          <span className="ml-[var(--space-1)] text-[var(--ink-tertiary)]">
                             — {output.description}
                           </span>
-                        )}
+                        ) : null}
                       </div>
                     ))}
                   </div>
                 </DetailSection>
-              )}
+              ) : null}
 
               {skill.requiredTools.length === 0 &&
-                skill.inputParams.length === 0 &&
-                skill.outputs.length === 0 && (
-                  <p className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
-                    No additional details available.
-                  </p>
-                )}
+              skill.inputParams.length === 0 &&
+              skill.outputs.length === 0 ? (
+                <p className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+                  No additional details available.
+                </p>
+              ) : null}
             </div>
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -345,10 +377,10 @@ function ScopeBadge({ scope }: { scope: "global" | "project" }) {
   );
 }
 
-function DetailSection({ label, children }: { label: string; children: React.ReactNode }) {
+function DetailSection({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div>
-      <p className="mb-1 text-[var(--text-micro)] font-medium uppercase tracking-wider text-[var(--ink-ghost)]">
+    <div className="flex flex-col gap-[var(--space-1)]">
+      <p className="text-[var(--text-micro)] font-medium uppercase tracking-[var(--tracking-wide)] text-[var(--ink-ghost)]">
         {label}
       </p>
       {children}
@@ -358,12 +390,12 @@ function DetailSection({ label, children }: { label: string; children: React.Rea
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <Icon icon="solar:widget-outline" width={32} className="mb-3 text-[var(--ink-ghost)]" />
+    <div className="flex flex-col items-center justify-center gap-[var(--space-2)] py-[var(--space-12)] text-center">
+      <Icon icon="solar:widget-outline" width={32} className="text-[var(--ink-ghost)]" />
       <p className="text-[var(--text-body-sm)] font-medium text-[var(--ink-secondary)]">
         No skills installed
       </p>
-      <p className="mt-1 text-[var(--text-caption)] text-[var(--ink-ghost)]">
+      <p className="text-[var(--text-caption)] text-[var(--ink-ghost)]">
         Drag a .skill.md file onto the app or click Import.
       </p>
     </div>

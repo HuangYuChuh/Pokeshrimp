@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Modal, ModalContent, Button, Skeleton } from "@/design-system/components";
+import { useCallback, useEffect, useState } from "react";
+import { Button, Modal, ModalContent, Skeleton } from "@/design-system/components";
 import { Icon } from "@iconify/react";
 import {
-  type McpServerConfig,
   type HookEntryConfig,
+  type McpServerConfig,
   type PermissionConfig,
 } from "@/components/settings-sections";
 import { AccountsTab } from "@/components/settings/accounts-tab";
+import { AppearanceTab } from "@/components/settings/appearance-tab";
+import { AutomationTab } from "@/components/settings/automation-tab";
 import { ModelsTab } from "@/components/settings/models-tab";
 import { SkillsTab } from "@/components/settings/skills-tab";
 import { ToolsTab } from "@/components/settings/tools-tab";
-import { AutomationTab } from "@/components/settings/automation-tab";
-import { AppearanceTab } from "@/components/settings/appearance-tab";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -67,7 +67,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
 
   useEffect(() => {
     if (open && initialTab) setActiveTab(initialTab);
-  }, [open, initialTab]);
+  }, [initialTab, open]);
 
   useEffect(() => {
     const stored = localStorage.getItem("pokeshrimp-theme") as "dark" | "light" | "system" | null;
@@ -97,12 +97,12 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
       ?.getValidToken?.()
       .then((token) => setOauthConnected(!!token))
       .catch(() => setOauthConnected(false));
-  }, [open, isElectron]);
+  }, [isElectron, open]);
 
   useEffect(() => {
     if (!open) return;
     fetch("/api/settings")
-      .then((r) => r.json())
+      .then((response) => response.json())
       .then((data: SettingsData) => {
         setSettings(data);
         setAnthropicKey(data.apiKeys?.anthropic ?? "");
@@ -140,7 +140,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
     } finally {
       setSaving(false);
     }
-  }, [defaultModel, anthropicKey, openaiKey, mcpServers, hooks, permissions]);
+  }, [anthropicKey, defaultModel, hooks, mcpServers, openaiKey, permissions]);
 
   const handleOauthAutoSave = useCallback(
     async (openaiToken: string) => {
@@ -158,7 +158,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     },
-    [defaultModel, anthropicKey],
+    [anthropicKey, defaultModel],
   );
 
   if (!open) return null;
@@ -169,66 +169,73 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
         title="Settings"
         hideHeader
         size="lg"
-        className="nodrag w-[780px] max-w-[92vw] min-h-[520px] p-0 flex flex-col overflow-hidden"
+        className="nodrag flex h-[min(640px,88vh)] w-[780px] max-w-[92vw] flex-col overflow-hidden p-0 max-[720px]:max-w-[96vw]"
       >
-        {/* ── Sidebar + Content ── */}
-        <div className="flex min-h-0 flex-1 overflow-hidden">
-          {/* Sidebar nav */}
-          <nav className="w-[200px] shrink-0 bg-[var(--canvas-subtle)] py-[var(--space-5)] overflow-y-auto">
-            <div className="px-[var(--space-4)] mb-[var(--space-5)]">
-              <h2 className="text-[var(--text-title)] font-semibold text-[var(--ink)]">Settings</h2>
-            </div>
-            <div className="flex flex-col gap-px px-[var(--space-3)]">
-              {NAV_ITEMS.map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setActiveTab(item.id)}
-                    className={[
-                      "flex items-center gap-[var(--space-3)] w-full px-[var(--space-3)] py-[var(--space-2)] rounded-[var(--radius-md)]",
-                      "text-[var(--text-body-sm)] transition-colors text-left",
-                      isActive
-                        ? "bg-[var(--surface)] text-[var(--ink)] font-medium shadow-[var(--shadow-xs)]"
-                        : "text-[var(--ink-secondary)] hover:text-[var(--ink)] hover:bg-[var(--border-subtle)]",
-                    ].join(" ")}
-                  >
-                    <Icon
-                      icon={item.icon}
-                      width={16}
-                      className={isActive ? "text-[var(--accent)]" : ""}
-                    />
-                    {item.label}
-                  </button>
-                );
-              })}
+        <div className="flex min-h-0 flex-1 overflow-hidden max-[720px]:flex-col">
+          <nav
+            aria-label="Settings sections"
+            className="w-[220px] shrink-0 overflow-hidden border-r border-[var(--border)] bg-[var(--canvas-subtle)] max-[720px]:w-full max-[720px]:border-r-0 max-[720px]:border-b"
+          >
+            <div className="flex h-full flex-col gap-[var(--space-5)] py-[var(--space-5)] max-[720px]:gap-[var(--space-3)] max-[720px]:py-[var(--space-3)]">
+              <div className="px-[var(--space-4)]">
+                <h2 className="text-[var(--text-title)] font-semibold text-[var(--ink)]">
+                  Settings
+                </h2>
+              </div>
+
+              <div className="flex flex-col gap-[var(--space-1)] px-[var(--space-3)] max-[720px]:flex-row max-[720px]:overflow-x-auto max-[720px]:pb-[var(--space-1)]">
+                {NAV_ITEMS.map((item) => {
+                  const isActive = activeTab === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setActiveTab(item.id)}
+                      aria-current={isActive ? "page" : undefined}
+                      className={[
+                        "flex w-full min-w-0 items-center gap-[var(--space-3)] whitespace-nowrap rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[var(--text-body-sm)] transition-colors max-[720px]:w-auto max-[720px]:shrink-0",
+                        isActive
+                          ? "bg-[var(--surface)] font-medium text-[var(--ink)] shadow-[var(--shadow-xs)]"
+                          : "text-[var(--ink-secondary)] hover:bg-[var(--border-subtle)] hover:text-[var(--ink)]",
+                      ].join(" ")}
+                      title={item.label}
+                    >
+                      <Icon
+                        icon={item.icon}
+                        width={16}
+                        className={isActive ? "shrink-0 text-[var(--accent)]" : "shrink-0"}
+                      />
+                      <span className="truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </nav>
 
-          {/* Content area */}
-          <div className="relative flex-1 overflow-y-auto">
-            {/* Close button */}
+          <div className="relative min-w-0 flex-1 overflow-y-auto bg-[var(--surface)]">
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-[var(--space-4)] top-[var(--space-4)] rounded-[var(--radius-sm)] p-[var(--space-1)] text-[var(--ink-secondary)] hover:text-[var(--ink)] transition-colors"
+              className="absolute right-[var(--space-4)] top-[var(--space-4)] z-10 rounded-[var(--radius-sm)] p-[var(--space-1)] text-[var(--ink-secondary)] transition-colors hover:text-[var(--ink)]"
               aria-label="Close settings"
             >
               <Icon icon="solar:close-circle-outline" width={18} />
             </button>
-            <div className="px-[var(--space-8)] py-[var(--space-6)]">
+
+            <div className="px-[var(--space-8)] py-[var(--space-6)] pr-[var(--space-12)] max-[720px]:px-[var(--space-4)] max-[720px]:py-[var(--space-5)] max-[720px]:pr-[var(--space-10)]">
               {!settings ? (
-                <div className="space-y-6">
-                  <Skeleton className="h-5 w-40" />
-                  <Skeleton className="h-9 w-full" />
-                  <Skeleton className="h-9 w-full" />
-                  <Skeleton className="h-5 w-40 mt-4" />
-                  <Skeleton className="h-9 w-full" />
+                <div className="space-y-[var(--space-4)]">
+                  <Skeleton className="h-[20px] w-[160px]" />
+                  <Skeleton className="h-[36px] w-full" />
+                  <Skeleton className="h-[36px] w-full" />
+                  <Skeleton className="mt-[var(--space-4)] h-[20px] w-[160px]" />
+                  <Skeleton className="h-[36px] w-full" />
                 </div>
               ) : (
                 <>
-                  {activeTab === "accounts" && (
+                  {activeTab === "accounts" ? (
                     <AccountsTab
                       anthropicKey={anthropicKey}
                       openaiKey={openaiKey}
@@ -240,19 +247,23 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
                       onOauthConnected={setOauthConnected}
                       onAutoSave={handleOauthAutoSave}
                     />
-                  )}
-                  {activeTab === "models" && (
+                  ) : null}
+
+                  {activeTab === "models" ? (
                     <ModelsTab defaultModel={defaultModel} onDefaultModelChange={setDefaultModel} />
-                  )}
-                  {activeTab === "skills" && <SkillsTab active={activeTab === "skills"} />}
-                  {activeTab === "tools" && (
+                  ) : null}
+
+                  {activeTab === "skills" ? <SkillsTab active={activeTab === "skills"} /> : null}
+
+                  {activeTab === "tools" ? (
                     <ToolsTab
                       active={activeTab === "tools"}
                       mcpServers={mcpServers}
                       onMcpServersChange={setMcpServers}
                     />
-                  )}
-                  {activeTab === "automation" && (
+                  ) : null}
+
+                  {activeTab === "automation" ? (
                     <AutomationTab
                       hooks={hooks}
                       conventionHooks={conventionHooks}
@@ -260,24 +271,30 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
                       permissions={permissions}
                       onPermissionsChange={setPermissions}
                     />
-                  )}
-                  {activeTab === "appearance" && (
+                  ) : null}
+
+                  {activeTab === "appearance" ? (
                     <AppearanceTab theme={theme} onThemeChange={handleThemeChange} />
-                  )}
+                  ) : null}
                 </>
               )}
             </div>
 
-            {/* Footer — inside scroll area so it doesn't eat space */}
-            <div className="sticky bottom-0 flex items-center justify-between px-[var(--space-8)] py-[var(--space-4)] bg-[var(--surface)] border-t border-[var(--border)]">
-              <p className="text-[var(--text-caption)] text-[var(--ink-ghost)]">
+            <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t border-[var(--border)] bg-[var(--surface)] px-[var(--space-8)] py-[var(--space-4)] max-[720px]:px-[var(--space-4)] max-[520px]:items-stretch">
+              <p className="min-w-0 truncate font-[var(--font-mono)] text-[var(--text-caption)] text-[var(--ink-ghost)]">
                 ~/.visagent/config.json
               </p>
-              <div className="flex gap-[var(--space-3)]">
-                <Button variant="ghost" size="sm" onClick={onClose}>
+              <div className="flex flex-wrap items-center gap-[var(--space-3)] max-[520px]:w-full">
+                <Button variant="ghost" size="sm" onClick={onClose} className="max-[520px]:flex-1">
                   Cancel
                 </Button>
-                <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="max-[520px]:flex-1"
+                >
                   {saved ? "Saved!" : saving ? "Saving..." : "Save"}
                 </Button>
               </div>

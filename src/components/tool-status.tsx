@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { Card, CardContent, Chip, Skeleton } from "@/design-system/components";
 import { Icon } from "@iconify/react";
-import { Skeleton, Card, CardContent } from "@/design-system/components";
+import { cn } from "@/lib/utils";
 
 interface ToolStatus {
   name: string;
@@ -25,7 +25,7 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
     setLoading(true);
     setError(null);
     fetch("/api/tools")
-      .then((r) => r.json())
+      .then((response) => response.json())
       .then((data: { tools: ToolStatus[] }) => setTools(data.tools))
       .catch(() => setError("Failed to load tool status"))
       .finally(() => setLoading(false));
@@ -55,8 +55,8 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
   return (
     <div className="space-y-[var(--space-2)]">
       {tools.map((tool) => (
-        <Card key={tool.name}>
-          <CardContent className="flex items-center gap-[var(--space-3)] px-[var(--space-3)] py-[var(--space-2)]">
+        <Card key={tool.name} className="overflow-hidden">
+          <CardContent className="flex min-w-0 flex-wrap items-start gap-[var(--space-3)] px-[var(--space-3)] py-[var(--space-3)] leading-[var(--leading-normal)] max-[560px]:flex-col">
             <Icon
               icon={
                 tool.status === "available"
@@ -65,27 +65,43 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
               }
               width={16}
               className={cn(
-                "shrink-0",
+                "mt-[var(--space-1)] shrink-0",
                 tool.status === "available" ? "text-[var(--success)]" : "text-[var(--error)]",
               )}
             />
+
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-[var(--space-2)]">
-                <span className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+              <div className="flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
+                <span
+                  className="truncate text-[var(--text-body-sm)] font-medium text-[var(--ink)]"
+                  title={tool.name}
+                >
                   {tool.name}
                 </span>
-                <span
-                  className={cn(
-                    "text-[var(--text-micro)]",
-                    tool.status === "available" ? "text-[var(--success)]" : "text-[var(--error)]",
-                  )}
-                >
+                <Chip size="sm" variant={tool.status === "available" ? "success" : "error"}>
                   {tool.status === "available" ? "Available" : "Not installed"}
-                </span>
+                </Chip>
               </div>
-              <p className="mt-[var(--space-1)] text-[var(--text-caption)] text-[var(--ink-tertiary)]">
-                Used by: {tool.skills.join(", ")}
-              </p>
+
+              {tool.skills.length > 0 ? (
+                <div className="mt-[var(--space-1)] flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
+                  <span className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+                    Used by
+                  </span>
+                  {tool.skills.map((skill) => (
+                    <Chip
+                      key={`${tool.name}-${skill}`}
+                      size="sm"
+                      className="max-w-full font-[var(--font-mono)]"
+                      title={skill}
+                    >
+                      <span className="block max-w-[18rem] truncate max-[640px]:max-w-[12rem]">
+                        {skill}
+                      </span>
+                    </Chip>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </CardContent>
         </Card>
