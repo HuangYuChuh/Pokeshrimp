@@ -1,5 +1,6 @@
 "use client";
 
+import "@/lib/iconify-offline";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { AppProvider, useAppDispatch, useAppState } from "@/lib/store";
 import { Sidebar } from "@/components/sidebar";

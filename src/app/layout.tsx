@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang="zh-CN"
+      lang="en"
       className={cn("dark font-sans", geist.variable, playfair.variable)}
       suppressHydrationWarning
     >
@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Restore theme preference before first paint to prevent flash */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var d=document.documentElement,t=localStorage.getItem("pokeshrimp-theme"),light=t==="light"||(t==="system"&&!window.matchMedia("(prefers-color-scheme: dark)").matches);if(light){d.classList.remove("dark");d.classList.add("light")}}catch(e){}})()`,
+            __html: `(function(){try{var d=document.documentElement,t=localStorage.getItem("pokeshrimp-theme"),light=t==="light"||(t==="system"&&!window.matchMedia("(prefers-color-scheme: dark)").matches);if(light){d.classList.remove("dark");d.classList.add("light")}var l=localStorage.getItem("pokeshrimp-locale");if(l==="zh")d.lang="zh-CN"}catch(e){}})()`,
           }}
         />
         {children}
