@@ -1,6 +1,7 @@
 "use client";
 
 import { Select } from "@/design-system/components";
+import { SettingsSection, SettingsTabHeader } from "@/components/settings-sections";
 
 interface AppearanceTabProps {
   theme: "dark" | "light" | "system";
@@ -15,23 +16,20 @@ const THEME_OPTIONS = [
 
 export function AppearanceTab({ theme, onThemeChange }: AppearanceTabProps) {
   return (
-    <div>
-      <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Appearance</h3>
-      <p className="mt-1 text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
-        Customize the visual style of the application.
-      </p>
+    <div className="flex min-w-0 flex-col gap-[var(--space-8)]">
+      <SettingsTabHeader
+        title="Appearance"
+        description="Customize the visual style of the application."
+      />
 
-      <div className="mt-8">
-        <label className="block text-[var(--text-title)] font-medium text-[var(--ink)] mb-2">
-          Theme
-        </label>
+      <SettingsSection label="Theme">
         <Select
           value={theme}
-          onChange={(v) => onThemeChange(v as "dark" | "light" | "system")}
+          onChange={(value) => onThemeChange(value as "dark" | "light" | "system")}
           options={THEME_OPTIONS}
           className="w-full"
         />
-      </div>
+      </SettingsSection>
     </div>
   );
 }

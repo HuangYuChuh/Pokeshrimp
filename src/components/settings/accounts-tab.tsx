@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useId, useState, type ReactNode } from "react";
 import { Button, Input } from "@/design-system/components";
+import { SettingsSection, SettingsTabHeader } from "@/components/settings-sections";
 import { Icon } from "@iconify/react";
 
 interface AccountsTabProps {
@@ -37,6 +38,8 @@ export function AccountsTab({
 }: AccountsTabProps) {
   const [oauthLoading, setOauthLoading] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
+  const anthropicInputId = useId();
+  const openaiInputId = useId();
   const isElectron = typeof window !== "undefined" && !!window.pokeshrimp?.auth;
 
   const handleOpenAIOAuth = useCallback(async () => {
@@ -54,23 +57,21 @@ export function AccountsTab({
     } finally {
       setOauthLoading(false);
     }
-  }, [onOpenaiKeyChange, onOauthConnected, onAutoSave]);
+  }, [onAutoSave, onOauthConnected, onOpenaiKeyChange]);
 
   return (
-    <div>
-      <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Accounts</h3>
-      <p className="mt-1 text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
-        API keys for connecting to LLM providers.
-      </p>
+    <div className="flex min-w-0 flex-col gap-[var(--space-8)]">
+      <SettingsTabHeader title="Accounts" description="API keys for connecting to LLM providers." />
 
-      <div className="mt-8 space-y-8">
-        {/* Anthropic */}
+      <div className="flex min-w-0 flex-col gap-[var(--space-8)]">
         <FieldGroup
           label="Anthropic"
           hint="Required for Claude models"
+          inputId={anthropicInputId}
           getKeyUrl="https://console.anthropic.com/settings/keys"
         >
           <Input
+            id={anthropicInputId}
             type="password"
             value={anthropicKey}
             onChange={(e) => onAnthropicKeyChange(e.target.value)}
@@ -87,14 +88,15 @@ export function AccountsTab({
           />
         </FieldGroup>
 
-        {/* OpenAI */}
         <FieldGroup
           label="OpenAI"
           hint="Required for GPT models"
+          inputId={openaiInputId}
           getKeyUrl="https://platform.openai.com/api-keys"
         >
-          <div className="flex gap-[var(--space-2)]">
+          <div className="flex min-w-0 gap-[var(--space-2)] max-[620px]:flex-col">
             <Input
+              id={openaiInputId}
               type="password"
               value={openaiKey}
               onChange={(e) => onOpenaiKeyChange(e.target.value)}
@@ -104,26 +106,36 @@ export function AccountsTab({
               }}
               className="w-full font-[var(--font-mono)]"
             />
-            {isElectron && (
+            {isElectron ? (
               <Button
                 variant="outline"
                 size="sm"
-                className="shrink-0"
+                className="shrink-0 max-[620px]:w-full"
                 disabled={oauthLoading}
                 onClick={handleOpenAIOAuth}
               >
                 {oauthLoading ? "Connecting..." : "Login with OpenAI"}
               </Button>
-            )}
+            ) : null}
           </div>
-          {oauthConnected && !oauthError && (
-            <p className="mt-2 text-[var(--text-caption)] text-[var(--success)]">
+          {oauthConnected && !oauthError ? (
+            <p
+              className="text-[var(--text-caption)] text-[var(--success)]"
+              role="status"
+              aria-live="polite"
+            >
               Connected — token auto-refreshes
             </p>
-          )}
-          {oauthError && (
-            <p className="mt-2 text-[var(--text-caption)] text-[var(--error)]">{oauthError}</p>
-          )}
+          ) : null}
+          {oauthError ? (
+            <p
+              className="text-[var(--text-caption)] text-[var(--error)]"
+              role="alert"
+              aria-live="assertive"
+            >
+              {oauthError}
+            </p>
+          ) : null}
           <EnvHint env={envKeys?.openai} config={!!apiKeys?.openai} name="OPENAI_API_KEY" />
         </FieldGroup>
       </div>
@@ -131,55 +143,56 @@ export function AccountsTab({
   );
 }
 
-/* ─── Field group ── */
-
 function FieldGroup({
   label,
   hint,
+  inputId,
   getKeyUrl,
   children,
 }: {
   label: string;
   hint?: string;
+  inputId: string;
   getKeyUrl?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <label className="text-[var(--text-title)] font-medium text-[var(--ink)]">{label}</label>
-          {hint && (
-            <p className="mt-0.5 text-[var(--text-caption)] text-[var(--ink-tertiary)]">{hint}</p>
-          )}
-        </div>
-        {getKeyUrl && (
+    <SettingsSection
+      label={label}
+      hint={hint}
+      htmlFor={inputId}
+      action={
+        getKeyUrl ? (
           <button
             type="button"
             onClick={() => openKeyUrl(getKeyUrl)}
-            className="text-[var(--text-caption)] text-[var(--accent)] hover:underline"
+            className="inline-flex items-center gap-[var(--space-1)] text-[var(--text-caption)] text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]"
           >
-            Get key{" "}
-            <Icon
-              icon="solar:arrow-right-outline"
-              width={10}
-              className="inline ml-[var(--space-1)]"
-            />
+            <span>Get key</span>
+            <Icon icon="solar:arrow-right-outline" width={10} className="shrink-0" />
           </button>
-        )}
-      </div>
-      {children}
-    </div>
+        ) : null
+      }
+    >
+      <div className="flex min-w-0 flex-col gap-[var(--space-2)]">{children}</div>
+    </SettingsSection>
   );
 }
 
-/* ─── Env hint ── */
-
 function EnvHint({ env, config, name }: { env?: boolean; config: boolean; name: string }) {
   if (!env) return null;
+
   return (
-    <p className="mt-2 text-[var(--text-caption)] text-[var(--ink-tertiary)]">
-      {config ? "Config key takes priority over env" : `Using ${name} from environment`}
+    <p className="text-[var(--text-caption)] leading-[var(--leading-normal)] text-[var(--ink-tertiary)]">
+      {config ? (
+        <>
+          Config key takes priority over <span className="font-[var(--font-mono)]">{name}</span>
+        </>
+      ) : (
+        <>
+          Using <span className="font-[var(--font-mono)]">{name}</span> from environment
+        </>
+      )}
     </p>
   );
 }

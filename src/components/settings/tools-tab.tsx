@@ -1,7 +1,12 @@
 "use client";
 
+import {
+  McpServersSection,
+  SettingsSection,
+  SettingsTabHeader,
+  type McpServerConfig,
+} from "@/components/settings-sections";
 import { ToolStatusList } from "@/components/tool-status";
-import { McpServersSection, type McpServerConfig } from "@/components/settings-sections";
 
 interface ToolsTabProps {
   active: boolean;
@@ -11,24 +16,17 @@ interface ToolsTabProps {
 
 export function ToolsTab({ active, mcpServers, onMcpServersChange }: ToolsTabProps) {
   return (
-    <div>
-      <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">
-        Tools & Integrations
-      </h3>
-      <p className="mt-1 text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
-        CLI tools and MCP server connections.
-      </p>
+    <div className="flex min-w-0 flex-col gap-[var(--space-6)]">
+      <SettingsTabHeader
+        title="Tools & Integrations"
+        description="CLI tools and MCP server connections."
+      />
 
-      <div className="mt-8 space-y-8">
-        <div>
-          <label className="block text-[var(--text-title)] font-medium text-[var(--ink)] mb-3">
-            CLI Tools
-          </label>
-          <ToolStatusList open={active} />
-        </div>
+      <SettingsSection label="CLI Tools">
+        <ToolStatusList open={active} />
+      </SettingsSection>
 
-        <McpServersSection servers={mcpServers} onChange={onMcpServersChange} />
-      </div>
+      <McpServersSection servers={mcpServers} onChange={onMcpServersChange} />
     </div>
   );
 }

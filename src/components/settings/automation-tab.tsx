@@ -3,6 +3,7 @@
 import {
   HooksSection,
   PermissionsSection,
+  SettingsTabHeader,
   type HookEntryConfig,
   type PermissionConfig,
 } from "@/components/settings-sections";
@@ -23,16 +24,14 @@ export function AutomationTab({
   onPermissionsChange,
 }: AutomationTabProps) {
   return (
-    <div>
-      <h3 className="text-[var(--text-headline)] font-semibold text-[var(--ink)]">Automation</h3>
-      <p className="mt-1 text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
-        Hook scripts and command permission rules.
-      </p>
+    <div className="flex min-w-0 flex-col gap-[var(--space-6)]">
+      <SettingsTabHeader
+        title="Automation"
+        description="Hook scripts and command permission rules."
+      />
 
-      <div className="mt-8 space-y-6">
-        <HooksSection hooks={hooks} conventionHooks={conventionHooks} onChange={onHooksChange} />
-        <PermissionsSection permissions={permissions} onChange={onPermissionsChange} />
-      </div>
+      <HooksSection hooks={hooks} conventionHooks={conventionHooks} onChange={onHooksChange} />
+      <PermissionsSection permissions={permissions} onChange={onPermissionsChange} />
     </div>
   );
 }
