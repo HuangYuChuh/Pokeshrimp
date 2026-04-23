@@ -6,11 +6,12 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 /* ─── Types ── */
 
 type Variant = "primary" | "ghost" | "outline" | "danger";
-type Size = "sm" | "md";
+type Size = "sm" | "md" | "icon-sm" | "icon-md";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
+  loading?: boolean;
   asChild?: boolean;
 }
 
@@ -34,20 +35,46 @@ const variants: Record<Variant, string> = {
 const sizes: Record<Size, string> = {
   sm: "h-7 px-3 text-[var(--text-body-sm)] rounded-[var(--radius-md)]",
   md: "h-9 px-4 text-[var(--text-body)] rounded-[var(--radius-md)]",
+  "icon-sm": "h-7 w-7 p-0 rounded-[var(--radius-md)]",
+  "icon-md": "h-9 w-9 p-0 rounded-[var(--radius-md)]",
 };
+
+/* ─── Spinner ── */
+
+function Spinner() {
+  return (
+    <svg
+      className="animate-spin h-4 w-4"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <circle cx="8" cy="8" r="6" className="opacity-25" />
+      <path d="M8 2a6 6 0 0 1 6 6" className="opacity-75" />
+    </svg>
+  );
+}
 
 /* ─── Component ── */
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = "primary", size = "md", asChild, className, ...props }, ref) => {
+  (
+    { variant = "primary", size = "md", loading, asChild, className, children, disabled, ...props },
+    ref,
+  ) => {
     const Comp = asChild ? Slot : "button";
+    const isDisabled = disabled || loading;
     return (
       <Comp
         ref={ref}
         type={asChild ? undefined : "button"}
+        disabled={isDisabled}
         className={`${base} ${variants[variant]} ${sizes[size]} ${className ?? ""}`}
         {...props}
-      />
+      >
+        {loading ? <Spinner /> : children}
+      </Comp>
     );
   },
 );

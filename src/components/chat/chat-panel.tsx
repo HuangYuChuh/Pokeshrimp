@@ -360,18 +360,18 @@ export function ChatPanel({
       <div className="drag flex h-13 shrink-0 items-center justify-between px-3">
         <Button
           variant="ghost"
-          size="sm"
+          size="icon-sm"
           onClick={onToggleSidebar}
-          className={cn("nodrag h-7 w-7 min-w-0 p-0", sidebarOpen && "invisible")}
+          className={cn("nodrag", sidebarOpen && "invisible")}
           aria-label="Toggle sidebar"
         >
           <Icon icon="solar:sidebar-minimalistic-outline" width={16} />
         </Button>
         <Button
           variant="ghost"
-          size="sm"
+          size="icon-sm"
           onClick={onTogglePreview}
-          className={cn("nodrag h-7 w-7 min-w-0 p-0", previewOpen && "invisible")}
+          className={cn("nodrag", previewOpen && "invisible")}
           aria-label="Toggle preview"
         >
           <Icon icon="solar:sidebar-minimalistic-outline" width={16} className="scale-x-[-1]" />
