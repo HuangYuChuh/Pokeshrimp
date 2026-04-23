@@ -357,7 +357,7 @@ export function ChatPanel({
   return (
     <div className="flex min-w-0 flex-1 flex-col bg-[var(--canvas)]">
       {/* Drag region with toggle buttons */}
-      <div className="drag flex h-13 shrink-0 items-center justify-between px-3">
+      <div className="drag flex h-[var(--height-titlebar)] shrink-0 items-center justify-between px-[var(--space-3)]">
         <Button
           variant="ghost"
           size="icon-sm"
@@ -384,12 +384,12 @@ export function ChatPanel({
           <div className="flex flex-1 items-center justify-center pb-32">
             <div className="text-center">
               <h1
-                className="text-[var(--text-hero)] font-light tracking-tight text-[var(--ink)]"
+                className="text-[var(--text-display)] font-light tracking-[var(--tracking-tight)] text-[var(--ink)]"
                 style={{ fontFamily: "var(--font-serif)" }}
               >
                 What would you like to create?
               </h1>
-              <p className="mt-3 text-[var(--text-title)] text-[var(--ink-secondary)]">
+              <p className="mt-[var(--space-3)] text-[var(--text-title)] text-[var(--ink-secondary)]">
                 Describe what you want to create, and leave the rest to me
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-[var(--gap-inline)]">
@@ -411,7 +411,7 @@ export function ChatPanel({
       ) : (
         <>
           <ScrollArea className="flex-1">
-            <div className="selectable mx-auto max-w-[var(--width-chat)] px-3 pb-6 pt-4 sm:px-6">
+            <div className="selectable mx-auto max-w-[var(--width-chat)] px-[var(--space-3)] pb-[var(--space-6)] pt-[var(--space-4)] sm:px-6">
               {/* Session summary card */}
               {sessionSummary && !summaryCollapsed && (
                 <Card className="mb-[var(--gap-message)]">
@@ -485,7 +485,7 @@ export function ChatPanel({
 
               {error && (
                 <Card className="border-[var(--error)] bg-[var(--error-subtle)]">
-                  <CardContent className="px-4 py-3 text-[var(--text-body-sm)] text-[var(--error)]">
+                  <CardContent className="px-[var(--space-4)] py-[var(--space-3)] text-[var(--text-body-sm)] text-[var(--error)]">
                     {error.message || "Something went wrong"}
                   </CardContent>
                 </Card>

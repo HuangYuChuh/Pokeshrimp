@@ -54,13 +54,13 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex h-full shrink-0 flex-col overflow-hidden bg-[var(--canvas-subtle)] transition-all duration-200",
+        "flex h-full shrink-0 flex-col overflow-hidden bg-[var(--canvas-subtle)] transition-all duration-[var(--duration-normal)] ease-[var(--ease-out)]",
         open ? "w-[var(--width-sidebar)]" : "w-0",
       )}
     >
-      <div className="drag h-13 shrink-0" />
+      <div className="drag h-[var(--height-titlebar)] shrink-0" />
 
-      <div className="px-3 pb-4">
+      <div className="px-[var(--space-3)] pb-[var(--space-4)]">
         <Button
           variant="ghost"
           size="sm"
@@ -72,14 +72,14 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
         </Button>
       </div>
 
-      <div className="px-5 pb-2">
+      <div className="px-[var(--space-5)] pb-[var(--space-2)]">
         <span className="whitespace-nowrap text-[var(--text-micro)] font-medium tracking-wide text-[var(--ink-ghost)]">
           Recents
         </span>
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="flex flex-col gap-px px-3">
+        <div className="flex flex-col gap-px px-[var(--space-3)]">
           {sessions.map((session) => (
             <SessionItem
               key={session.id}
@@ -93,8 +93,8 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
       </div>
 
       {(onOpenSettings || onOpenSkills) && (
-        <div className="shrink-0 px-3 py-3">
-          <Separator className="mb-3" />
+        <div className="shrink-0 px-[var(--space-3)] py-[var(--space-3)]">
+          <Separator className="mb-[var(--space-3)]" />
           {onOpenSkills && (
             <Button
               variant="ghost"
