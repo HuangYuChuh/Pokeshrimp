@@ -236,7 +236,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
   const modelOptions = MODEL_OPTIONS.map((m) => ({ value: m.id, label: m.label }));
 
   return (
-    <div className="shrink-0 px-3 pb-4 sm:px-6 sm:pb-6">
+    <div className="shrink-0 px-[var(--space-3)] pb-[var(--space-4)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
       <form onSubmit={handleFormSubmit} className="relative mx-auto max-w-[var(--width-chat)]">
         {/* Slash command popup */}
         {isSlashMode && (
@@ -288,21 +288,21 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
           <CardContent className="p-0">
             {/* Attachment previews */}
             {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-[var(--space-2)] px-4 pt-3">
+              <div className="flex flex-wrap gap-[var(--space-2)] px-[var(--space-4)] pt-3">
                 {attachments.map((att) => (
                   <div
                     key={att.id}
-                    className="group/att relative flex items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-2.5 py-1.5"
+                    className="group/att relative flex items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-[var(--space-3)] py-1.5"
                   >
                     {att.previewUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={att.previewUrl}
                         alt={att.name}
-                        className="h-10 w-10 rounded object-cover"
+                        className="h-10 w-10 rounded-[var(--radius-sm)] object-cover"
                       />
                     ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded bg-[var(--border-subtle)]">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--border-subtle)]">
                         <Icon
                           icon="solar:file-outline"
                           width={16}
@@ -338,10 +338,10 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
               placeholder="Describe what you want to create, type / for skills..."
               rows={1}
               disabled={isLoading}
-              className="selectable nodrag block w-full resize-none border-none bg-transparent px-4 pb-2 pt-4 text-[var(--text-body)] leading-6 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
+              className="selectable nodrag block w-full resize-none border-none bg-transparent px-[var(--space-4)] pb-[var(--space-2)] pt-[var(--space-4)] text-[var(--text-body)] leading-6 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
             />
 
-            <div className="flex items-center justify-between px-3 pb-2.5">
+            <div className="flex items-center justify-between px-[var(--space-3)] pb-[var(--space-3)]">
               <div className="flex items-center">
                 <input
                   ref={fileInputRef}

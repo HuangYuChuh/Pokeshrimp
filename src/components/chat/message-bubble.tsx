@@ -17,7 +17,7 @@ const markdownComponents: Components = {
     if (isInline) {
       return (
         <code
-          className="rounded bg-[var(--border-subtle)] px-1.5 py-0.5 text-[var(--text-body-sm)]"
+          className="rounded bg-[var(--border-subtle)] px-[var(--space-2)] py-[var(--space-1)] text-[var(--text-body-sm)]"
           {...props}
         >
           {children}
@@ -77,7 +77,7 @@ export function MessageBubble({
             ) : (
               <div className="max-w-[95%] sm:max-w-[85%]">
                 <Card className="bg-[var(--surface-raised)] text-[var(--ink)]">
-                  <CardContent className="px-4 py-2.5">
+                  <CardContent className="px-[var(--space-4)] py-[var(--space-3)]">
                     <div className="whitespace-pre-wrap break-words text-[var(--text-body)] leading-[var(--leading-relaxed)]">
                       {message.content}
                     </div>
@@ -92,7 +92,7 @@ export function MessageBubble({
             )
           ) : (
             <div className="max-w-[95%] sm:max-w-[85%]">
-              <div className="prose prose-sm max-w-[72ch] text-[var(--text-body)] leading-[var(--leading-relaxed)] text-[var(--ink)] dark:prose-invert">
+              <div className="prose max-w-[72ch] text-[length:var(--text-body)] leading-[var(--leading-relaxed)] text-[var(--ink)] dark:prose-invert">
                 <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                   {message.content}
                 </ReactMarkdown>

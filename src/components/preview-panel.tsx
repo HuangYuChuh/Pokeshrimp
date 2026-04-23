@@ -40,18 +40,18 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
   return (
     <aside
       className={cn(
-        "flex h-screen shrink-0 flex-col border-l border-[var(--border)] bg-[var(--canvas-subtle)] overflow-hidden transition-all duration-200",
+        "flex h-screen shrink-0 flex-col border-l border-[var(--border)] bg-[var(--canvas-subtle)] overflow-hidden transition-all duration-[var(--duration-normal)] ease-[var(--ease-out)]",
         open ? "w-[var(--width-preview)] min-w-[var(--width-preview)]" : "w-0 min-w-0 border-l-0",
       )}
     >
-      <div className="drag h-13 shrink-0" />
+      <div className="drag h-[var(--height-titlebar)] shrink-0" />
 
       <Tabs
         value={previewTab}
         onValueChange={handleTabChange}
         className="flex flex-1 flex-col overflow-hidden"
       >
-        <TabsList className="mx-4 shrink-0">
+        <TabsList className="mx-[var(--space-4)] shrink-0">
           <TabsTrigger value="preview">Preview</TabsTrigger>
           <TabsTrigger value="editor">Editor</TabsTrigger>
           <TabsTrigger value="output">Output</TabsTrigger>
@@ -209,7 +209,7 @@ function PreviewContent({
 
     return (
       <div className="flex h-full flex-col">
-        <div className="flex shrink-0 items-center gap-1 border-b border-[var(--border)] px-3 py-1.5">
+        <div className="flex shrink-0 items-center gap-[var(--space-1)] border-b border-[var(--border)] px-[var(--space-3)] py-[var(--space-2)]">
           <Button variant="ghost" size="icon-sm" onClick={handleZoomOut} aria-label="Zoom out">
             <Icon icon="solar:magnifer-zoom-out-outline" width={15} />
           </Button>
@@ -292,7 +292,7 @@ function PreviewContent({
           </div>
         )}
 
-        <div className="flex shrink-0 items-center justify-center gap-[var(--gap-inline)] border-t border-[var(--border)] px-3 py-2">
+        <div className="flex shrink-0 items-center justify-center gap-[var(--gap-inline)] border-t border-[var(--border)] px-[var(--space-3)] py-[var(--space-2)]">
           <Button variant="ghost" size="sm" onClick={onRerun}>
             <Icon icon="solar:refresh-outline" width={15} className="mr-1.5" />
             Re-run
