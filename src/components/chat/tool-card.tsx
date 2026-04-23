@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
-import { Card, CardHeader, CardContent, Chip } from "@/design-system/components";
+import { Card, CardHeader, CardContent, Chip, Button } from "@/design-system/components";
 
 interface ToolInvocation {
   toolCallId: string;
@@ -39,7 +39,14 @@ export function ToolCard({ invocation }: ToolCardProps) {
       >
         <CardHeader className="flex flex-row items-center gap-[var(--gap-inline)] mb-0">
           <Chip size="sm" variant={isDone ? "success" : "warning"}>
-            {isDone ? "Done" : "Running"}
+            {isDone ? (
+              "Done"
+            ) : (
+              <span className="flex items-center gap-[var(--space-1)]">
+                <Icon icon="solar:loading-outline" width={11} className="animate-spin" />
+                Running
+              </span>
+            )}
           </Chip>
           <span className="text-[var(--text-caption)] font-medium text-[var(--ink)]">{label}</span>
           {hasArgs && (
@@ -63,28 +70,49 @@ export function ToolCard({ invocation }: ToolCardProps) {
         </CardHeader>
 
         {expanded && (
-          <CardContent className="max-h-[300px] overflow-y-auto px-3 pb-3 pt-0 font-[var(--font-mono)] text-[var(--text-micro)] leading-relaxed text-[var(--ink-secondary)]">
-            {hasArgs && (
-              <>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-ghost)]">
-                  Input
-                </div>
-                <pre className="mb-3 whitespace-pre-wrap break-all">
-                  {formatVal(invocation.args)}
-                </pre>
-              </>
-            )}
-            {hasResult && (
-              <>
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-ghost)]">
-                  Result
-                </div>
-                <pre className="whitespace-pre-wrap break-all">{formatVal(invocation.result)}</pre>
-              </>
-            )}
+          <CardContent className="selectable max-h-[300px] overflow-y-auto px-[var(--space-3)] pb-[var(--space-3)] pt-0 font-[var(--font-mono)] text-[var(--text-micro)] leading-relaxed text-[var(--ink-secondary)]">
+            {hasArgs && <PreBlock label="Input" value={formatVal(invocation.args)} />}
+            {hasResult && <PreBlock label="Result" value={formatVal(invocation.result)} />}
           </CardContent>
         )}
       </Card>
+    </div>
+  );
+}
+
+/* ─── Pre block with copy button ── */
+
+function PreBlock({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      navigator.clipboard.writeText(value).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      });
+    },
+    [value],
+  );
+
+  return (
+    <div className="mb-[var(--space-3)]">
+      <div className="flex items-center justify-between mb-[var(--space-1)]">
+        <span className="text-[10px] font-semibold uppercase tracking-[var(--tracking-wide)] text-[var(--ink-ghost)]">
+          {label}
+        </span>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={handleCopy}
+          aria-label={`Copy ${label}`}
+          className="h-5 w-5"
+        >
+          <Icon icon={copied ? "solar:check-circle-outline" : "solar:copy-outline"} width={12} />
+        </Button>
+      </div>
+      <pre className="whitespace-pre-wrap break-all">{value}</pre>
     </div>
   );
 }

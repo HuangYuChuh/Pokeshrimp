@@ -1,6 +1,14 @@
 "use client";
 
-import { forwardRef, useState, useRef, useCallback, type KeyboardEvent } from "react";
+import {
+  forwardRef,
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  type KeyboardEvent,
+} from "react";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
@@ -89,15 +97,24 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
   // Slash command popup
   const slashQuery =
     input.startsWith("/") && !input.includes(" ") ? input.slice(1).toLowerCase() : null;
-  const filteredSkills =
-    slashQuery !== null
-      ? skills.filter(
-          (s) =>
-            s.command.toLowerCase().includes(slashQuery) ||
-            s.name.toLowerCase().includes(slashQuery),
-        )
-      : [];
-  const isSlashMode = slashQuery !== null && filteredSkills.length > 0;
+  const filteredSkills = useMemo(
+    () =>
+      slashQuery !== null
+        ? skills.filter(
+            (s) =>
+              s.command.toLowerCase().includes(slashQuery) ||
+              s.name.toLowerCase().includes(slashQuery),
+          )
+        : [],
+    [slashQuery, skills],
+  );
+  const isSlashMode = slashQuery !== null;
+  const [slashIndex, setSlashIndex] = useState(0);
+
+  // Reset highlight when results change
+  useEffect(() => {
+    setSlashIndex(0);
+  }, [filteredSkills.length]);
 
   const addFiles = useCallback((files: FileList | File[]) => {
     const newAttachments = Array.from(files).map(createLocalAttachment);
@@ -167,6 +184,30 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
 
   const handleKeyDownWithAttachments = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      // Slash command keyboard navigation
+      if (isSlashMode && filteredSkills.length > 0) {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          setSlashIndex((i) => (i + 1) % filteredSkills.length);
+          return;
+        }
+        if (e.key === "ArrowUp") {
+          e.preventDefault();
+          setSlashIndex((i) => (i - 1 + filteredSkills.length) % filteredSkills.length);
+          return;
+        }
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          onSelectSkill(filteredSkills[slashIndex].command);
+          return;
+        }
+        if (e.key === "Escape") {
+          e.preventDefault();
+          // Clear slash input to close popup
+          return;
+        }
+      }
+
       if (e.key === "Enter" && !e.shiftKey) {
         if (attachments.length > 0 && !input.trim() && !isLoading) {
           e.preventDefault();
@@ -179,7 +220,17 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
       }
       onKeyDown(e);
     },
-    [attachments, input, isLoading, onKeyDown, handleFormSubmit],
+    [
+      attachments,
+      input,
+      isLoading,
+      onKeyDown,
+      handleFormSubmit,
+      isSlashMode,
+      filteredSkills,
+      slashIndex,
+      onSelectSkill,
+    ],
   );
 
   const modelOptions = MODEL_OPTIONS.map((m) => ({ value: m.id, label: m.label }));
@@ -189,27 +240,39 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
       <form onSubmit={handleFormSubmit} className="relative mx-auto max-w-[var(--width-chat)]">
         {/* Slash command popup */}
         {isSlashMode && (
-          <Card className="absolute bottom-full left-0 z-10 mb-2 w-full p-1">
-            {filteredSkills.map((skill) => (
-              <button
-                key={skill.command}
-                type="button"
-                className="nodrag flex w-full items-start gap-[var(--space-3)] rounded-[var(--radius-lg)] px-3 py-2.5 text-left transition-colors hover:bg-[var(--accent-subtle)]"
-                onClick={() => onSelectSkill(skill.command)}
-              >
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[var(--border-subtle)] text-[var(--ink-tertiary)]">
-                  <Icon icon="solar:slash-circle-outline" width={11} />
-                </span>
-                <div className="min-w-0">
-                  <div className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
-                    {skill.command}
+          <Card className="absolute bottom-full left-0 z-10 mb-[var(--space-2)] w-full p-[var(--space-1)] max-h-[240px] overflow-y-auto">
+            {filteredSkills.length > 0 ? (
+              filteredSkills.map((skill, i) => (
+                <button
+                  key={skill.command}
+                  type="button"
+                  className={cn(
+                    "nodrag flex w-full items-start gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left transition-colors",
+                    i === slashIndex
+                      ? "bg-[var(--accent-subtle)] text-[var(--accent)]"
+                      : "hover:bg-[var(--border-subtle)]",
+                  )}
+                  onClick={() => onSelectSkill(skill.command)}
+                  onMouseEnter={() => setSlashIndex(i)}
+                >
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--border-subtle)] text-[var(--ink-tertiary)]">
+                    <Icon icon="solar:slash-circle-outline" width={11} />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+                      {skill.command}
+                    </div>
+                    <div className="truncate text-[var(--text-caption)] text-[var(--ink-tertiary)]">
+                      {skill.description}
+                    </div>
                   </div>
-                  <div className="truncate text-[var(--text-caption)] text-[var(--ink-tertiary)]">
-                    {skill.description}
-                  </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              ))
+            ) : (
+              <div className="px-[var(--space-3)] py-[var(--space-4)] text-center text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
+                No skills match &ldquo;/{slashQuery}&rdquo;
+              </div>
+            )}
           </Card>
         )}
 
