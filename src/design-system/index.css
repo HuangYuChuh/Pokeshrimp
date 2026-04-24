@@ -7,16 +7,87 @@
 
 @import "./tokens/index.css";
 
+/* ─── Semantic heading variables ── */
+
+:root {
+  --h1-size: var(--text-hero);
+  --h1-leading: var(--leading-tight);
+  --h2-size: var(--text-display);
+  --h2-leading: var(--leading-tight);
+  --h3-size: var(--text-headline);
+  --h3-leading: var(--leading-snug);
+  --h4-size: var(--text-title);
+  --h4-leading: var(--leading-snug);
+  --p-size: var(--text-body);
+  --p-leading: var(--leading-relaxed);
+}
+
 /* ─── Body base styles ── */
 
 body {
-  font-family: var(--font-sans-stack);
-  font-size: var(--text-body);
-  line-height: var(--leading-normal);
+  font-family: var(--font-sans);
+  font-size: var(--p-size);
+  line-height: var(--p-leading);
   color: var(--ink);
   background-color: var(--canvas);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Heading resets ── */
+
+h1 {
+  font-family: var(--font-sans);
+  font-size: var(--h1-size);
+  line-height: var(--h1-leading);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink);
+}
+h2 {
+  font-family: var(--font-sans);
+  font-size: var(--h2-size);
+  line-height: var(--h2-leading);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink);
+}
+h3 {
+  font-family: var(--font-sans);
+  font-size: var(--h3-size);
+  line-height: var(--h3-leading);
+  font-weight: 600;
+  color: var(--ink);
+}
+h4 {
+  font-family: var(--font-sans);
+  font-size: var(--h4-size);
+  line-height: var(--h4-leading);
+  font-weight: 600;
+  color: var(--ink);
+}
+p {
+  font-family: var(--font-sans);
+  font-size: var(--p-size);
+  line-height: var(--p-leading);
+  color: var(--ink);
+}
+small {
+  font-size: var(--text-caption);
+  color: var(--ink-secondary);
+}
+code,
+pre,
+kbd {
+  font-family: var(--font-mono);
+  font-size: var(--text-body-sm);
+}
+
+/* ─── Utility ── */
+
+.display-serif {
+  font-family: var(--font-serif);
+  letter-spacing: var(--tracking-tight);
 }
 
 /* ─── Selection ── */
@@ -38,17 +109,14 @@ body {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track,
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-full);
+  border-radius: 9999px;
   background: var(--border);
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: var(--border-strong);
 }
