@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import { useT } from "@/lib/i18n";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
-import { Button, Card, CardContent, Select, Textarea } from "@/design-system/components";
+import { Button, Card, Select } from "@/design-system/components";
 
 /* --- Skill type --- */
 
@@ -238,7 +238,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
   const modelOptions = MODEL_OPTIONS.map((m) => ({ value: m.id, label: m.label }));
 
   return (
-    <div className="shrink-0 px-[var(--space-3)] pb-[var(--space-4)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
+    <div className="shrink-0 px-[var(--space-4)] pb-[18px] pt-[var(--space-3)]">
       <form onSubmit={handleFormSubmit} className="relative mx-auto max-w-[var(--width-chat)]">
         {/* Slash command popup */}
         {isSlashMode && (
@@ -278,112 +278,139 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
           </Card>
         )}
 
-        <Card
+        {/* Composer card */}
+        <div
           className={cn(
-            "overflow-hidden transition-colors",
+            "rounded-[var(--radius-2xl)] border border-[var(--border)] bg-[var(--surface)] px-[var(--space-3)] pb-[var(--space-2)] pt-[10px] transition-colors",
             isDragOver && "border-[var(--accent)] bg-[var(--accent-subtle)]",
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <CardContent className="p-0">
-            {/* Attachment previews */}
-            {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-[var(--space-2)] px-[var(--space-4)] pt-3">
-                {attachments.map((att) => (
-                  <div
-                    key={att.id}
-                    className="group/att relative flex items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-[var(--space-3)] py-1.5"
-                  >
-                    {att.previewUrl ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={att.previewUrl}
-                        alt={att.name}
-                        className="h-10 w-10 rounded-[var(--radius-sm)] object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--border-subtle)]">
-                        <Icon
-                          icon="solar:file-outline"
-                          width={16}
-                          className="text-[var(--ink-tertiary)]"
-                        />
-                      </div>
-                    )}
-                    <div className="min-w-0 max-w-[120px]">
-                      <div className="truncate text-[var(--text-caption)] font-medium text-[var(--ink)]">
-                        {att.name}
-                      </div>
-                      <div className="text-[var(--text-micro)] text-[var(--ink-tertiary)]">
-                        {formatFileSize(att.size)}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeAttachment(att.id)}
-                      className="nodrag absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--canvas)] opacity-0 transition-opacity group-hover/att:opacity-100"
-                    >
-                      <Icon icon="solar:close-circle-outline" width={10} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <Textarea
-              ref={ref}
-              value={input}
-              onChange={onChange}
-              onKeyDown={handleKeyDownWithAttachments}
-              placeholder={t.inputPlaceholder}
-              rows={1}
-              disabled={isLoading}
-              className="selectable nodrag block w-full resize-none border-none bg-transparent px-[var(--space-4)] pb-[var(--space-2)] pt-[var(--space-4)] text-[var(--text-body)] leading-6 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
-            />
-
-            <div className="flex items-center justify-between px-[var(--space-3)] pb-[var(--space-3)]">
-              <div className="flex items-center">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept={ACCEPTED_TYPES}
-                  onChange={handleFileInputChange}
-                  className="hidden"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isLoading}
-                  className="nodrag"
-                  aria-label={t.attachFiles}
+          {/* Attachment previews */}
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-[var(--space-2)] px-[var(--space-1)] pb-[var(--space-2)]">
+              {attachments.map((att) => (
+                <div
+                  key={att.id}
+                  className="group/att relative flex items-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--border-subtle)] px-[var(--space-3)] py-1.5"
                 >
-                  <Icon icon="solar:paperclip-outline" width={15} />
-                </Button>
-              </div>
-              <div className="flex items-center gap-[var(--gap-inline)]">
+                  {att.previewUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={att.previewUrl}
+                      alt={att.name}
+                      className="h-10 w-10 rounded-[var(--radius-sm)] object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--border-subtle)]">
+                      <Icon
+                        icon="solar:file-outline"
+                        width={16}
+                        className="text-[var(--ink-tertiary)]"
+                      />
+                    </div>
+                  )}
+                  <div className="min-w-0 max-w-[120px]">
+                    <div className="truncate text-[var(--text-caption)] font-medium text-[var(--ink)]">
+                      {att.name}
+                    </div>
+                    <div className="text-[var(--text-micro)] text-[var(--ink-tertiary)]">
+                      {formatFileSize(att.size)}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(att.id)}
+                    className="nodrag absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--canvas)] opacity-0 transition-opacity group-hover/att:opacity-100"
+                  >
+                    <Icon icon="solar:close-circle-outline" width={10} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Textarea */}
+          <textarea
+            ref={ref}
+            value={input}
+            onChange={onChange}
+            onKeyDown={handleKeyDownWithAttachments}
+            placeholder={t.inputPlaceholder}
+            rows={1}
+            disabled={isLoading}
+            className="selectable nodrag block w-full resize-none border-none bg-transparent px-[var(--space-1)] py-0 font-[family-name:var(--font-sans)] text-[var(--text-body)] leading-[var(--leading-normal)] text-[var(--ink)] shadow-none min-h-[56px] placeholder:text-[var(--ink-ghost)] focus:outline-none focus:ring-0 disabled:opacity-50"
+          />
+
+          {/* Bottom toolbar */}
+          <div className="flex items-center gap-[6px]">
+            {/* Left group */}
+            <div className="flex items-center gap-[6px]">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept={ACCEPTED_TYPES}
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
+
+              {/* Paperclip */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading}
+                className="nodrag flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] bg-transparent text-[var(--ink-secondary)] transition-colors hover:bg-[var(--border-subtle)] disabled:opacity-50 disabled:pointer-events-none"
+                aria-label={t.attachFiles}
+              >
+                <Icon icon="solar:paperclip-outline" width={15} />
+              </button>
+
+              {/* Skills button */}
+              <button
+                type="button"
+                onClick={() => onSelectSkill("/")}
+                disabled={isLoading}
+                className="nodrag flex h-7 w-auto items-center gap-[var(--space-1)] rounded-[var(--radius-sm)] bg-transparent px-[var(--space-2)] text-[var(--ink-secondary)] transition-colors hover:bg-[var(--border-subtle)] disabled:opacity-50 disabled:pointer-events-none"
+              >
+                <Icon icon="solar:slash-circle-outline" width={13} />
+                <span className="font-[family-name:var(--font-mono)] text-[var(--text-micro)] text-[var(--ink-secondary)]">
+                  {t.skills.toLowerCase()}
+                </span>
+              </button>
+            </div>
+
+            {/* Right group */}
+            <div className="ml-auto flex items-center gap-[6px]">
+              {/* Model selector (styled as plain text) */}
+              <div className="relative">
                 <Select
                   value={modelId}
                   onChange={onModelChange}
                   options={modelOptions}
-                  className="nodrag"
+                  className="nodrag !h-auto !w-auto !border-none !bg-transparent !p-0 !shadow-none !ring-0 !outline-none [&>span]:font-[family-name:var(--font-mono)] [&>span]:text-[10px] [&>span]:text-[var(--ink-ghost)] [&>svg]:hidden"
                 />
-                <Button
-                  variant="primary"
-                  size="icon-sm"
-                  type="submit"
-                  disabled={(!input.trim() && attachments.length === 0) || isLoading}
-                  className="nodrag"
-                >
-                  <Icon icon="solar:arrow-up-outline" width={15} />
-                </Button>
               </div>
+
+              {/* Shortcut hint */}
+              <span className="select-none font-[family-name:var(--font-mono)] text-[10px] text-[var(--ink-ghost)]">
+                ·&nbsp;&#x2318;&#x21B5;
+              </span>
+
+              {/* Send */}
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={(!input.trim() && attachments.length === 0) || isLoading}
+                className="nodrag !h-7 !w-7 !rounded-[var(--radius-md)] !p-0"
+              >
+                <Icon icon="solar:arrow-up-outline" width={15} />
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </form>
     </div>
   );

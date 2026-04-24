@@ -361,26 +361,44 @@ export function ChatPanel({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col bg-[var(--canvas)]">
-      {/* Drag region with toggle buttons */}
-      <div className="drag flex h-[var(--height-titlebar)] shrink-0 items-center justify-between px-[var(--space-3)]">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onToggleSidebar}
-          className={cn("nodrag", sidebarOpen && "invisible")}
-          aria-label={t.toggleSidebar}
-        >
-          <Icon icon="solar:sidebar-minimalistic-outline" width={16} />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onTogglePreview}
-          className={cn("nodrag", previewOpen && "invisible")}
-          aria-label={t.togglePreview}
-        >
-          <Icon icon="solar:sidebar-minimalistic-outline" width={16} className="scale-x-[-1]" />
-        </Button>
+      {/* Top bar */}
+      <div className="drag flex h-[var(--height-titlebar)] shrink-0 items-center justify-between border-b border-[var(--border-subtle)] px-[var(--space-4)]">
+        {/* Left: status + title + model */}
+        <div className="nodrag flex items-center gap-[var(--space-3)]">
+          <div
+            className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--warning)]"
+            style={{ boxShadow: "0 0 3px var(--warning)" }}
+          />
+          <span className="text-[13px] font-medium text-[var(--ink)]">{t.newConversation}</span>
+          <span
+            className="text-[var(--ink-tertiary)]"
+            style={{ fontFamily: "var(--font-mono)", fontSize: "11px" }}
+          >
+            {modelId}
+          </span>
+        </div>
+
+        {/* Right: actions + sidebar toggles */}
+        <div className="nodrag flex items-center gap-[var(--space-1)]">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onToggleSidebar}
+            className={cn(sidebarOpen && "invisible")}
+            aria-label={t.toggleSidebar}
+          >
+            <Icon icon="solar:sidebar-minimalistic-outline" width={16} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onTogglePreview}
+            className={cn(previewOpen && "invisible")}
+            aria-label={t.togglePreview}
+          >
+            <Icon icon="solar:sidebar-minimalistic-outline" width={16} className="scale-x-[-1]" />
+          </Button>
+        </div>
       </div>
 
       {/* Content area */}
@@ -388,10 +406,7 @@ export function ChatPanel({
         <div className="flex flex-1 flex-col">
           <div className="flex flex-1 items-center justify-center pb-32">
             <div className="text-center">
-              <h1
-                className="text-[var(--text-display)] font-light tracking-[var(--tracking-tight)] text-[var(--ink)]"
-                style={{ fontFamily: "var(--font-serif)" }}
-              >
+              <h1 className="display-serif text-[var(--text-display)] font-light tracking-[var(--tracking-tight)] text-[var(--ink)]">
                 {t.emptyTitle}
               </h1>
               <p className="mt-[var(--space-3)] text-[var(--text-title)] text-[var(--ink-secondary)]">

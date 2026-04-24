@@ -1,7 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/design-system/components";
+import { useT } from "@/lib/i18n";
 import { MessageActions } from "./message-actions";
 import { EditBubble } from "./edit-bubble";
 import { ToolCard } from "./tool-card";
@@ -9,7 +8,7 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Message } from "@ai-sdk/react";
 
-/* --- Markdown components for assistant messages --- */
+/* ── Markdown components for assistant messages ── */
 
 const markdownComponents: Components = {
   code({ className, children, ...props }) {
@@ -37,7 +36,7 @@ const markdownComponents: Components = {
   },
 };
 
-/* --- Props --- */
+/* ── Props ── */
 
 interface MessageBubbleProps {
   message: Message;
@@ -62,48 +61,75 @@ export function MessageBubble({
   onDelete,
   onRegenerate,
 }: MessageBubbleProps) {
+  const t = useT();
+  const isUser = message.role === "user";
+
   return (
     <div className="group/msg relative mb-[var(--gap-message)]">
       {message.content && (
-        <div className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
-          {message.role === "user" ? (
-            isEditing ? (
-              <EditBubble
-                content={editingContent}
-                onChange={onEditContentChange}
-                onSave={() => onSaveEdit(message.id)}
-                onCancel={onCancelEdit}
-              />
+        <div className="flex gap-[10px]">
+          {/* Avatar */}
+          <div
+            className={
+              isUser
+                ? "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--accent-subtle)] text-[11px] font-medium text-[var(--accent)]"
+                : "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface)] text-[11px] text-[var(--ink-secondary)]"
+            }
+          >
+            {isUser ? "K" : "◆"}
+          </div>
+
+          {/* Content column */}
+          <div className="min-w-0 flex-1">
+            {/* Label */}
+            <div
+              className="mb-1 text-[var(--ink-tertiary)]"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "11px",
+                textTransform: "uppercase",
+                letterSpacing: "0.03em",
+              }}
+            >
+              {isUser ? t.labelYou : t.labelAgent}
+            </div>
+
+            {/* Message body */}
+            {isUser ? (
+              isEditing ? (
+                <EditBubble
+                  content={editingContent}
+                  onChange={onEditContentChange}
+                  onSave={() => onSaveEdit(message.id)}
+                  onCancel={onCancelEdit}
+                />
+              ) : (
+                <>
+                  <div className="whitespace-pre-wrap break-words text-[14px] leading-[1.75] text-[var(--ink)]">
+                    {message.content}
+                  </div>
+                  <MessageActions
+                    role="user"
+                    onEdit={() => onStartEdit(message.id, message.content)}
+                    onDelete={() => onDelete(message.id)}
+                  />
+                </>
+              )
             ) : (
-              <div className="max-w-[95%] sm:max-w-[85%]">
-                <Card className="bg-[var(--surface-raised)] text-[var(--ink)]">
-                  <CardContent className="px-[var(--space-4)] py-[var(--space-3)]">
-                    <div className="whitespace-pre-wrap break-words text-[var(--text-body)] leading-[var(--leading-relaxed)]">
-                      {message.content}
-                    </div>
-                  </CardContent>
-                </Card>
+              <>
+                <div className="prose max-w-[72ch] text-[14px] leading-[1.75] text-[var(--ink-secondary)] dark:prose-invert">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
                 <MessageActions
-                  role="user"
-                  onEdit={() => onStartEdit(message.id, message.content)}
+                  role="assistant"
+                  onRegenerate={() => onRegenerate(message.id)}
                   onDelete={() => onDelete(message.id)}
                 />
-              </div>
-            )
-          ) : (
-            <div className="max-w-[95%] sm:max-w-[85%]">
-              <div className="prose max-w-[72ch] text-[length:var(--text-body)] leading-[var(--leading-relaxed)] text-[var(--ink)] dark:prose-invert">
-                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                  {message.content}
-                </ReactMarkdown>
-              </div>
-              <MessageActions
-                role="assistant"
-                onRegenerate={() => onRegenerate(message.id)}
-                onDelete={() => onDelete(message.id)}
-              />
-            </div>
-          )}
+              </>
+            )}
+          </div>
         </div>
       )}
 

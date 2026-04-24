@@ -48,9 +48,15 @@ export const en = {
   sessionSummary: "Session Summary",
   messages: "messages",
   somethingWentWrong: "Something went wrong",
+  labelYou: "YOU",
+  labelAgent: "AGENT",
+  newConversation: "New conversation",
+  copyConversation: "Copy conversation",
+  clearConversation: "Clear conversation",
 
   // ── Approval ──
   commandApproval: "Command Approval Required",
+  approvalRequired: "Approval required",
   riskLevel: "Risk",
   allowOnce: "Allow Once",
   alwaysAllow: "Always Allow",
