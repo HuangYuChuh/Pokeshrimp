@@ -4,23 +4,37 @@
 
 :root {
   /* ── Easing curves ── */
-  --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in:      cubic-bezier(0.7, 0, 0.84, 0);
-  --ease-in-out:  cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
 
   /* ── Duration scale ── */
-  --duration-instant:  100ms;
-  --duration-fast:     150ms;
-  --duration-normal:   200ms;
-  --duration-slow:     300ms;
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+}
+
+/* ── Keyframes ── */
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.6;
+  }
 }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --duration-instant:  0ms;
-    --duration-fast:     0ms;
-    --duration-normal:   0ms;
-    --duration-slow:     0ms;
+    --duration-instant: 0ms;
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
   }
 }

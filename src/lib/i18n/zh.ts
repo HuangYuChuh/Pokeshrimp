@@ -48,9 +48,15 @@ export const zh = {
   sessionSummary: "会话摘要",
   messages: "条消息",
   somethingWentWrong: "出了点问题",
+  labelYou: "你",
+  labelAgent: "助手",
+  newConversation: "新对话",
+  copyConversation: "复制对话",
+  clearConversation: "清空对话",
 
   // ── Approval ──
   commandApproval: "需要命令审批",
+  approvalRequired: "需要审批",
   riskLevel: "风险",
   allowOnce: "允许一次",
   alwaysAllow: "始终允许",

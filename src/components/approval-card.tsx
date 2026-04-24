@@ -4,7 +4,8 @@ import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import { useT } from "@/lib/i18n";
-import { Button, Card, CardHeader, CardContent, Chip } from "@/design-system/components";
+
+/* ─── Types ── */
 
 export interface ApprovalRequestData {
   type: "approval-request";
@@ -29,17 +30,7 @@ interface ApprovalCardProps {
   resolved?: ApprovalResolvedData;
 }
 
-const RISK_CHIP_VARIANT = {
-  safe: "success",
-  moderate: "warning",
-  dangerous: "error",
-} as const;
-
-const RISK_ICON = {
-  safe: "solar:shield-check-outline",
-  moderate: "solar:shield-warning-outline",
-  dangerous: "solar:shield-cross-outline",
-} as const;
+/* ─── Component ── */
 
 export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
   const t = useT();
@@ -92,79 +83,89 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
   }
 
   const isPending = state === "pending";
+  const pattern = request.command.split(" ")[0] ?? request.command;
 
   return (
-    <Card className="mt-[var(--space-2)]">
-      <CardHeader className="flex flex-row items-start gap-[var(--space-3)]">
-        <Icon
-          icon={RISK_ICON[request.riskLevel]}
-          width={18}
-          className="mt-0.5 shrink-0 text-[var(--ink-secondary)]"
-        />
-        <div className="min-w-0 flex-1">
-          <span className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
-            {t.commandApproval}
+    <div className="mt-[var(--space-2)]">
+      <div className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--warning)] bg-[var(--warning-subtle)]">
+        {/* ── Header ── */}
+        <div className="flex items-center gap-[var(--gap-inline)] px-[12px] py-[10px]">
+          <Icon
+            icon="solar:shield-warning-outline"
+            width={18}
+            className="shrink-0 text-[var(--warning)]"
+          />
+          <span className="text-[var(--text-body-sm)] font-semibold text-[var(--ink)]">
+            {t.approvalRequired}
           </span>
-          <code className="mt-1.5 block truncate rounded-[var(--radius-sm)] bg-[var(--border-subtle)] px-2 py-1 font-[var(--font-mono)] text-[var(--text-caption)] text-[var(--ink-secondary)]">
+          <span className="ml-auto font-[var(--font-mono)] text-[var(--text-micro)] uppercase text-[var(--warning)]">
+            {t.riskLevel}: {request.riskLevel}
+          </span>
+        </div>
+
+        {/* ── Command ── */}
+        <div className="px-[12px] pb-[12px]">
+          <code className="block rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--canvas)] px-[12px] py-[10px] font-[var(--font-mono)] text-[var(--text-body-sm)] text-[var(--ink)]">
             $ {request.command}
           </code>
-          <Chip size="sm" variant={RISK_CHIP_VARIANT[request.riskLevel]} className="mt-2">
-            {t.riskLevel}: {request.riskLevel}
-          </Chip>
         </div>
-      </CardHeader>
-      <CardContent className="px-4 pb-4 pt-[var(--space-3)]">
-        {isPending ? (
-          <div className="ml-[30px]">
-            <div className="flex items-center gap-[var(--gap-inline)]">
-              <Button
-                size="sm"
-                variant="primary"
-                onClick={() => handleDecision("allow-once")}
-                disabled={loading}
-              >
-                {t.allowOnce}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleDecision("always-allow")}
-                disabled={loading}
-              >
-                {t.alwaysAllow}
-              </Button>
-              <Button
-                size="sm"
-                variant="danger"
-                onClick={() => handleDecision("deny")}
-                disabled={loading}
-              >
-                {t.deny}
-              </Button>
+
+        {/* ── Actions ── */}
+        <div className="px-[12px] pb-[12px]">
+          {isPending ? (
+            <div>
+              <div className="flex items-center gap-[var(--gap-inline)]">
+                {/* Allow Once — accent bg, white text */}
+                <button
+                  onClick={() => handleDecision("allow-once")}
+                  disabled={loading}
+                  className="h-[30px] rounded-[var(--radius-md)] bg-[var(--accent)] px-[14px] text-[var(--text-body-sm)] font-medium text-white transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
+                >
+                  {t.allowOnce}
+                </button>
+                {/* Always Allow — outline */}
+                <button
+                  onClick={() => handleDecision("always-allow")}
+                  disabled={loading}
+                  className="h-[30px] rounded-[var(--radius-md)] border border-[var(--border)] bg-transparent px-[14px] text-[var(--text-body-sm)] font-medium text-[var(--ink)] transition-colors hover:bg-[var(--border-subtle)] disabled:opacity-50"
+                >
+                  {t.alwaysAllow} <code className="ml-1 text-[var(--text-micro)]">{pattern}</code>
+                </button>
+                {/* Deny — outline error */}
+                <button
+                  onClick={() => handleDecision("deny")}
+                  disabled={loading}
+                  className="h-[30px] rounded-[var(--radius-md)] border border-[var(--error)] bg-transparent px-[14px] text-[var(--text-body-sm)] font-medium text-[var(--error)] transition-colors hover:bg-[var(--error-subtle)] disabled:opacity-50"
+                >
+                  {t.deny}
+                </button>
+              </div>
+              {error && (
+                <p className="mt-1.5 text-[var(--text-micro)] text-[var(--error)]">{error}</p>
+              )}
             </div>
-            {error && (
-              <p className="mt-1.5 text-[var(--text-micro)] text-[var(--error)]">{error}</p>
-            )}
-          </div>
-        ) : (
-          <div
-            className={cn(
-              "ml-[30px] text-[var(--text-caption)] font-medium",
-              state === "denied" || state === "expired"
-                ? "text-[var(--error)]"
-                : "text-[var(--success)]",
-            )}
-          >
-            {state === "allowed" && t.allowedOnce}
-            {state === "always-allowed" && t.alwaysAllowedSaved}
-            {state === "denied" && t.denied}
-            {state === "expired" && t.expired}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          ) : (
+            <div
+              className={cn(
+                "text-[var(--text-body-sm)] font-medium",
+                state === "denied" || state === "expired"
+                  ? "text-[var(--error)]"
+                  : "text-[var(--success)]",
+              )}
+            >
+              {state === "allowed" && t.allowedOnce}
+              {state === "always-allowed" && t.alwaysAllowedSaved}
+              {state === "denied" && t.denied}
+              {state === "expired" && t.expired}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
+
+/* ─── Helpers ── */
 
 function mapDecisionToState(decision: string, reason?: string): CardState {
   if (decision === "deny" && reason === "timeout") return "expired";
