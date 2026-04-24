@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, Chip, Skeleton } from "@/design-system/components";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 interface ToolStatus {
   name: string;
@@ -16,6 +17,7 @@ interface ToolStatusListProps {
 }
 
 export function ToolStatusList({ open }: ToolStatusListProps) {
+  const t = useT();
   const [tools, setTools] = useState<ToolStatus[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,11 +47,7 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
   }
 
   if (tools.length === 0) {
-    return (
-      <p className="text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
-        No CLI tools required by installed skills.
-      </p>
-    );
+    return <p className="text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">{t.noTools}</p>;
   }
 
   return (
@@ -79,14 +77,14 @@ export function ToolStatusList({ open }: ToolStatusListProps) {
                   {tool.name}
                 </span>
                 <Chip size="sm" variant={tool.status === "available" ? "success" : "error"}>
-                  {tool.status === "available" ? "Available" : "Not installed"}
+                  {tool.status === "available" ? t.available : t.notInstalled}
                 </Chip>
               </div>
 
               {tool.skills.length > 0 ? (
                 <div className="mt-[var(--space-1)] flex min-w-0 flex-wrap items-center gap-[var(--space-2)]">
                   <span className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
-                    Used by
+                    {t.usedBy}
                   </span>
                   {tool.skills.map((skill) => (
                     <Chip

@@ -11,6 +11,7 @@ import {
 } from "react";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
+import { useT } from "@/lib/i18n";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
 import { Button, Card, CardContent, Select, Textarea } from "@/design-system/components";
 
@@ -90,6 +91,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
   },
   ref,
 ) {
+  const t = useT();
   const [attachments, setAttachments] = useState<LocalAttachment[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -270,7 +272,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
               ))
             ) : (
               <div className="px-[var(--space-3)] py-[var(--space-4)] text-center text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
-                No skills match &ldquo;/{slashQuery}&rdquo;
+                {t.noSkillsMatch} &ldquo;/{slashQuery}&rdquo;
               </div>
             )}
           </Card>
@@ -335,7 +337,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
               value={input}
               onChange={onChange}
               onKeyDown={handleKeyDownWithAttachments}
-              placeholder="Describe what you want to create, type / for skills..."
+              placeholder={t.inputPlaceholder}
               rows={1}
               disabled={isLoading}
               className="selectable nodrag block w-full resize-none border-none bg-transparent px-[var(--space-4)] pb-[var(--space-2)] pt-[var(--space-4)] text-[var(--text-body)] leading-6 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
@@ -357,7 +359,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isLoading}
                   className="nodrag"
-                  aria-label="Attach files"
+                  aria-label={t.attachFiles}
                 >
                   <Icon icon="solar:paperclip-outline" width={15} />
                 </Button>

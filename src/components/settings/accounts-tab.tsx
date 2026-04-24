@@ -4,6 +4,7 @@ import { useCallback, useId, useState, type ReactNode } from "react";
 import { Button, Input } from "@/design-system/components";
 import { SettingsSection, SettingsTabHeader } from "@/components/settings-sections";
 import { Icon } from "@iconify/react";
+import { useT } from "@/lib/i18n";
 
 interface AccountsTabProps {
   anthropicKey: string;
@@ -36,6 +37,7 @@ export function AccountsTab({
   onOauthConnected,
   onAutoSave,
 }: AccountsTabProps) {
+  const t = useT();
   const [oauthLoading, setOauthLoading] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
   const anthropicInputId = useId();
@@ -61,12 +63,12 @@ export function AccountsTab({
 
   return (
     <div className="flex min-w-0 flex-col gap-[var(--space-8)]">
-      <SettingsTabHeader title="Accounts" description="API keys for connecting to LLM providers." />
+      <SettingsTabHeader title={t.accounts} description={t.accountsDescription} />
 
       <div className="flex min-w-0 flex-col gap-[var(--space-8)]">
         <FieldGroup
-          label="Anthropic"
-          hint="Required for Claude models"
+          label={t.anthropic}
+          hint={t.anthropicHint}
           inputId={anthropicInputId}
           getKeyUrl="https://console.anthropic.com/settings/keys"
         >
@@ -89,8 +91,8 @@ export function AccountsTab({
         </FieldGroup>
 
         <FieldGroup
-          label="OpenAI"
-          hint="Required for GPT models"
+          label={t.openai}
+          hint={t.openaiHint}
           inputId={openaiInputId}
           getKeyUrl="https://platform.openai.com/api-keys"
         >
@@ -114,7 +116,7 @@ export function AccountsTab({
                 disabled={oauthLoading}
                 onClick={handleOpenAIOAuth}
               >
-                {oauthLoading ? "Connecting..." : "Login with OpenAI"}
+                {oauthLoading ? t.connecting : t.loginWithOpenAI}
               </Button>
             ) : null}
           </div>
@@ -124,7 +126,7 @@ export function AccountsTab({
               role="status"
               aria-live="polite"
             >
-              Connected — token auto-refreshes
+              {t.oauthConnected}
             </p>
           ) : null}
           {oauthError ? (
@@ -156,6 +158,7 @@ function FieldGroup({
   getKeyUrl?: string;
   children: ReactNode;
 }) {
+  const t = useT();
   return (
     <SettingsSection
       label={label}
@@ -168,7 +171,7 @@ function FieldGroup({
             onClick={() => openKeyUrl(getKeyUrl)}
             className="inline-flex items-center gap-[var(--space-1)] text-[var(--text-caption)] text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]"
           >
-            <span>Get key</span>
+            <span>{t.getKey}</span>
             <Icon icon="solar:arrow-right-outline" width={10} className="shrink-0" />
           </button>
         ) : null
@@ -180,17 +183,20 @@ function FieldGroup({
 }
 
 function EnvHint({ env, config, name }: { env?: boolean; config: boolean; name: string }) {
+  const t = useT();
   if (!env) return null;
 
   return (
     <p className="text-[var(--text-caption)] leading-[var(--leading-normal)] text-[var(--ink-tertiary)]">
       {config ? (
         <>
-          Config key takes priority over <span className="font-[var(--font-mono)]">{name}</span>
+          {t.envKeyPriority} <span className="font-[var(--font-mono)]">{name}</span>
         </>
       ) : (
         <>
-          Using <span className="font-[var(--font-mono)]">{name}</span> from environment
+          {t.usingEnvVar.split("{name}")[0]}
+          <span className="font-[var(--font-mono)]">{name}</span>
+          {t.usingEnvVar.split("{name}")[1]}
         </>
       )}
     </p>

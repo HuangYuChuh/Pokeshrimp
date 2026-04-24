@@ -14,6 +14,7 @@ import {
   Skeleton,
   ScrollArea,
 } from "@/design-system/components";
+import { useT } from "@/lib/i18n";
 import { MessageBubble } from "./message-bubble";
 import { ApprovalCards } from "./approval-cards";
 import { InputArea, type SkillInfo } from "./input-area";
@@ -71,17 +72,20 @@ function useSessionSummary(sessionId: string | null, hasMessages: boolean) {
   return { summary: data, loading };
 }
 
-function formatRelativeTime(isoDate: string): string {
+function formatRelativeTime(
+  isoDate: string,
+  t: { justNow: string; minutesAgo: string; hoursAgo: string; daysAgo: string; monthsAgo: string },
+): string {
   const diff = Date.now() - new Date(isoDate).getTime();
   const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return t.justNow;
+  if (minutes < 60) return t.minutesAgo.replace("{n}", String(minutes));
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t.hoursAgo.replace("{n}", String(hours));
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
+  if (days < 30) return t.daysAgo.replace("{n}", String(days));
   const months = Math.floor(days / 30);
-  return `${months}mo ago`;
+  return t.monthsAgo.replace("{n}", String(months));
 }
 
 /* --- Skill data hook --- */
@@ -118,6 +122,7 @@ export function ChatPanel({
   onToggleSidebar,
   onTogglePreview,
 }: ChatPanelProps) {
+  const t = useT();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const textareaRef = inputRef ?? internalRef;
@@ -363,7 +368,7 @@ export function ChatPanel({
           size="icon-sm"
           onClick={onToggleSidebar}
           className={cn("nodrag", sidebarOpen && "invisible")}
-          aria-label="Toggle sidebar"
+          aria-label={t.toggleSidebar}
         >
           <Icon icon="solar:sidebar-minimalistic-outline" width={16} />
         </Button>
@@ -372,7 +377,7 @@ export function ChatPanel({
           size="icon-sm"
           onClick={onTogglePreview}
           className={cn("nodrag", previewOpen && "invisible")}
-          aria-label="Toggle preview"
+          aria-label={t.togglePreview}
         >
           <Icon icon="solar:sidebar-minimalistic-outline" width={16} className="scale-x-[-1]" />
         </Button>
@@ -387,10 +392,10 @@ export function ChatPanel({
                 className="text-[var(--text-display)] font-light tracking-[var(--tracking-tight)] text-[var(--ink)]"
                 style={{ fontFamily: "var(--font-serif)" }}
               >
-                What would you like to create?
+                {t.emptyTitle}
               </h1>
               <p className="mt-[var(--space-3)] text-[var(--text-title)] text-[var(--ink-secondary)]">
-                Describe what you want to create, and leave the rest to me
+                {t.emptyDescription}
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-[var(--gap-inline)]">
                 {EXAMPLE_PROMPTS.map((prompt) => (
@@ -418,7 +423,7 @@ export function ChatPanel({
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div className="flex items-center gap-[var(--gap-inline)] text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
                       <Icon icon="solar:clipboard-list-outline" width={15} />
-                      Session Summary
+                      {t.sessionSummary}
                     </div>
                     <Button
                       variant="ghost"
@@ -426,15 +431,15 @@ export function ChatPanel({
                       onClick={() => setSummaryCollapsed(true)}
                       className="h-6 min-w-0 gap-1 px-2 text-[var(--text-caption)]"
                     >
-                      Collapse
+                      {t.collapse}
                       <Icon icon="solar:alt-arrow-up-outline" width={12} />
                     </Button>
                   </CardHeader>
                   <CardContent>
                     <p className="text-[var(--text-caption)] text-[var(--ink-tertiary)]">
-                      {sessionSummary.messageCount} messages
+                      {sessionSummary.messageCount} {t.messages}
                       {sessionSummary.lastActiveAt &&
-                        ` \u00B7 Last active ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
+                        ` \u00B7 ${formatRelativeTime(sessionSummary.lastActiveAt, t)}`}
                     </p>
                     <div className="mt-2 space-y-1 text-[var(--text-body-sm)] leading-relaxed text-[var(--ink-secondary)]">
                       {sessionSummary.summary.split("\n").map((line, i) => (
@@ -454,9 +459,9 @@ export function ChatPanel({
                     onClick={() => setSummaryCollapsed(false)}
                   >
                     <Icon icon="solar:clipboard-list-outline" width={12} />
-                    {sessionSummary.messageCount} messages
+                    {sessionSummary.messageCount} {t.messages}
                     {sessionSummary.lastActiveAt &&
-                      ` \u00B7 ${formatRelativeTime(sessionSummary.lastActiveAt)}`}
+                      ` \u00B7 ${formatRelativeTime(sessionSummary.lastActiveAt, t)}`}
                   </Chip>
                 </div>
               )}
@@ -486,7 +491,7 @@ export function ChatPanel({
               {error && (
                 <Card className="border-[var(--error)] bg-[var(--error-subtle)]">
                   <CardContent className="px-[var(--space-4)] py-[var(--space-3)] text-[var(--text-body-sm)] text-[var(--error)]">
-                    {error.message || "Something went wrong"}
+                    {error.message || t.somethingWentWrong}
                   </CardContent>
                 </Card>
               )}

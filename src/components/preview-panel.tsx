@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppState, useAppDispatch, type PreviewTab } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
+import { useT } from "@/lib/i18n";
 import {
   Tabs,
   TabsList,
@@ -20,6 +21,7 @@ interface PreviewPanelProps {
 }
 
 export function PreviewPanel({ open }: PreviewPanelProps) {
+  const t = useT();
   const { previewTab, previewContent, previousPreview, editorParams, outputFiles } = useAppState();
   const dispatch = useAppDispatch();
 
@@ -52,10 +54,10 @@ export function PreviewPanel({ open }: PreviewPanelProps) {
         className="flex flex-1 flex-col overflow-hidden"
       >
         <TabsList className="mx-[var(--space-4)] shrink-0">
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-          <TabsTrigger value="editor">Editor</TabsTrigger>
-          <TabsTrigger value="output">Output</TabsTrigger>
-          <TabsTrigger value="designfile">Designfile</TabsTrigger>
+          <TabsTrigger value="preview">{t.preview}</TabsTrigger>
+          <TabsTrigger value="editor">{t.editor}</TabsTrigger>
+          <TabsTrigger value="output">{t.output}</TabsTrigger>
+          <TabsTrigger value="designfile">{t.designfile}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="preview" className="flex-1 overflow-hidden mt-0">
@@ -110,6 +112,7 @@ function PreviewContent({
   onRerun: () => void;
   onEditRerun: () => void;
 }) {
+  const t = useT();
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [comparing, setComparing] = useState(false);
@@ -210,16 +213,16 @@ function PreviewContent({
     return (
       <div className="flex h-full flex-col">
         <div className="flex shrink-0 items-center gap-[var(--space-1)] border-b border-[var(--border)] px-[var(--space-3)] py-[var(--space-2)]">
-          <Button variant="ghost" size="icon-sm" onClick={handleZoomOut} aria-label="Zoom out">
+          <Button variant="ghost" size="icon-sm" onClick={handleZoomOut} aria-label={t.zoomOut}>
             <Icon icon="solar:magnifer-zoom-out-outline" width={15} />
           </Button>
           <span className="min-w-[3.5rem] text-center text-[var(--text-caption)] tabular-nums text-[var(--ink-secondary)]">
             {Math.round(zoom * 100)}%
           </span>
-          <Button variant="ghost" size="icon-sm" onClick={handleZoomIn} aria-label="Zoom in">
+          <Button variant="ghost" size="icon-sm" onClick={handleZoomIn} aria-label={t.zoomIn}>
             <Icon icon="solar:magnifer-zoom-in-outline" width={15} />
           </Button>
-          <Button variant="ghost" size="icon-sm" onClick={handleReset} aria-label="Reset zoom">
+          <Button variant="ghost" size="icon-sm" onClick={handleReset} aria-label={t.resetZoom}>
             <Icon icon="solar:maximize-square-outline" width={15} />
           </Button>
           {hasComparison && (
@@ -229,7 +232,7 @@ function PreviewContent({
                 variant={comparing ? "outline" : "ghost"}
                 size="icon-sm"
                 onClick={() => setComparing((v) => !v)}
-                aria-label="Compare"
+                aria-label={t.compare}
               >
                 <Icon icon="solar:tuning-2-outline" width={15} />
               </Button>
@@ -242,7 +245,7 @@ function PreviewContent({
             <div className="flex flex-1 items-center justify-center overflow-hidden border-r border-[var(--border)] p-2">
               <div className="flex flex-col items-center gap-1">
                 <span className="text-[var(--text-micro)] font-medium text-[var(--ink-secondary)]">
-                  Before
+                  {t.before}
                 </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -256,7 +259,7 @@ function PreviewContent({
             <div className="flex flex-1 items-center justify-center overflow-hidden p-2">
               <div className="flex flex-col items-center gap-1">
                 <span className="text-[var(--text-micro)] font-medium text-[var(--ink-secondary)]">
-                  After
+                  {t.after}
                 </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -295,11 +298,11 @@ function PreviewContent({
         <div className="flex shrink-0 items-center justify-center gap-[var(--gap-inline)] border-t border-[var(--border)] px-[var(--space-3)] py-[var(--space-2)]">
           <Button variant="ghost" size="sm" onClick={onRerun}>
             <Icon icon="solar:refresh-outline" width={15} className="mr-1.5" />
-            Re-run
+            {t.reRun}
           </Button>
           <Button variant="ghost" size="sm" onClick={onEditRerun}>
             <Icon icon="solar:pen-outline" width={15} className="mr-1.5" />
-            Edit & Re-run
+            {t.editAndReRun}
           </Button>
         </div>
       </div>
@@ -318,16 +321,17 @@ function PreviewContent({
 
   return (
     <div className="flex h-full items-center justify-center text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
-      Generated content will appear here
+      {t.generatedContent}
     </div>
   );
 }
 
 function EditorContent({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const t = useT();
   return (
     <div className="flex h-full flex-col p-4">
       <label className="mb-2 text-[var(--text-micro)] font-medium uppercase tracking-wider text-[var(--ink-ghost)]">
-        Parameters
+        {t.parameters}
       </label>
       <Textarea
         value={value}
@@ -341,10 +345,11 @@ function EditorContent({ value, onChange }: { value: string; onChange: (v: strin
 }
 
 function OutputContent({ files }: { files: { name: string; path: string; type: string }[] }) {
+  const t = useT();
   if (files.length === 0) {
     return (
       <div className="flex h-full items-center justify-center text-[var(--text-body-sm)] text-[var(--ink-tertiary)]">
-        Output files will appear here
+        {t.outputFiles}
       </div>
     );
   }

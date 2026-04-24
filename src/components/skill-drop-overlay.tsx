@@ -2,13 +2,14 @@
 
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
-import { Chip } from "@/design-system/components";
+import { useT } from "@/lib/i18n";
 
 interface SkillDropOverlayProps {
   visible: boolean;
 }
 
 export function SkillDropOverlay({ visible }: SkillDropOverlayProps) {
+  const t = useT();
   return (
     <div
       className={cn(
@@ -18,9 +19,7 @@ export function SkillDropOverlay({ visible }: SkillDropOverlayProps) {
     >
       <div className="flex flex-col items-center gap-[var(--space-3)]">
         <Icon icon="solar:file-download-outline" width={48} className="text-[var(--ink)]" />
-        <p className="text-[var(--text-title)] font-semibold text-[var(--ink)]">
-          Drop <Chip size="sm">.skill.md</Chip> to install
-        </p>
+        <p className="text-[var(--text-title)] font-semibold text-[var(--ink)]">{t.dropSkill}</p>
       </div>
     </div>
   );

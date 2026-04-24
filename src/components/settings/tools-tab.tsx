@@ -7,6 +7,7 @@ import {
   type McpServerConfig,
 } from "@/components/settings-sections";
 import { ToolStatusList } from "@/components/tool-status";
+import { useT } from "@/lib/i18n";
 
 interface ToolsTabProps {
   active: boolean;
@@ -15,14 +16,12 @@ interface ToolsTabProps {
 }
 
 export function ToolsTab({ active, mcpServers, onMcpServersChange }: ToolsTabProps) {
+  const t = useT();
   return (
     <div className="flex min-w-0 flex-col gap-[var(--space-6)]">
-      <SettingsTabHeader
-        title="Tools & Integrations"
-        description="CLI tools and MCP server connections."
-      />
+      <SettingsTabHeader title={t.tools} description={t.toolsDescription} />
 
-      <SettingsSection label="CLI Tools">
+      <SettingsSection label={t.cliTools}>
         <ToolStatusList open={active} />
       </SettingsSection>
 
