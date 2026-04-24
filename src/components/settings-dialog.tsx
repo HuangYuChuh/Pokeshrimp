@@ -38,7 +38,7 @@ const NAV_ICONS: Record<SettingsTabId, string> = {
   accounts: "solar:key-outline",
   models: "solar:cpu-bolt-outline",
   skills: "solar:widget-outline",
-  tools: "solar:wrench-outline",
+  tools: "solar:plug-circle-outline",
   automation: "solar:bolt-outline",
   appearance: "solar:palette-outline",
 };
