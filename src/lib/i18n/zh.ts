@@ -10,6 +10,17 @@ export const zh = {
   close: "关闭",
   confirm: "确认",
   import: "导入",
+  copy: "复制",
+  copied: "已复制",
+  usedBy: "被以下技能使用",
+  collapse: "收起",
+
+  // ── Time ──
+  justNow: "刚刚",
+  minutesAgo: "{n}分钟前",
+  hoursAgo: "{n}小时前",
+  daysAgo: "{n}天前",
+  monthsAgo: "{n}个月前",
 
   // ── Sidebar ──
   newTask: "新任务",
@@ -18,6 +29,8 @@ export const zh = {
   settings: "设置",
   deleteSession: "删除会话",
   confirmDelete: "再次点击确认删除",
+  toggleSidebar: "切换侧边栏",
+  togglePreview: "切换预览面板",
 
   // ── Chat ──
   emptyTitle: "你想创作什么？",
@@ -31,18 +44,37 @@ export const zh = {
   running: "运行中",
   input: "输入",
   result: "结果",
+  attachFiles: "附加文件",
+  sessionSummary: "会话摘要",
+  messages: "条消息",
+  somethingWentWrong: "出了点问题",
+
+  // ── Approval ──
+  commandApproval: "需要命令审批",
+  riskLevel: "风险",
+  allowOnce: "允许一次",
+  alwaysAllow: "始终允许",
+  deny: "拒绝",
+  allowedOnce: "已允许（一次）",
+  alwaysAllowedSaved: "已始终允许 — 规则已保存到配置",
+  denied: "已拒绝",
+  expired: "已过期 — 超时自动拒绝",
+  approvalFailed: "审批发送失败 — 服务器错误",
+  approvalConnectionError: "审批发送失败 — 请检查连接",
 
   // ── Settings ──
   settingsTitle: "设置",
   accounts: "账户",
   models: "模型",
-  tools: "工具与集成",
+  tools: "工具",
   automation: "自动化",
   appearance: "外观",
   language: "语言",
 
   // ── Settings > Accounts ──
   accountsDescription: "连接 LLM 供应商的 API 密钥。",
+  anthropic: "Anthropic",
+  openai: "OpenAI",
   anthropicHint: "Claude 模型必需",
   openaiHint: "GPT 模型必需",
   getKey: "获取密钥",
@@ -50,6 +82,7 @@ export const zh = {
   connecting: "连接中...",
   oauthConnected: "已连接 — 令牌自动刷新",
   envKeyPriority: "配置密钥优先于环境变量",
+  usingEnvVar: "正在使用环境变量 {name}",
 
   // ── Settings > Models ──
   modelsDescription: "选择新对话的默认模型。",
@@ -69,6 +102,16 @@ export const zh = {
   skillsDescription: "已安装的 .skill.md 文件，教 Agent 使用 CLI 工具。",
   noSkills: "未安装技能",
   noSkillsHint: "拖拽 .skill.md 文件到应用中或点击导入。",
+  skillDeleted: "技能 '{name}' 已删除",
+  skillInstalled: "技能 '{name}' 已安装",
+  skillImportError: "导入技能失败",
+  onlySkillFiles: "只能导入 .skill.md 文件",
+  requiredTools: "必需的 CLI 工具",
+  inputParams: "输入参数",
+  outputs: "输出",
+  noDetails: "没有更多详细信息。",
+  global: "全局",
+  project: "项目",
 
   // ── Settings > Tools ──
   toolsDescription: "CLI 工具和 MCP 服务器连接。",
@@ -76,9 +119,29 @@ export const zh = {
   noTools: "已安装的技能不需要 CLI 工具。",
   available: "可用",
   notInstalled: "未安装",
+  mcpServers: "MCP 服务器",
+  noMcpServers: "未配置 MCP 服务器。",
+  serverName: "服务器名称",
+  command: "命令",
+  args: "参数（空格分隔）",
+  envVars: "环境变量（KEY=VALUE KEY2=VALUE2）",
+  addServer: "添加服务器",
 
   // ── Settings > Automation ──
   automationDescription: "Hook 脚本和命令权限规则。",
+  hooks: "钩子",
+  noHooks: "未配置钩子。",
+  convention: "约定",
+  hookCommand: "命令（如 ./scripts/validate.sh）",
+  timeout: "超时（毫秒）",
+  matcher: "匹配器（可选）",
+  addHook: "添加钩子",
+  hookEventsRef: "参见 docs/hook-events.md 了解事件类型。",
+  permissions: "权限",
+  alwaysAllowLabel: "始终允许",
+  alwaysDenyLabel: "始终拒绝",
+  alwaysAskLabel: "始终询问",
+  patternPlaceholder: "comfyui-cli *",
 
   // ── Preview ──
   preview: "预览",
@@ -88,6 +151,12 @@ export const zh = {
   parameters: "参数",
   generatedContent: "生成的内容将在这里显示",
   outputFiles: "输出文件将在这里显示",
+  zoomIn: "放大",
+  zoomOut: "缩小",
+  resetZoom: "重置缩放",
+  compare: "对比",
+  before: "之前",
+  after: "之后",
 
   // ── Misc ──
   configPath: "~/.visagent/config.json",

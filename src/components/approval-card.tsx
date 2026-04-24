@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
+import { useT } from "@/lib/i18n";
 import { Button, Card, CardHeader, CardContent, Chip } from "@/design-system/components";
 
 export interface ApprovalRequestData {
@@ -41,6 +42,7 @@ const RISK_ICON = {
 } as const;
 
 export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
+  const t = useT();
   const [state, setState] = useState<CardState>(
     resolved ? mapDecisionToState(resolved.decision, resolved.reason) : "pending",
   );
@@ -71,17 +73,17 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
             setState("expired");
           } else {
             console.error("Approval failed:", data);
-            setError("Failed to send approval — server error");
+            setError(t.approvalFailed);
           }
         }
       } catch (err) {
         console.error("Approval request failed:", err);
-        setError("Failed to send approval — check your connection");
+        setError(t.approvalConnectionError);
       } finally {
         setLoading(false);
       }
     },
-    [request.id],
+    [request.id, t.approvalFailed, t.approvalConnectionError],
   );
 
   if (resolved && state === "pending") {
@@ -101,13 +103,13 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
         />
         <div className="min-w-0 flex-1">
           <span className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
-            Command Approval Required
+            {t.commandApproval}
           </span>
           <code className="mt-1.5 block truncate rounded-[var(--radius-sm)] bg-[var(--border-subtle)] px-2 py-1 font-[var(--font-mono)] text-[var(--text-caption)] text-[var(--ink-secondary)]">
             $ {request.command}
           </code>
           <Chip size="sm" variant={RISK_CHIP_VARIANT[request.riskLevel]} className="mt-2">
-            Risk: {request.riskLevel}
+            {t.riskLevel}: {request.riskLevel}
           </Chip>
         </div>
       </CardHeader>
@@ -121,7 +123,7 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
                 onClick={() => handleDecision("allow-once")}
                 disabled={loading}
               >
-                Allow Once
+                {t.allowOnce}
               </Button>
               <Button
                 size="sm"
@@ -129,7 +131,7 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
                 onClick={() => handleDecision("always-allow")}
                 disabled={loading}
               >
-                Always Allow
+                {t.alwaysAllow}
               </Button>
               <Button
                 size="sm"
@@ -137,7 +139,7 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
                 onClick={() => handleDecision("deny")}
                 disabled={loading}
               >
-                Deny
+                {t.deny}
               </Button>
             </div>
             {error && (
@@ -153,10 +155,10 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
                 : "text-[var(--success)]",
             )}
           >
-            {state === "allowed" && "Allowed (once)"}
-            {state === "always-allowed" && "Always allowed — pattern saved to config"}
-            {state === "denied" && "Denied"}
-            {state === "expired" && "Expired — auto-denied after timeout"}
+            {state === "allowed" && t.allowedOnce}
+            {state === "always-allowed" && t.alwaysAllowedSaved}
+            {state === "denied" && t.denied}
+            {state === "expired" && t.expired}
           </div>
         )}
       </CardContent>

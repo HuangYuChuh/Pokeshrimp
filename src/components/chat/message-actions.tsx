@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
+import { useT } from "@/lib/i18n";
 import {
   Button,
   Card,
@@ -19,6 +20,7 @@ interface MessageActionsProps {
 }
 
 export function MessageActions({ role, onEdit, onDelete, onRegenerate }: MessageActionsProps) {
+  const t = useT();
   return (
     <TooltipProvider>
       <Card
@@ -34,7 +36,7 @@ export function MessageActions({ role, onEdit, onDelete, onRegenerate }: Message
                 <Icon icon="solar:pen-outline" width={13} />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Edit</TooltipContent>
+            <TooltipContent>{t.edit}</TooltipContent>
           </Tooltip>
         )}
         {role === "assistant" && onRegenerate && (
@@ -44,7 +46,7 @@ export function MessageActions({ role, onEdit, onDelete, onRegenerate }: Message
                 <Icon icon="solar:refresh-outline" width={13} />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Regenerate</TooltipContent>
+            <TooltipContent>{t.regenerate}</TooltipContent>
           </Tooltip>
         )}
         <Tooltip>
@@ -53,7 +55,7 @@ export function MessageActions({ role, onEdit, onDelete, onRegenerate }: Message
               <Icon icon="solar:trash-bin-2-outline" width={13} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Delete</TooltipContent>
+          <TooltipContent>{t.delete}</TooltipContent>
         </Tooltip>
       </Card>
     </TooltipProvider>

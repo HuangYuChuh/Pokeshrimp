@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
+import { useT } from "@/lib/i18n";
 import { Card, CardHeader, CardContent, Chip, Button } from "@/design-system/components";
 
 interface ToolInvocation {
@@ -18,6 +19,7 @@ interface ToolCardProps {
 }
 
 export function ToolCard({ invocation }: ToolCardProps) {
+  const t = useT();
   const [expanded, setExpanded] = useState(false);
   const isDone = invocation.state === "result";
   const hasArgs = !!(
@@ -40,11 +42,11 @@ export function ToolCard({ invocation }: ToolCardProps) {
         <CardHeader className="flex flex-row items-center gap-[var(--gap-inline)] mb-0">
           <Chip size="sm" variant={isDone ? "success" : "warning"}>
             {isDone ? (
-              "Done"
+              t.done
             ) : (
               <span className="flex items-center gap-[var(--space-1)]">
                 <Icon icon="solar:loading-outline" width={11} className="animate-spin" />
-                Running
+                {t.running}
               </span>
             )}
           </Chip>
@@ -71,8 +73,8 @@ export function ToolCard({ invocation }: ToolCardProps) {
 
         {expanded && (
           <CardContent className="selectable max-h-[300px] overflow-y-auto px-[var(--space-3)] pb-[var(--space-3)] pt-0 font-[var(--font-mono)] text-[var(--text-micro)] leading-relaxed text-[var(--ink-secondary)]">
-            {hasArgs && <PreBlock label="Input" value={formatVal(invocation.args)} />}
-            {hasResult && <PreBlock label="Result" value={formatVal(invocation.result)} />}
+            {hasArgs && <PreBlock label={t.input} value={formatVal(invocation.args)} />}
+            {hasResult && <PreBlock label={t.result} value={formatVal(invocation.result)} />}
           </CardContent>
         )}
       </Card>

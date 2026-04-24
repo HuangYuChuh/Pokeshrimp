@@ -10,6 +10,17 @@ export const en = {
   close: "Close",
   confirm: "Confirm",
   import: "Import",
+  copy: "Copy",
+  copied: "Copied",
+  usedBy: "Used by",
+  collapse: "Collapse",
+
+  // ── Time ──
+  justNow: "just now",
+  minutesAgo: "{n}m ago",
+  hoursAgo: "{n}h ago",
+  daysAgo: "{n}d ago",
+  monthsAgo: "{n}mo ago",
 
   // ── Sidebar ──
   newTask: "New task",
@@ -18,6 +29,8 @@ export const en = {
   settings: "Settings",
   deleteSession: "Delete session",
   confirmDelete: "Click again to confirm",
+  toggleSidebar: "Toggle sidebar",
+  togglePreview: "Toggle preview",
 
   // ── Chat ──
   emptyTitle: "What would you like to create?",
@@ -31,6 +44,23 @@ export const en = {
   running: "Running",
   input: "Input",
   result: "Result",
+  attachFiles: "Attach files",
+  sessionSummary: "Session Summary",
+  messages: "messages",
+  somethingWentWrong: "Something went wrong",
+
+  // ── Approval ──
+  commandApproval: "Command Approval Required",
+  riskLevel: "Risk",
+  allowOnce: "Allow Once",
+  alwaysAllow: "Always Allow",
+  deny: "Deny",
+  allowedOnce: "Allowed (once)",
+  alwaysAllowedSaved: "Always allowed — pattern saved to config",
+  denied: "Denied",
+  expired: "Expired — auto-denied after timeout",
+  approvalFailed: "Failed to send approval — server error",
+  approvalConnectionError: "Failed to send approval — check your connection",
 
   // ── Settings ──
   settingsTitle: "Settings",
@@ -43,6 +73,8 @@ export const en = {
 
   // ── Settings > Accounts ──
   accountsDescription: "API keys for connecting to LLM providers.",
+  anthropic: "Anthropic",
+  openai: "OpenAI",
   anthropicHint: "Required for Claude models",
   openaiHint: "Required for GPT models",
   getKey: "Get key",
@@ -50,6 +82,7 @@ export const en = {
   connecting: "Connecting...",
   oauthConnected: "Connected — token auto-refreshes",
   envKeyPriority: "Config key takes priority over env var",
+  usingEnvVar: "Using {name} from environment",
 
   // ── Settings > Models ──
   modelsDescription: "Choose the default model for new conversations.",
@@ -69,6 +102,16 @@ export const en = {
   skillsDescription: "Installed .skill.md files that teach the agent CLI tools.",
   noSkills: "No skills installed",
   noSkillsHint: "Drag a .skill.md file onto the app or click Import.",
+  skillDeleted: "Skill '{name}' deleted",
+  skillInstalled: "Skill '{name}' installed",
+  skillImportError: "Failed to import skill",
+  onlySkillFiles: "Only .skill.md files can be imported",
+  requiredTools: "Required CLI tools",
+  inputParams: "Input parameters",
+  outputs: "Outputs",
+  noDetails: "No additional details available.",
+  global: "global",
+  project: "project",
 
   // ── Settings > Tools ──
   toolsDescription: "CLI tools and MCP server connections.",
@@ -76,9 +119,29 @@ export const en = {
   noTools: "No CLI tools required by installed skills.",
   available: "Available",
   notInstalled: "Not installed",
+  mcpServers: "MCP Servers",
+  noMcpServers: "No MCP servers configured.",
+  serverName: "Server name",
+  command: "Command",
+  args: "Args (space separated)",
+  envVars: "Env vars (KEY=VALUE KEY2=VALUE2)",
+  addServer: "Add Server",
 
   // ── Settings > Automation ──
   automationDescription: "Hook scripts and command permission rules.",
+  hooks: "Hooks",
+  noHooks: "No hooks configured.",
+  convention: "convention",
+  hookCommand: "Command (e.g. ./scripts/validate.sh)",
+  timeout: "Timeout (ms)",
+  matcher: "Matcher (optional)",
+  addHook: "Add Hook",
+  hookEventsRef: "See docs/hook-events.md for event reference.",
+  permissions: "Permissions",
+  alwaysAllowLabel: "Always Allow",
+  alwaysDenyLabel: "Always Deny",
+  alwaysAskLabel: "Always Ask",
+  patternPlaceholder: "comfyui-cli *",
 
   // ── Preview ──
   preview: "Preview",
@@ -88,6 +151,12 @@ export const en = {
   parameters: "Parameters",
   generatedContent: "Generated content will appear here",
   outputFiles: "Output files will appear here",
+  zoomIn: "Zoom in",
+  zoomOut: "Zoom out",
+  resetZoom: "Reset zoom",
+  compare: "Compare",
+  before: "Before",
+  after: "After",
 
   // ── Misc ──
   configPath: "~/.visagent/config.json",

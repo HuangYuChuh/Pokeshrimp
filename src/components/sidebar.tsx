@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react";
 import { useAppState, useAppDispatch } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Button, Separator } from "@/design-system/components";
+import { useT } from "@/lib/i18n";
 
 interface SidebarProps {
   open: boolean;
@@ -13,6 +14,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
+  const t = useT();
   const { sessions, currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
 
@@ -29,14 +31,14 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
 
   const handleNewTask = useCallback(() => {
     const id = crypto.randomUUID();
-    const session = { id, title: "New Task", createdAt: new Date().toISOString() };
+    const session = { id, title: t.newTask, createdAt: new Date().toISOString() };
     dispatch({ type: "ADD_SESSION", session });
     fetch("/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(session),
     }).catch(() => {});
-  }, [dispatch]);
+  }, [dispatch, t.newTask]);
 
   const handleSelectSession = useCallback(
     (id: string) => dispatch({ type: "SET_CURRENT_SESSION", id }),
@@ -68,13 +70,13 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
           onClick={handleNewTask}
         >
           <Icon icon="solar:add-circle-outline" width={15} />
-          <span className="truncate">New task</span>
+          <span className="truncate">{t.newTask}</span>
         </Button>
       </div>
 
       <div className="px-[var(--space-5)] pb-[var(--space-2)]">
         <span className="whitespace-nowrap text-[var(--text-micro)] font-medium tracking-wide text-[var(--ink-ghost)]">
-          Recents
+          {t.recents}
         </span>
       </div>
 
@@ -103,7 +105,7 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
               onClick={onOpenSkills}
             >
               <Icon icon="solar:widget-outline" width={15} />
-              <span className="truncate">Skills</span>
+              <span className="truncate">{t.skills}</span>
             </Button>
           )}
           {onOpenSettings && (
@@ -114,7 +116,7 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
               onClick={onOpenSettings}
             >
               <Icon icon="solar:settings-outline" width={15} />
-              <span className="truncate">Settings</span>
+              <span className="truncate">{t.settings}</span>
             </Button>
           )}
         </div>
@@ -136,13 +138,13 @@ function SessionItem({
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
 }) {
+  const t = useT();
   const [confirming, setConfirming] = useState(false);
 
-  // Reset confirm state after 3s
   useEffect(() => {
     if (!confirming) return;
-    const t = setTimeout(() => setConfirming(false), 3000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setConfirming(false), 3000);
+    return () => clearTimeout(timer);
   }, [confirming]);
 
   return (
@@ -172,8 +174,8 @@ function SessionItem({
             setConfirming(true);
           }
         }}
-        aria-label={confirming ? `Confirm delete ${session.title}` : `Delete ${session.title}`}
-        title={confirming ? "Click again to confirm" : "Delete"}
+        aria-label={confirming ? t.confirmDelete : t.deleteSession}
+        title={confirming ? t.confirmDelete : t.delete}
       >
         <Icon
           icon={confirming ? "solar:trash-bin-2-outline" : "solar:close-circle-outline"}
