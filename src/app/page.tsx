@@ -42,9 +42,9 @@ function useMediaQuery(query: string) {
  * --------------------------------------------------------------------------- */
 
 function HomeInner() {
-  const [modelId, setModelId] = useState("claude-sonnet");
+  const [modelId, setModelId] = useState("anthropic:claude-sonnet-4-20250514");
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<SettingsTabId>("accounts");
+  const [settingsTab, setSettingsTab] = useState<SettingsTabId>("providers");
   const chatInputRef = useRef<HTMLTextAreaElement>(null);
   const dispatch = useAppDispatch();
   const { previewContent } = useAppState();
@@ -131,7 +131,7 @@ function HomeInner() {
       chatInputRef.current?.focus();
     }, []),
     onOpenSettings: useCallback(() => {
-      setSettingsTab("accounts");
+      setSettingsTab("providers");
       setSettingsOpen(true);
     }, []),
     onCloseSettings: useCallback(() => setSettingsOpen(false), []),
@@ -227,7 +227,7 @@ function HomeInner() {
         <Sidebar
           open={sidebarOpen}
           onOpenSettings={() => {
-            setSettingsTab("accounts");
+            setSettingsTab("providers");
             setSettingsOpen(true);
           }}
           onOpenSkills={() => {

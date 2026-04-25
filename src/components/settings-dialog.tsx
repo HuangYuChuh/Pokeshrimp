@@ -9,12 +9,13 @@ import {
   type McpServerConfig,
   type PermissionConfig,
 } from "@/components/settings-sections";
-import { AccountsTab } from "@/components/settings/accounts-tab";
 import { AppearanceTab } from "@/components/settings/appearance-tab";
 import { AutomationTab } from "@/components/settings/automation-tab";
 import { ModelsTab } from "@/components/settings/models-tab";
+import { ProvidersTab } from "@/components/settings/providers-tab";
 import { SkillsTab } from "@/components/settings/skills-tab";
 import { ToolsTab } from "@/components/settings/tools-tab";
+import type { ProviderConfig } from "@/core/config/schema";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -24,18 +25,17 @@ interface SettingsDialogProps {
 
 interface SettingsData {
   defaultModel: string;
-  apiKeys: { anthropic: string; openai: string };
-  envKeys?: { anthropic: boolean; openai: boolean };
+  providers: Record<string, ProviderConfig>;
   mcpServers?: Record<string, McpServerConfig>;
   hooks?: Record<string, HookEntryConfig[]>;
   permissions?: PermissionConfig;
   conventionHooks?: string[];
 }
 
-type SettingsTabId = "accounts" | "models" | "skills" | "tools" | "automation" | "appearance";
+type SettingsTabId = "providers" | "models" | "skills" | "tools" | "automation" | "appearance";
 
 const NAV_ICONS: Record<SettingsTabId, string> = {
-  accounts: "solar:key-outline",
+  providers: "solar:key-outline",
   models: "solar:cpu-bolt-outline",
   skills: "solar:widget-outline",
   tools: "solar:plug-circle-outline",
@@ -44,7 +44,7 @@ const NAV_ICONS: Record<SettingsTabId, string> = {
 };
 
 const TAB_IDS: SettingsTabId[] = [
-  "accounts",
+  "providers",
   "models",
   "skills",
   "tools",
@@ -56,14 +56,12 @@ export type { SettingsTabId };
 
 export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProps) {
   const t = useT();
-  const [activeTab, setActiveTab] = useState<SettingsTabId>(initialTab ?? "accounts");
+  const [activeTab, setActiveTab] = useState<SettingsTabId>(initialTab ?? "providers");
   const [settings, setSettings] = useState<SettingsData | null>(null);
-  const [anthropicKey, setAnthropicKey] = useState("");
-  const [openaiKey, setOpenaiKey] = useState("");
-  const [defaultModel, setDefaultModel] = useState("claude-sonnet");
+  const [defaultModel, setDefaultModel] = useState("anthropic:claude-sonnet-4-20250514");
+  const [providers, setProviders] = useState<Record<string, ProviderConfig>>({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [oauthConnected, setOauthConnected] = useState(false);
   const [theme, setThemeState] = useState<"dark" | "light" | "system">("dark");
   const [mcpServers, setMcpServers] = useState<Record<string, McpServerConfig>>({});
   const [hooks, setHooks] = useState<Record<string, HookEntryConfig[]>>({});
@@ -73,8 +71,6 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
     alwaysAsk: [],
   });
   const [conventionHooks, setConventionHooks] = useState<string[]>([]);
-
-  const isElectron = typeof window !== "undefined" && !!window.pokeshrimp?.auth;
 
   useEffect(() => {
     if (open && initialTab) setActiveTab(initialTab);
@@ -103,22 +99,13 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
   }, []);
 
   useEffect(() => {
-    if (!open || !isElectron) return;
-    window.pokeshrimp?.auth
-      ?.getValidToken?.()
-      .then((token) => setOauthConnected(!!token))
-      .catch(() => setOauthConnected(false));
-  }, [isElectron, open]);
-
-  useEffect(() => {
     if (!open) return;
     fetch("/api/settings")
       .then((response) => response.json())
       .then((data: SettingsData) => {
         setSettings(data);
-        setAnthropicKey(data.apiKeys?.anthropic ?? "");
-        setOpenaiKey(data.apiKeys?.openai ?? "");
-        setDefaultModel(data.defaultModel ?? "claude-sonnet");
+        setDefaultModel(data.defaultModel ?? "anthropic:claude-sonnet-4-20250514");
+        setProviders(data.providers ?? {});
         setMcpServers(data.mcpServers ?? {});
         setHooks(data.hooks ?? {});
         setPermissions(data.permissions ?? { alwaysAllow: [], alwaysDeny: [], alwaysAsk: [] });
@@ -135,10 +122,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           defaultModel,
-          apiKeys: {
-            anthropic: anthropicKey.includes("****") ? undefined : anthropicKey,
-            openai: openaiKey.includes("****") ? undefined : openaiKey,
-          },
+          providers,
           mcpServers,
           hooks,
           permissions,
@@ -151,26 +135,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
     } finally {
       setSaving(false);
     }
-  }, [anthropicKey, defaultModel, hooks, mcpServers, openaiKey, permissions]);
-
-  const handleOauthAutoSave = useCallback(
-    async (openaiToken: string) => {
-      await fetch("/api/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          defaultModel,
-          apiKeys: {
-            anthropic: anthropicKey.includes("****") ? undefined : anthropicKey,
-            openai: openaiToken,
-          },
-        }),
-      });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    },
-    [anthropicKey, defaultModel],
-  );
+  }, [defaultModel, providers, hooks, mcpServers, permissions]);
 
   if (!open) return null;
 
@@ -247,22 +212,16 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
                 </div>
               ) : (
                 <>
-                  {activeTab === "accounts" ? (
-                    <AccountsTab
-                      anthropicKey={anthropicKey}
-                      openaiKey={openaiKey}
-                      onAnthropicKeyChange={setAnthropicKey}
-                      onOpenaiKeyChange={setOpenaiKey}
-                      envKeys={settings.envKeys}
-                      apiKeys={settings.apiKeys}
-                      oauthConnected={oauthConnected}
-                      onOauthConnected={setOauthConnected}
-                      onAutoSave={handleOauthAutoSave}
-                    />
+                  {activeTab === "providers" ? (
+                    <ProvidersTab providers={providers} onProvidersChange={setProviders} />
                   ) : null}
 
                   {activeTab === "models" ? (
-                    <ModelsTab defaultModel={defaultModel} onDefaultModelChange={setDefaultModel} />
+                    <ModelsTab
+                      defaultModel={defaultModel}
+                      providers={providers}
+                      onDefaultModelChange={setDefaultModel}
+                    />
                   ) : null}
 
                   {activeTab === "skills" ? <SkillsTab active={activeTab === "skills"} /> : null}
@@ -293,7 +252,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
             </div>
 
             <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t border-[var(--border)] bg-[var(--surface)] px-[var(--space-8)] py-[var(--space-4)] max-[720px]:px-[var(--space-4)] max-[520px]:items-stretch">
-              <p className="min-w-0 truncate font-[var(--font-mono)] text-[var(--text-caption)] text-[var(--ink-ghost)]">
+              <p className="min-w-0 truncate font-[family-name:var(--font-mono)] text-[var(--text-caption)] text-[var(--ink-ghost)]">
                 ~/.visagent/config.json
               </p>
               <div className="flex flex-wrap items-center gap-[var(--space-3)] max-[520px]:w-full">

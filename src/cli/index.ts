@@ -59,14 +59,11 @@ const runtime = await getRuntime();
 const modelId = opts.model ?? config.defaultModel;
 let model: ReturnType<typeof getModel>;
 try {
-  model = getModel(modelId, {
-    anthropic: config.apiKeys?.anthropic || process.env.ANTHROPIC_API_KEY,
-    openai: config.apiKeys?.openai || process.env.OPENAI_API_KEY,
-  });
+  model = getModel(modelId, config.providers);
 } catch {
   console.error("Error: No API key configured.");
   console.error("Set ANTHROPIC_API_KEY env var or add it to ~/.visagent/config.json:");
-  console.error('  { "apiKeys": { "anthropic": "sk-ant-..." } }');
+  console.error('  { "providers": { "anthropic": { "apiKey": "sk-ant-..." } } }');
   process.exit(1);
 }
 

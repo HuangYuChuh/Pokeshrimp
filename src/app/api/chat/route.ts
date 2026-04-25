@@ -25,10 +25,10 @@ const ChatRequestSchema = z.object({
   sessionId: z.string().nullable().optional(),
 });
 
-function missingApiKeyResponse(provider: string): Response {
+function missingApiKeyResponse(providerName: string): Response {
   return new Response(
     JSON.stringify({
-      error: `${provider} API key not configured. Open Settings to add your API key.`,
+      error: `${providerName} API key not configured. Open Settings → Providers to add your API key.`,
     }),
     { status: 401, headers: { "Content-Type": "application/json" } },
   );
@@ -69,45 +69,44 @@ export async function POST(req: Request) {
     await addMessage(sid, lastMsg.role, lastMsg.content as string);
   }
 
-  // Preflight: figure out which provider this model uses, and verify its
-  // key is set in either config or env. The Anthropic/OpenAI SDKs don't
-  // throw at construction time when the key is missing, so without this
-  // check the failure only surfaces ~10s later after internal retries.
+  // Resolve model from unified providers
   const config = getConfig();
-  // Use the user's selected model, or fall back to config default, or first available
-  const allModels = buildModelOptions(config.customProviders);
-  const resolvedModelId = modelId ?? config.defaultModel ?? allModels[0]?.id ?? "claude-sonnet";
+  const allModels = buildModelOptions(config.providers);
+  const resolvedModelId = modelId ?? config.defaultModel ?? allModels[0]?.id;
+
+  if (!resolvedModelId) {
+    return new Response(
+      JSON.stringify({
+        error: "No model configured. Open Settings → Providers to set up a provider.",
+      }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
   const option = allModels.find((m) => m.id === resolvedModelId);
   if (!option) {
-    return new Response(JSON.stringify({ error: `Unknown model: ${modelId}` }), {
+    return new Response(JSON.stringify({ error: `Unknown model: ${resolvedModelId}` }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
   }
-  // For custom providers, the key is in the provider config itself.
-  // For built-in providers, check config + env vars.
-  if (option.provider === "custom") {
-    const cp = config.customProviders?.[option.customProviderId ?? ""];
-    if (!cp?.apiKey && !cp?.baseURL) {
-      return missingApiKeyResponse("custom");
-    }
-  } else {
-    const apiKey =
-      option.provider === "anthropic"
-        ? config.apiKeys?.anthropic || process.env.ANTHROPIC_API_KEY
-        : config.apiKeys?.openai || process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return missingApiKeyResponse(option.provider);
-    }
+
+  // Preflight: verify API key exists
+  const providerConfig = config.providers[option.providerId];
+  const envKey =
+    option.providerId === "anthropic"
+      ? process.env.ANTHROPIC_API_KEY
+      : option.providerId === "openai"
+        ? process.env.OPENAI_API_KEY
+        : undefined;
+
+  if (!providerConfig?.apiKey && !envKey) {
+    return missingApiKeyResponse(option.providerName);
   }
 
   let model;
   try {
-    model = getModel(
-      option.id,
-      { anthropic: config.apiKeys?.anthropic, openai: config.apiKeys?.openai },
-      config.customProviders,
-    );
+    model = getModel(resolvedModelId, config.providers);
   } catch (err) {
     return new Response(
       JSON.stringify({
@@ -121,20 +120,12 @@ export async function POST(req: Request) {
   const context: ToolContext = {
     sessionId: sid,
     cwd: process.cwd(),
-    // Forward client-cancellation through to long-running tools
-    // (e.g. run_command) so they can abort early.
     signal: req.signal,
   };
 
-  // Stream every iteration's data into a single client-facing stream.
-  // The runtime owns the loop; createDataStreamResponse owns the protocol.
   return createDataStreamResponse({
     headers: { "X-Session-Id": sid },
     execute: async (dataStream) => {
-      // Wire the approval channel: when CommandApprovalMiddleware gets
-      // an "ask" decision, it calls channel.request() which writes an
-      // approval-request event into this data stream and blocks until
-      // the POST /api/approval endpoint resolves it.
       const contextWithApproval: ToolContext = {
         ...context,
         approvalChannel: {

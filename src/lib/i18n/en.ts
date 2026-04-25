@@ -70,25 +70,27 @@ export const en = {
 
   // ── Settings ──
   settingsTitle: "Settings",
-  accounts: "Accounts",
+  accounts: "Providers",
   models: "Models",
   tools: "Tools",
   automation: "Automation",
   appearance: "Appearance",
   language: "Language",
 
-  // ── Settings > Accounts ──
-  accountsDescription: "API keys for connecting to LLM providers.",
-  anthropic: "Anthropic",
-  openai: "OpenAI",
-  anthropicHint: "Required for Claude models",
-  openaiHint: "Required for GPT models",
+  // ── Settings > Providers ──
+  providers: "Providers",
+  providersDescription: "Configure API keys for LLM providers.",
+  configured: "Configured",
+  modelsAvailable: "models",
+  customProviders: "Custom Providers",
+  addProvider: "Add Provider",
+  addCustomProvider: "Add Custom Provider",
+  providerId: "Provider ID",
+  providerName: "Provider Name",
+  baseURL: "Base URL",
+  modelIds: "Model IDs",
+  modelIdsHint: "Comma-separated list of model IDs available from this provider",
   getKey: "Get key",
-  loginWithOpenAI: "Login with OpenAI",
-  connecting: "Connecting...",
-  oauthConnected: "Connected — token auto-refreshes",
-  envKeyPriority: "Config key takes priority over env var",
-  usingEnvVar: "Using {name} from environment",
 
   // ── Settings > Models ──
   modelsDescription: "Choose the default model for new conversations.",

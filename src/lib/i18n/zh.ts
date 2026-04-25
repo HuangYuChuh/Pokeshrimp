@@ -70,25 +70,27 @@ export const zh = {
 
   // ── Settings ──
   settingsTitle: "设置",
-  accounts: "账户",
+  accounts: "供应商",
   models: "模型",
   tools: "工具",
   automation: "自动化",
   appearance: "外观",
   language: "语言",
 
-  // ── Settings > Accounts ──
-  accountsDescription: "连接 LLM 供应商的 API 密钥。",
-  anthropic: "Anthropic",
-  openai: "OpenAI",
-  anthropicHint: "Claude 模型必需",
-  openaiHint: "GPT 模型必需",
+  // ── Settings > Providers ──
+  providers: "供应商",
+  providersDescription: "配置 LLM 供应商的 API 密钥。",
+  configured: "已配置",
+  modelsAvailable: "个模型",
+  customProviders: "自定义供应商",
+  addProvider: "添加供应商",
+  addCustomProvider: "添加自定义供应商",
+  providerId: "供应商 ID",
+  providerName: "供应商名称",
+  baseURL: "Base URL",
+  modelIds: "模型 ID",
+  modelIdsHint: "逗号分隔的模型 ID 列表",
   getKey: "获取密钥",
-  loginWithOpenAI: "使用 OpenAI 登录",
-  connecting: "连接中...",
-  oauthConnected: "已连接 — 令牌自动刷新",
-  envKeyPriority: "配置密钥优先于环境变量",
-  usingEnvVar: "正在使用环境变量 {name}",
 
   // ── Settings > Models ──
   modelsDescription: "选择新对话的默认模型。",

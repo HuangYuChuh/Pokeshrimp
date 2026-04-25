@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import { useT } from "@/lib/i18n";
 import { MODEL_OPTIONS } from "@/core/ai/provider";
+import type { ModelOption } from "@/core/ai/provider";
 import { Button, Card, Select } from "@/design-system/components";
 
 /* --- Skill type --- */
@@ -235,7 +236,10 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
     ],
   );
 
-  const modelOptions = MODEL_OPTIONS.map((m) => ({ value: m.id, label: m.label }));
+  const modelOptions = MODEL_OPTIONS.map((m: ModelOption) => ({
+    value: m.id,
+    label: `${m.providerName} / ${m.label}`,
+  }));
 
   return (
     <div className="shrink-0 px-[var(--space-4)] pb-[18px] pt-[var(--space-3)]">
