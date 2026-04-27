@@ -159,24 +159,18 @@ function buildMiddlewares(): Middleware[] {
       // pick up keys added mid-session without restarting.
       summarizerModel: (): LanguageModel | undefined => {
         const cfg = getConfig();
-        const anthropicKey = cfg.apiKeys?.anthropic || process.env.ANTHROPIC_API_KEY;
-        const openaiKey = cfg.apiKeys?.openai || process.env.OPENAI_API_KEY;
+        const anthropicKey = cfg.providers?.anthropic?.apiKey || process.env.ANTHROPIC_API_KEY;
+        const openaiKey = cfg.providers?.openai?.apiKey || process.env.OPENAI_API_KEY;
         if (!anthropicKey && !openaiKey) return undefined;
         try {
           // Use whichever provider has a key configured.
           // Prefer a cheap model: Haiku if Anthropic key exists,
           // otherwise fall back to the cheapest OpenAI option.
           if (anthropicKey) {
-            return getModel("claude-haiku", {
-              anthropic: cfg.apiKeys?.anthropic,
-              openai: cfg.apiKeys?.openai,
-            });
+            return getModel("anthropic:claude-haiku-4-5-20251001", cfg.providers);
           }
           if (openaiKey) {
-            return getModel("gpt-4o", {
-              anthropic: cfg.apiKeys?.anthropic,
-              openai: cfg.apiKeys?.openai,
-            });
+            return getModel("openai:gpt-5.4-nano", cfg.providers);
           }
           return undefined;
         } catch {

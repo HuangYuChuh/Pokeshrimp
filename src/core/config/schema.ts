@@ -1,22 +1,40 @@
 import { z } from "zod";
 
-export const CustomProviderSchema = z.object({
-  /** Display name (e.g. "DeepSeek", "Moonshot", "Local Ollama") */
-  name: z.string(),
-  /** OpenAI-compatible base URL (e.g. "https://api.deepseek.com/v1") */
-  baseURL: z.string(),
-  /** API key for this provider */
+// ─── Provider config ─────────────────────────────────────────
+// Unified shape: preset providers only need apiKey + enabled.
+// Custom providers fill in name, baseURL, and models too.
+
+export const ProviderConfigSchema = z.object({
+  /** Display name (only needed for custom providers) */
+  name: z.string().default(""),
+  /** API key */
   apiKey: z.string().default(""),
-  /** Model IDs available (e.g. ["deepseek-chat", "deepseek-coder"]) */
+  /** Base URL override (preset providers have defaults) */
+  baseURL: z.string().default(""),
+  /** Model IDs (empty = use preset defaults) */
   models: z.array(z.string()).default([]),
   /** Whether this provider is active */
   enabled: z.boolean().default(true),
 });
 
+export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
+
+// ─── Legacy schemas (kept for migration) ─────────────────────
+
 export const ApiKeysSchema = z.object({
   anthropic: z.string().optional(),
   openai: z.string().optional(),
 });
+
+export const CustomProviderSchema = z.object({
+  name: z.string(),
+  baseURL: z.string(),
+  apiKey: z.string().default(""),
+  models: z.array(z.string()).default([]),
+  enabled: z.boolean().default(true),
+});
+
+// ─── Other config sections ───────────────────────────────────
 
 export const McpServerConfigSchema = z.object({
   command: z.string(),
@@ -38,14 +56,18 @@ export const PermissionConfigSchema = z.object({
   alwaysAsk: z.array(z.string()).default([]),
 });
 
+// ─── App config ──────────────────────────────────────────────
+
 export const AppConfigSchema = z.object({
-  defaultModel: z.string().default("claude-sonnet"),
-  apiKeys: ApiKeysSchema.default({}),
-  /** Custom OpenAI-compatible providers (keyed by provider ID) */
-  customProviders: z.record(CustomProviderSchema).default({}),
+  defaultModel: z.string().default("anthropic:claude-sonnet-4-20250514"),
+  /** Unified provider map (replaces apiKeys + customProviders) */
+  providers: z.record(ProviderConfigSchema).default({}),
   mcpServers: z.record(McpServerConfigSchema).default({}),
   hooks: z.record(z.array(HookEntrySchema)).default({}),
   permissions: PermissionConfigSchema.default({}),
+  // Legacy fields — parsed for migration, not used at runtime
+  apiKeys: ApiKeysSchema.optional(),
+  customProviders: z.record(CustomProviderSchema).optional(),
 });
 
 export type AppConfig = z.infer<typeof AppConfigSchema>;

@@ -30,8 +30,8 @@ afterEach(() => {
 describe("AppConfigSchema", () => {
   it("provides defaults for empty object", () => {
     const config = AppConfigSchema.parse({});
-    expect(config.defaultModel).toBe("claude-sonnet");
-    expect(config.apiKeys).toEqual({});
+    expect(config.defaultModel).toBe("anthropic:claude-sonnet-4-20250514");
+    expect(config.providers).toEqual({});
     expect(config.permissions).toEqual({
       alwaysAllow: [],
       alwaysDeny: [],
@@ -39,7 +39,6 @@ describe("AppConfigSchema", () => {
     });
     expect(config.mcpServers).toEqual({});
     expect(config.hooks).toEqual({});
-    expect(config.customProviders).toEqual({});
   });
 
   it("rejects invalid defaultModel type", () => {
@@ -49,8 +48,11 @@ describe("AppConfigSchema", () => {
 
   it("accepts valid full config", () => {
     const result = AppConfigSchema.safeParse({
-      defaultModel: "gpt-4o",
-      apiKeys: { anthropic: "sk-ant-xxx", openai: "sk-xxx" },
+      defaultModel: "openai:gpt-5.4",
+      providers: {
+        anthropic: { apiKey: "sk-ant-xxx", enabled: true },
+        openai: { apiKey: "sk-xxx", enabled: true },
+      },
       permissions: {
         alwaysAllow: ["ls *"],
         alwaysDeny: ["rm -rf *"],
@@ -80,7 +82,7 @@ describe("loadConfigFile", () => {
     const dir = makeTmpDir();
     tmpDirs.push(dir);
     const filePath = path.join(dir, "bad-schema.json");
-    writeJSON(filePath, { defaultModel: 999, apiKeys: "not-an-object" });
+    writeJSON(filePath, { defaultModel: 999, providers: "not-an-object" });
     expect(loadConfigFile(filePath)).toEqual({});
   });
 
@@ -88,9 +90,9 @@ describe("loadConfigFile", () => {
     const dir = makeTmpDir();
     tmpDirs.push(dir);
     const filePath = path.join(dir, "config.json");
-    writeJSON(filePath, { defaultModel: "gpt-4o" });
+    writeJSON(filePath, { defaultModel: "openai:gpt-5.4" });
     const result = loadConfigFile(filePath);
-    expect(result.defaultModel).toBe("gpt-4o");
+    expect(result.defaultModel).toBe("openai:gpt-5.4");
   });
 });
 
@@ -101,24 +103,21 @@ describe("loadConfig", () => {
     const dir = makeTmpDir();
     tmpDirs.push(dir);
     const config = loadConfig(dir);
-    expect(config.defaultModel).toBe("claude-sonnet");
+    expect(config.defaultModel).toBe("anthropic:claude-sonnet-4-20250514");
   });
 
   it("project config overrides global config", () => {
     const dir = makeTmpDir();
     tmpDirs.push(dir);
 
-    // Simulate global config by writing to project dir
-    // (we can't write to real ~/.visagent in tests, so test the merge logic
-    //  by writing project + local configs)
     const projectConfigDir = path.join(dir, ".visagent");
     writeJSON(path.join(projectConfigDir, "config.json"), {
-      defaultModel: "gpt-4o",
+      defaultModel: "openai:gpt-5.4",
       permissions: { alwaysAllow: ["ls *"] },
     });
 
     const config = loadConfig(dir);
-    expect(config.defaultModel).toBe("gpt-4o");
+    expect(config.defaultModel).toBe("openai:gpt-5.4");
     expect(config.permissions.alwaysAllow).toEqual(["ls *"]);
   });
 
@@ -128,14 +127,14 @@ describe("loadConfig", () => {
 
     const configDir = path.join(dir, ".visagent");
     writeJSON(path.join(configDir, "config.json"), {
-      defaultModel: "gpt-4o",
+      defaultModel: "openai:gpt-5.4",
     });
     writeJSON(path.join(configDir, "config.local.json"), {
-      defaultModel: "claude-opus",
+      defaultModel: "anthropic:claude-sonnet-4-20250514",
     });
 
     const config = loadConfig(dir);
-    expect(config.defaultModel).toBe("claude-opus");
+    expect(config.defaultModel).toBe("anthropic:claude-sonnet-4-20250514");
   });
 
   it("deep merges nested objects", () => {
@@ -144,14 +143,29 @@ describe("loadConfig", () => {
 
     const configDir = path.join(dir, ".visagent");
     writeJSON(path.join(configDir, "config.json"), {
-      apiKeys: { anthropic: "sk-ant-xxx" },
+      providers: { anthropic: { apiKey: "sk-ant-xxx", enabled: true } },
     });
     writeJSON(path.join(configDir, "config.local.json"), {
-      apiKeys: { openai: "sk-xxx" },
+      providers: { openai: { apiKey: "sk-xxx", enabled: true } },
     });
 
     const config = loadConfig(dir);
-    expect(config.apiKeys.anthropic).toBe("sk-ant-xxx");
-    expect(config.apiKeys.openai).toBe("sk-xxx");
+    expect(config.providers.anthropic?.apiKey).toBe("sk-ant-xxx");
+    expect(config.providers.openai?.apiKey).toBe("sk-xxx");
+  });
+
+  it("migrates legacy apiKeys to providers", () => {
+    const dir = makeTmpDir();
+    tmpDirs.push(dir);
+
+    const configDir = path.join(dir, ".visagent");
+    writeJSON(path.join(configDir, "config.json"), {
+      apiKeys: { anthropic: "sk-ant-legacy" },
+      defaultModel: "claude-sonnet",
+    });
+
+    const config = loadConfig(dir);
+    expect(config.providers.anthropic?.apiKey).toBe("sk-ant-legacy");
+    expect(config.defaultModel).toBe("anthropic:claude-sonnet-4-20250514");
   });
 });

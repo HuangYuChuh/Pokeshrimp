@@ -5,17 +5,15 @@ import path from "path";
 import os from "os";
 import { getConfig, reloadConfig } from "@/core/config/loader";
 import {
-  ApiKeysSchema,
+  ProviderConfigSchema,
   McpServerConfigSchema,
   HookEntrySchema,
   PermissionConfigSchema,
-  CustomProviderSchema,
 } from "@/core/config/schema";
 
 const SettingsUpdateSchema = z.object({
-  apiKeys: ApiKeysSchema.partial().optional(),
   defaultModel: z.string().optional(),
-  customProviders: z.record(CustomProviderSchema).optional(),
+  providers: z.record(ProviderConfigSchema).optional(),
   mcpServers: z.record(McpServerConfigSchema).optional(),
   hooks: z.record(z.array(HookEntrySchema)).optional(),
   permissions: PermissionConfigSchema.partial().optional(),
@@ -55,18 +53,30 @@ function discoverConventionHooks(): string[] {
   return found;
 }
 
+function maskKey(key?: string): string {
+  if (!key) return "";
+  if (key.length <= 8) return "****";
+  return "****" + key.slice(-4);
+}
+
 export async function GET() {
   const config = getConfig();
+
+  // Mask API keys in provider configs for the response
+  const maskedProviders: Record<string, unknown> = {};
+  for (const [id, provider] of Object.entries(config.providers)) {
+    maskedProviders[id] = {
+      ...provider,
+      apiKey: maskKey(provider.apiKey),
+    };
+  }
+
   return NextResponse.json({
-    ...config,
-    apiKeys: {
-      anthropic: maskKey(config.apiKeys?.anthropic),
-      openai: maskKey(config.apiKeys?.openai),
-    },
-    envKeys: {
-      anthropic: !!process.env.ANTHROPIC_API_KEY,
-      openai: !!process.env.OPENAI_API_KEY,
-    },
+    defaultModel: config.defaultModel,
+    providers: maskedProviders,
+    mcpServers: config.mcpServers,
+    hooks: config.hooks,
+    permissions: config.permissions,
     conventionHooks: discoverConventionHooks(),
   });
 }
@@ -89,23 +99,26 @@ export async function PUT(req: Request) {
     // File doesn't exist yet
   }
 
-  if (body.apiKeys) {
-    const existing = (current.apiKeys ?? {}) as Record<string, string>;
-    if (body.apiKeys.anthropic !== undefined && body.apiKeys.anthropic !== "") {
-      existing.anthropic = body.apiKeys.anthropic;
-    }
-    if (body.apiKeys.openai !== undefined && body.apiKeys.openai !== "") {
-      existing.openai = body.apiKeys.openai;
-    }
-    current.apiKeys = existing;
-  }
+  // Clean up legacy fields on save
+  delete current.apiKeys;
+  delete current.customProviders;
 
   if (body.defaultModel !== undefined) {
     current.defaultModel = body.defaultModel;
   }
 
-  if (body.customProviders !== undefined) {
-    current.customProviders = body.customProviders;
+  if (body.providers !== undefined) {
+    // Merge provider keys: skip masked "****" values to avoid overwriting real keys
+    const existing = (current.providers ?? {}) as Record<string, Record<string, unknown>>;
+    for (const [id, incoming] of Object.entries(body.providers)) {
+      const prev = existing[id] as Record<string, unknown> | undefined;
+      if (incoming.apiKey.includes("****") && prev?.apiKey) {
+        existing[id] = { ...incoming, apiKey: prev.apiKey };
+      } else {
+        existing[id] = { ...incoming };
+      }
+    }
+    current.providers = existing;
   }
 
   if (body.mcpServers !== undefined) {
@@ -129,10 +142,4 @@ export async function PUT(req: Request) {
   reloadConfig();
 
   return NextResponse.json({ success: true });
-}
-
-function maskKey(key?: string): string {
-  if (!key) return "";
-  if (key.length <= 8) return "****";
-  return "****" + key.slice(-4);
 }

@@ -7,8 +7,6 @@ interface PokeshrimpBridge {
   platform: string;
   auth?: {
     openBrowser?: (url: string) => Promise<void>;
-    openaiOAuth?: () => Promise<{ accessToken: string }>;
-    getValidToken?: () => Promise<string | null>;
   };
 }
 
