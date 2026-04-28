@@ -46,7 +46,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
         <SelectPrimitive.Content
           position="popper"
           sideOffset={4}
-          className="z-50 w-[var(--radix-select-trigger-width)] max-h-[240px] overflow-y-auto rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[var(--shadow-sm)]"
+          className="z-50 min-w-[180px] w-[var(--radix-select-trigger-width)] max-h-[240px] overflow-y-auto rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[var(--shadow-sm)]"
         >
           <SelectPrimitive.Viewport>
             {options.map((opt) => (

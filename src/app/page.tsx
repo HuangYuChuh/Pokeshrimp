@@ -44,7 +44,7 @@ function useMediaQuery(query: string) {
  * --------------------------------------------------------------------------- */
 
 function HomeInner() {
-  const [modelId, setModelId] = useState("anthropic:claude-sonnet-4-20250514");
+  const [modelId, setModelId] = useState("");
   const [providers, setProviders] = useState<Record<string, ProviderConfig>>({});
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTabId>("providers");
@@ -117,7 +117,11 @@ function HomeInner() {
       .then((r) => r.json())
       .then((data) => {
         if (data.providers) setProviders(data.providers);
-        if (data.defaultModel) setModelId((prev) => prev || data.defaultModel);
+        // Sync modelId from server config; fall back to first available model
+        const serverDefault = data.defaultModel;
+        const firstModel = data.providers ? buildModelOptions(data.providers)[0]?.id : undefined;
+        const resolved = serverDefault || firstModel;
+        if (resolved) setModelId((prev) => prev || resolved);
       })
       .catch(() => {});
   }, []);
