@@ -106,6 +106,7 @@ function useSkills() {
 interface ChatPanelProps {
   modelId: string;
   onModelChange: (id: string) => void;
+  modelOptions: { value: string; label: string }[];
   inputRef?: React.RefObject<HTMLTextAreaElement | null>;
   sidebarOpen: boolean;
   previewOpen: boolean;
@@ -116,6 +117,7 @@ interface ChatPanelProps {
 export function ChatPanel({
   modelId,
   onModelChange,
+  modelOptions,
   inputRef,
   sidebarOpen,
   previewOpen,
@@ -351,6 +353,7 @@ export function ChatPanel({
       isLoading={isLoading}
       modelId={modelId}
       onModelChange={onModelChange}
+      modelOptions={modelOptions}
       skills={skills}
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
