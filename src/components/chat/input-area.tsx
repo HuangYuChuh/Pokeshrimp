@@ -386,11 +386,12 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
             {/* Right group */}
             <div className="ml-auto flex items-center gap-[6px]">
               {/* Model selector (styled as plain text) */}
-              <div className="relative">
+              <div className="relative min-w-[60px]">
                 <Select
-                  value={modelId}
+                  value={modelOptions.some((o) => o.value === modelId) ? modelId : undefined}
                   onChange={onModelChange}
                   options={modelOptions}
+                  placeholder="model..."
                   className="nodrag !h-auto !w-auto !border-none !bg-transparent !p-0 !shadow-none !ring-0 !outline-none [&>span]:font-[family-name:var(--font-mono)] [&>span]:text-[10px] [&>span]:text-[var(--ink-ghost)] [&>svg]:hidden"
                 />
               </div>
@@ -404,7 +405,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
               <Button
                 variant="primary"
                 type="submit"
-                disabled={(!input.trim() && attachments.length === 0) || isLoading}
+                disabled={(!input.trim() && attachments.length === 0) || isLoading || !modelId}
                 className="nodrag !h-7 !w-7 !rounded-[var(--radius-md)] !p-0"
               >
                 <Icon icon="solar:arrow-up-outline" width={15} />
