@@ -1,7 +1,7 @@
 "use client";
 
 import "@/lib/iconify-offline";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { AppProvider, useAppDispatch, useAppState } from "@/lib/store";
 import { Sidebar } from "@/components/sidebar";
 import { ChatPanel } from "@/components/chat/chat-panel";
@@ -10,6 +10,8 @@ import { SettingsDialog, type SettingsTabId } from "@/components/settings-dialog
 import { SkillDropOverlay } from "@/components/skill-drop-overlay";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { Chip } from "@/design-system/components";
+import { buildModelOptions } from "@/core/ai/provider";
+import type { ProviderConfig } from "@/core/config/schema";
 
 /* ---------------------------------------------------------------------------
  * Constants
@@ -43,6 +45,7 @@ function useMediaQuery(query: string) {
 
 function HomeInner() {
   const [modelId, setModelId] = useState("anthropic:claude-sonnet-4-20250514");
+  const [providers, setProviders] = useState<Record<string, ProviderConfig>>({});
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTabId>("providers");
   const chatInputRef = useRef<HTMLTextAreaElement>(null);
@@ -107,6 +110,35 @@ function HomeInner() {
       setPreviewOverride(true);
     }
   }, [previewContent]);
+
+  /* --- Load providers from settings ------------------------------------- */
+  const fetchProviders = useCallback(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.providers) setProviders(data.providers);
+        if (data.defaultModel) setModelId((prev) => prev || data.defaultModel);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetchProviders();
+  }, [fetchProviders]);
+
+  // Re-fetch when settings dialog closes (user may have changed providers)
+  useEffect(() => {
+    if (!settingsOpen) fetchProviders();
+  }, [settingsOpen, fetchProviders]);
+
+  const modelOptions = useMemo(
+    () =>
+      buildModelOptions(providers).map((m) => ({
+        value: m.id,
+        label: `${m.providerName} / ${m.label}`,
+      })),
+    [providers],
+  );
 
   /* --- Session management ----------------------------------------------- */
   const handleNewSession = useCallback(() => {
@@ -240,6 +272,7 @@ function HomeInner() {
         <ChatPanel
           modelId={modelId}
           onModelChange={setModelId}
+          modelOptions={modelOptions}
           inputRef={chatInputRef}
           sidebarOpen={sidebarOpen}
           previewOpen={previewOpen}

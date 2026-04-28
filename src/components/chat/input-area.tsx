@@ -12,8 +12,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
 import { useT } from "@/lib/i18n";
-import { MODEL_OPTIONS } from "@/core/ai/provider";
-import type { ModelOption } from "@/core/ai/provider";
 import { Button, Card, Select } from "@/design-system/components";
 
 /* --- Skill type --- */
@@ -67,6 +65,7 @@ interface InputAreaProps {
   input: string;
   isLoading: boolean;
   modelId: string;
+  modelOptions: { value: string; label: string }[];
   skills: SkillInfo[];
   onModelChange: (id: string) => void;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -83,6 +82,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
     input,
     isLoading,
     modelId,
+    modelOptions,
     skills,
     onModelChange,
     onChange,
@@ -236,10 +236,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
     ],
   );
 
-  const modelOptions = MODEL_OPTIONS.map((m: ModelOption) => ({
-    value: m.id,
-    label: `${m.providerName} / ${m.label}`,
-  }));
+  // modelOptions comes from props (dynamically loaded from user's provider config)
 
   return (
     <div className="shrink-0 px-[var(--space-4)] pb-[18px] pt-[var(--space-3)]">
