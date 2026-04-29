@@ -169,4 +169,5 @@ export const zh = {
   // ── Misc ──
   configPath: "~/.visagent/config.json",
   dropSkill: "拖拽 .skill.md 文件安装",
+  pressEscToCancel: "按 ESC 取消",
 } as const;
