@@ -170,6 +170,7 @@ export const en = {
   dreamina: "Dreamina",
   dreaminaDescription: "Connect your Dreamina account for AI image & video generation.",
   dreaminaNotInstalled: "Not installed",
+  dreaminaInstallHint: "curl -fsSL https://jimeng.jianying.com/cli | bash",
   dreaminaNotConnected: "Not connected",
   dreaminaConnected: "Connected",
   dreaminaConnect: "Connect",

@@ -47,9 +47,12 @@ export async function GET() {
 
 /* --- POST: login / checklogin / logout --------------------------------- */
 
+/* Strict hex pattern — device_code from Dreamina is always a 32-char hex string */
+const DEVICE_CODE_RE = /^[0-9a-f]{32}$/;
+
 const PostSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("login") }),
-  z.object({ action: z.literal("checklogin"), device_code: z.string() }),
+  z.object({ action: z.literal("checklogin"), device_code: z.string().regex(DEVICE_CODE_RE) }),
   z.object({ action: z.literal("logout") }),
 ]);
 
@@ -65,7 +68,7 @@ export async function POST(req: Request) {
   if (action === "login") {
     const result = run("dreamina login --headless");
     if (!result.ok) {
-      return NextResponse.json({ error: result.stderr }, { status: 500 });
+      return NextResponse.json({ error: "Login initialization failed" }, { status: 500 });
     }
 
     // Parse: verification_uri, user_code, device_code
@@ -93,7 +96,7 @@ export async function POST(req: Request) {
       if (result.stderr.includes("pending") || result.stderr.includes("authorization_pending")) {
         return NextResponse.json({ status: "pending" });
       }
-      return NextResponse.json({ status: "failed", error: result.stderr });
+      return NextResponse.json({ status: "failed" });
     }
 
     return NextResponse.json({ status: "connected" });

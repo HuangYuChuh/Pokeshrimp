@@ -170,6 +170,7 @@ export const zh = {
   dreamina: "即梦 Dreamina",
   dreaminaDescription: "连接即梦账号，获取 AI 图片和视频生成能力。",
   dreaminaNotInstalled: "未安装",
+  dreaminaInstallHint: "curl -fsSL https://jimeng.jianying.com/cli | bash",
   dreaminaNotConnected: "未连接",
   dreaminaConnected: "已连接",
   dreaminaConnect: "连接",

@@ -25,8 +25,16 @@ export function DreaminaCard() {
   const [credits, setCredits] = useState<number | null>(null);
   const [auth, setAuth] = useState<AuthInfo | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  /* --- Check status on mount ----------------------------------------- */
+  /* --- Helpers -------------------------------------------------------- */
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    pollRef.current = undefined;
+    timeoutRef.current = undefined;
+  }, []);
 
   const checkStatus = useCallback(() => {
     fetch("/api/dreamina")
@@ -38,19 +46,17 @@ export function DreaminaCard() {
       .catch(() => setStatus("not-installed"));
   }, []);
 
+  /* --- Lifecycle ------------------------------------------------------ */
+
   useEffect(() => {
     checkStatus();
   }, [checkStatus]);
 
-  /* --- Cleanup poll on unmount --------------------------------------- */
-
   useEffect(() => {
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
-  }, []);
+    return () => stopPolling();
+  }, [stopPolling]);
 
-  /* --- Start login --------------------------------------------------- */
+  /* --- Connect -------------------------------------------------------- */
 
   const handleConnect = useCallback(async () => {
     setStatus("connecting");
@@ -60,11 +66,11 @@ export function DreaminaCard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "login" }),
       });
-      const data = await res.json();
       if (!res.ok) {
         setStatus("not-connected");
         return;
       }
+      const data: AuthInfo = await res.json();
       setAuth(data);
 
       // Poll checklogin every 5s
@@ -76,50 +82,49 @@ export function DreaminaCard() {
             body: JSON.stringify({ action: "checklogin", device_code: data.device_code }),
           });
           const result = await r.json();
-          if (result.status === "connected") {
-            clearInterval(pollRef.current);
-            pollRef.current = undefined;
+          if (result.status === "connected" || result.status === "failed") {
+            stopPolling();
             setAuth(null);
-            checkStatus();
+            if (result.status === "connected") checkStatus();
+            else setStatus("not-connected");
           }
         } catch {
-          /* keep polling */
+          /* network blip — keep polling */
         }
       }, 5000);
 
       // Auto-stop after 2 minutes
-      setTimeout(() => {
-        if (pollRef.current) {
-          clearInterval(pollRef.current);
-          pollRef.current = undefined;
-          setAuth(null);
-          setStatus("not-connected");
-        }
+      timeoutRef.current = setTimeout(() => {
+        stopPolling();
+        setAuth(null);
+        setStatus("not-connected");
       }, 120_000);
     } catch {
       setStatus("not-connected");
     }
-  }, [checkStatus]);
+  }, [checkStatus, stopPolling]);
 
-  /* --- Disconnect ---------------------------------------------------- */
+  /* --- Disconnect ----------------------------------------------------- */
 
   const handleDisconnect = useCallback(async () => {
+    stopPolling();
     await fetch("/api/dreamina", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "logout" }),
     }).catch(() => {});
     setCredits(null);
+    setAuth(null);
     setStatus("not-connected");
-  }, []);
+  }, [stopPolling]);
 
-  /* --- Render -------------------------------------------------------- */
+  /* --- Render --------------------------------------------------------- */
 
   return (
     <Card>
       <CardContent className="flex items-start gap-[var(--space-4)] px-[var(--space-4)] py-[var(--space-4)]">
         {/* Icon */}
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--accent-subtle)]">
+        <div className="flex h-[var(--space-10)] w-[var(--space-10)] shrink-0 items-center justify-center rounded-[var(--radius-lg)] bg-[var(--accent-subtle)]">
           <Icon icon="solar:pallete-2-outline" width={22} className="text-[var(--accent)]" />
         </div>
 
@@ -154,7 +159,7 @@ export function DreaminaCard() {
           {status === "not-installed" && (
             <div className="mt-[var(--space-3)]">
               <code className="block rounded-[var(--radius-md)] bg-[var(--canvas-subtle)] px-[var(--space-3)] py-[var(--space-2)] font-[var(--font-mono)] text-[var(--text-caption)] text-[var(--ink-secondary)]">
-                curl -fsSL https://jimeng.jianying.com/cli | bash
+                {t.dreaminaInstallHint}
               </code>
             </div>
           )}
