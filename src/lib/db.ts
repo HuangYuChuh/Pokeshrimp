@@ -15,8 +15,8 @@ function getManager(): SessionManager {
   return manager;
 }
 
-export async function createSession(title: string): Promise<Session> {
-  return getManager().createSession(title);
+export async function createSession(title: string, id?: string): Promise<Session> {
+  return getManager().createSession(title, id);
 }
 
 export async function listSessions(): Promise<Session[]> {

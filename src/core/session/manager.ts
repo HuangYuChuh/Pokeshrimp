@@ -63,13 +63,13 @@ export class SessionManager {
 
   // --- Sessions ---
 
-  async createSession(title: string): Promise<Session> {
-    const id = this.uid();
+  async createSession(title: string, id?: string): Promise<Session> {
+    const sessionId = id ?? this.uid();
     const now = new Date().toISOString();
     this.db
       .prepare("INSERT INTO sessions (id, title, created_at, updated_at) VALUES (?, ?, ?, ?)")
-      .run(id, title, now, now);
-    return { id, title, createdAt: now, updatedAt: now };
+      .run(sessionId, title, now, now);
+    return { id: sessionId, title, createdAt: now, updatedAt: now };
   }
 
   async listSessions(): Promise<Session[]> {
