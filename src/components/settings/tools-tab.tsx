@@ -7,6 +7,7 @@ import {
   type McpServerConfig,
 } from "@/components/settings-sections";
 import { ToolStatusList } from "@/components/tool-status";
+import { DreaminaCard } from "@/components/settings/dreamina-card";
 import { useT } from "@/lib/i18n";
 
 interface ToolsTabProps {
@@ -20,6 +21,8 @@ export function ToolsTab({ active, mcpServers, onMcpServersChange }: ToolsTabPro
   return (
     <div className="flex min-w-0 flex-col gap-[var(--space-6)]">
       <SettingsTabHeader title={t.tools} description={t.toolsDescription} />
+
+      <DreaminaCard />
 
       <SettingsSection label={t.cliTools}>
         <ToolStatusList open={active} />

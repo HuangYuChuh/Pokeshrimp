@@ -166,6 +166,19 @@ export const zh = {
   before: "之前",
   after: "之后",
 
+  // ── Dreamina ──
+  dreamina: "即梦 Dreamina",
+  dreaminaDescription: "连接即梦账号，获取 AI 图片和视频生成能力。",
+  dreaminaNotInstalled: "未安装",
+  dreaminaNotConnected: "未连接",
+  dreaminaConnected: "已连接",
+  dreaminaConnect: "连接",
+  dreaminaDisconnect: "断开",
+  dreaminaCredits: "{n} 积分",
+  dreaminaAuthPrompt: "打开链接并输入验证码完成授权：",
+  dreaminaOpenLink: "打开",
+  dreaminaWaiting: "等待授权中...",
+
   // ── Misc ──
   configPath: "~/.visagent/config.json",
   dropSkill: "拖拽 .skill.md 文件安装",
