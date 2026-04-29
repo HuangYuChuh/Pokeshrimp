@@ -228,12 +228,9 @@ export function ChatPanel({
     fetch(`/api/sessions/${currentSessionId}`, { signal: ac.signal })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
+        if (ac.signal.aborted) return;
         const parsed = SessionResponseSchema.safeParse(data);
-        if (parsed.success) {
-          setMessages(parsed.data.messages);
-        } else {
-          setMessages([]);
-        }
+        setMessages(parsed.success ? parsed.data.messages : []);
       })
       .catch(() => {
         if (!ac.signal.aborted) setMessages([]);

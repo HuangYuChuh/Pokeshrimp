@@ -67,9 +67,24 @@ export class SessionManager {
     const sessionId = id ?? this.uid();
     const now = new Date().toISOString();
     this.db
-      .prepare("INSERT INTO sessions (id, title, created_at, updated_at) VALUES (?, ?, ?, ?)")
+      .prepare(
+        "INSERT OR IGNORE INTO sessions (id, title, created_at, updated_at) VALUES (?, ?, ?, ?)",
+      )
       .run(sessionId, title, now, now);
-    return { id: sessionId, title, createdAt: now, updatedAt: now };
+    const row = this.db
+      .prepare("SELECT id, title, created_at, updated_at FROM sessions WHERE id = ?")
+      .get(sessionId) as { id: string; title: string; created_at: string; updated_at: string };
+    return { id: row.id, title: row.title, createdAt: row.created_at, updatedAt: row.updated_at };
+  }
+
+  async ensureSession(title: string, id?: string): Promise<string> {
+    if (id) {
+      const existing = await this.getSession(id);
+      if (!existing) await this.createSession(title, id);
+      return id;
+    }
+    const session = await this.createSession(title);
+    return session.id;
   }
 
   async listSessions(): Promise<Session[]> {

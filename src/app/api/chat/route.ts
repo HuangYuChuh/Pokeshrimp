@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createDataStreamResponse } from "ai";
 import { getModel, buildModelOptions } from "@/core/ai/provider";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
-import { createSession, getSession, addMessage, touchSession } from "@/lib/db";
+import { ensureSession, addMessage, touchSession } from "@/lib/db";
 import { getRuntime } from "@/core/init";
 import { getConfig } from "@/core/config/loader";
 import { approvalBus } from "@/app/api/approval/channel";
@@ -22,7 +22,7 @@ const ChatRequestSchema = z.object({
       .passthrough(),
   ),
   modelId: z.string().optional(),
-  sessionId: z.string().nullable().optional(),
+  sessionId: z.string().uuid().nullable().optional(),
 });
 
 function missingApiKeyResponse(providerName: string): Response {
@@ -54,22 +54,9 @@ export async function POST(req: Request) {
   }
   const { messages, modelId, sessionId } = parsed.data;
 
-  // Ensure session exists — guard against race where frontend optimistically
-  // sets the session ID before POST /api/sessions completes
-  let sid = sessionId as string | undefined;
-  if (sid) {
-    const existing = await getSession(sid);
-    if (!existing) {
-      const firstUserMsg = messages.find((m: { role: string }) => m.role === "user");
-      const title = firstUserMsg ? (firstUserMsg.content as string).slice(0, 60) : "New Chat";
-      await createSession(title, sid);
-    }
-  } else {
-    const firstUserMsg = messages.find((m: { role: string }) => m.role === "user");
-    const title = firstUserMsg ? (firstUserMsg.content as string).slice(0, 60) : "New Chat";
-    const session = await createSession(title);
-    sid = session.id;
-  }
+  const firstUserMsg = messages.find((m: { role: string }) => m.role === "user");
+  const title = firstUserMsg ? (firstUserMsg.content as string).slice(0, 60) : "New Chat";
+  const sid = await ensureSession(title, sessionId ?? undefined);
 
   // Persist latest user message
   const lastMsg = messages[messages.length - 1];
