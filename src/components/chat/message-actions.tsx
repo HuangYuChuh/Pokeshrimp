@@ -33,7 +33,7 @@ export function MessageActions({ role, onEdit, onDelete, onRegenerate }: Message
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon-sm" onClick={onEdit}>
-                <Icon icon="solar:pen-outline" width={13} />
+                <Icon icon="solar:pen-outline" width={14} />
               </Button>
             </TooltipTrigger>
             <TooltipContent>{t.edit}</TooltipContent>
@@ -43,7 +43,7 @@ export function MessageActions({ role, onEdit, onDelete, onRegenerate }: Message
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon-sm" onClick={onRegenerate}>
-                <Icon icon="solar:refresh-outline" width={13} />
+                <Icon icon="solar:refresh-outline" width={14} />
               </Button>
             </TooltipTrigger>
             <TooltipContent>{t.regenerate}</TooltipContent>
@@ -52,7 +52,7 @@ export function MessageActions({ role, onEdit, onDelete, onRegenerate }: Message
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon-sm" onClick={onDelete}>
-              <Icon icon="solar:trash-bin-2-outline" width={13} />
+              <Icon icon="solar:trash-bin-2-outline" width={14} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>{t.delete}</TooltipContent>

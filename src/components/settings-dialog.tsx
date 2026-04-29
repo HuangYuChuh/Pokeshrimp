@@ -198,7 +198,7 @@ export function SettingsDialog({ open, onClose, initialTab }: SettingsDialogProp
               className="absolute right-[var(--space-4)] top-[var(--space-4)] z-10 rounded-[var(--radius-sm)] p-[var(--space-1)] text-[var(--ink-secondary)] transition-colors hover:text-[var(--ink)]"
               aria-label={t.close}
             >
-              <Icon icon="solar:close-circle-outline" width={18} />
+              <Icon icon="solar:close-circle-outline" width={20} />
             </button>
 
             <div className="px-[var(--space-8)] py-[var(--space-6)] pr-[var(--space-12)] max-[720px]:px-[var(--space-4)] max-[720px]:py-[var(--space-5)] max-[720px]:pr-[var(--space-10)]">

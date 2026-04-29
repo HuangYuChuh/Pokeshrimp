@@ -145,7 +145,7 @@ export function ProvidersTab({ providers, onProvidersChange }: ProvidersTabProps
                       className="h-[var(--space-6)] w-[var(--space-6)] min-w-0 p-0"
                       aria-label={`Remove ${config.name || id}`}
                     >
-                      <Icon icon="solar:trash-bin-2-outline" width={13} />
+                      <Icon icon="solar:trash-bin-2-outline" width={14} />
                     </Button>
                   </div>
                 </div>
@@ -232,7 +232,7 @@ export function ProvidersTab({ providers, onProvidersChange }: ProvidersTabProps
         </Card>
       ) : (
         <Button variant="outline" size="sm" onClick={() => setAddingCustom(true)}>
-          <Icon icon="solar:add-circle-outline" width={13} />
+          <Icon icon="solar:add-circle-outline" width={14} />
           {t.addCustomProvider}
         </Button>
       )}
@@ -274,7 +274,7 @@ function ProviderCard({
         <div className="flex min-w-0 items-center justify-between gap-[var(--space-3)]">
           <div className="flex min-w-0 items-center gap-[var(--space-3)]">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--border-subtle)]">
-              <Icon icon={icon} width={16} className="text-[var(--ink-secondary)]" />
+              <Icon icon={icon} width={18} className="text-[var(--ink-secondary)]" />
             </div>
             <div className="min-w-0">
               <div className="truncate text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
@@ -312,7 +312,7 @@ function ProviderCard({
             className="inline-flex shrink-0 items-center gap-[var(--space-1)] whitespace-nowrap text-[var(--text-caption)] text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]"
           >
             <span>{t.getKey}</span>
-            <Icon icon="solar:arrow-right-outline" width={10} />
+            <Icon icon="solar:arrow-right-outline" width={12} />
           </button>
         </div>
       </CardContent>

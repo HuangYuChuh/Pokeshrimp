@@ -67,13 +67,13 @@ export function MessageBubble({
   return (
     <div className="group/msg relative mb-[var(--gap-message)]">
       {message.content && (
-        <div className="flex gap-[10px]">
+        <div className="flex gap-[var(--gap-inline)]">
           {/* Avatar */}
           <div
             className={
               isUser
-                ? "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--accent-subtle)] text-[11px] font-medium text-[var(--accent)]"
-                : "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface)] text-[11px] text-[var(--ink-secondary)]"
+                ? "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--accent-subtle)] text-[var(--text-micro)] font-medium text-[var(--accent)]"
+                : "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--text-micro)] text-[var(--ink-secondary)]"
             }
           >
             {isUser ? "K" : "◆"}
@@ -86,7 +86,7 @@ export function MessageBubble({
               className="mb-1 text-[var(--ink-tertiary)]"
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: "11px",
+                fontSize: "var(--text-micro)",
                 textTransform: "uppercase",
                 letterSpacing: "0.03em",
               }}
@@ -105,7 +105,7 @@ export function MessageBubble({
                 />
               ) : (
                 <>
-                  <div className="whitespace-pre-wrap break-words text-[14px] leading-[1.75] text-[var(--ink)]">
+                  <div className="whitespace-pre-wrap break-words text-[var(--text-body)] leading-[1.75] text-[var(--ink)]">
                     {message.content}
                   </div>
                   <MessageActions
@@ -117,7 +117,7 @@ export function MessageBubble({
               )
             ) : (
               <>
-                <div className="prose max-w-[72ch] text-[14px] leading-[1.75] text-[var(--ink-secondary)] dark:prose-invert">
+                <div className="prose max-w-[72ch] text-[var(--text-body)] leading-[1.75] text-[var(--ink-secondary)] dark:prose-invert">
                   <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                     {message.content}
                   </ReactMarkdown>

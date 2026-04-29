@@ -183,7 +183,7 @@ export function Toaster() {
             }}
           >
             <div className="flex items-start gap-[var(--space-3)] bg-[var(--surface)] rounded-[var(--radius-lg)] px-[var(--space-4)] py-[var(--space-3)] shadow-[var(--shadow-md)] border border-[var(--border-subtle)]">
-              <Icon icon={icon} width={20} className="shrink-0 mt-[2px]" style={{ color }} />
+              <Icon icon={icon} width={22} className="shrink-0 mt-[2px]" style={{ color }} />
               <div
                 className="min-w-0"
                 style={{

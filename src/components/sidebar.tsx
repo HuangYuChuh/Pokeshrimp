@@ -10,6 +10,7 @@ import { useT } from "@/lib/i18n";
 
 interface SidebarProps {
   open: boolean;
+  onToggle?: () => void;
   onOpenSettings?: () => void;
   onOpenSkills?: () => void;
 }
@@ -34,7 +35,7 @@ function formatRelativeTime(iso: string, t: ReturnType<typeof useT>): string {
 
 /* ─── Sidebar ── */
 
-export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
+export function Sidebar({ open, onToggle, onOpenSettings, onOpenSkills }: SidebarProps) {
   const t = useT();
   const { sessions, currentSessionId } = useAppState();
   const dispatch = useAppDispatch();
@@ -79,84 +80,113 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
       className={cn(
         "flex h-full shrink-0 flex-col overflow-hidden bg-[var(--canvas-subtle)]",
         "transition-all duration-[var(--duration-normal)] ease-[var(--ease-out)]",
-        open ? "w-[var(--width-sidebar)]" : "w-0",
+        open ? "w-[var(--width-sidebar)]" : "w-[var(--width-sidebar-collapsed)]",
       )}
     >
       {/* ── Titlebar drag region ── */}
       <div className="drag h-[var(--height-titlebar)] shrink-0" />
 
       {/* ── Brand + New Task ── */}
-      <div className="flex flex-col gap-[var(--space-3)] px-[var(--space-3)] pb-[var(--space-4)]">
-        {/* Brand glyph */}
-        <div className="nodrag flex items-center gap-[var(--space-2)] px-[var(--space-1)]">
+      <div
+        className={cn(
+          "flex flex-col gap-[var(--space-3)] pb-[var(--space-4)]",
+          open ? "px-[var(--space-3)]" : "items-center px-0",
+        )}
+      >
+        {/* Brand glyph — clickable to toggle */}
+        <button
+          type="button"
+          onClick={onToggle}
+          className={cn(
+            "nodrag flex items-center gap-[var(--space-2)] rounded-[var(--radius-md)] transition-colors hover:bg-[var(--border-subtle)]",
+            open ? "px-[var(--space-1)] py-[var(--space-1)]" : "justify-center p-[var(--space-1)]",
+          )}
+          title={open ? undefined : "pokeshrimp"}
+        >
           <div
             className={cn(
-              "flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--radius-md)]",
+              "flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-md)]",
               "border border-[var(--accent)] bg-[var(--accent-subtle)]",
             )}
           >
-            <span className="text-[13px] font-bold leading-none text-[var(--accent)]">P</span>
+            <span className="text-[var(--text-body-sm)] font-bold leading-none text-[var(--accent)]">
+              P
+            </span>
           </div>
-          <span className="text-[13px] font-semibold text-[var(--ink)]">
-            pokeshrimp
-            <span className="text-[var(--accent)]">.</span>
-          </span>
-        </div>
+          {open && (
+            <span className="text-[var(--text-body-sm)] font-semibold text-[var(--ink)]">
+              pokeshrimp
+              <span className="text-[var(--accent)]">.</span>
+            </span>
+          )}
+        </button>
 
         {/* New task button */}
         <button
           type="button"
           onClick={handleNewTask}
           className={cn(
-            "nodrag flex h-8 w-full items-center gap-[var(--gap-inline)]",
+            "nodrag flex items-center justify-center",
             "rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)]",
-            "px-[var(--space-3)] text-[var(--text-body-sm)] font-medium text-[var(--ink)]",
             "transition-colors hover:bg-[var(--surface-raised)]",
+            open
+              ? "h-8 w-full gap-[var(--gap-inline)] px-[var(--space-3)] text-[var(--text-body-sm)] font-medium text-[var(--ink)]"
+              : "h-8 w-8",
           )}
+          title={open ? undefined : t.newTask}
         >
-          <Icon icon="solar:add-circle-outline" width={15} />
-          <span>{t.newTask}</span>
-          <kbd
-            className={cn("ml-auto font-[var(--font-mono)] text-[10px] text-[var(--ink-ghost)]")}
-          >
-            ⌘N
-          </kbd>
+          <Icon icon="solar:add-circle-outline" width={16} />
+          {open && <span>{t.newTask}</span>}
+          {open && (
+            <kbd className="ml-auto font-[var(--font-mono)] text-[var(--text-micro)] text-[var(--ink-ghost)]">
+              ⌘N
+            </kbd>
+          )}
         </button>
       </div>
 
-      {/* ── Recents label ── */}
-      <div className="px-[var(--space-4)] pb-[var(--space-2)]">
-        <span
-          className={cn(
-            "whitespace-nowrap text-[var(--text-micro)] font-medium uppercase",
-            "tracking-[0.03em] text-[var(--ink-ghost)]",
-          )}
-        >
-          {t.recents}
-        </span>
-      </div>
-
-      {/* ── Session list ── */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="flex flex-col gap-px px-[var(--space-3)]">
-          {sessions.map((session) => (
-            <SessionItem
-              key={session.id}
-              session={session}
-              isActive={session.id === currentSessionId}
-              onSelect={handleSelectSession}
-              onDelete={handleDeleteSession}
-            />
-          ))}
+      {/* ── Recents label (expanded only) ── */}
+      {open && (
+        <div className="px-[var(--space-4)] pb-[var(--space-2)]">
+          <span
+            className={cn(
+              "whitespace-nowrap text-[var(--text-micro)] font-medium uppercase",
+              "tracking-[0.03em] text-[var(--ink-ghost)]",
+            )}
+          >
+            {t.recents}
+          </span>
         </div>
-      </div>
+      )}
+
+      {/* ── Session list (expanded only) ── */}
+      {open && (
+        <div className="flex-1 overflow-y-auto scrollbar-thin">
+          <div className="flex flex-col gap-px px-[var(--space-3)]">
+            {sessions.map((session) => (
+              <SessionItem
+                key={session.id}
+                session={session}
+                isActive={session.id === currentSessionId}
+                onSelect={handleSelectSession}
+                onDelete={handleDeleteSession}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Spacer when collapsed (pushes footer to bottom) */}
+      {!open && <div className="flex-1" />}
 
       {/* ── Footer ── */}
       {(onOpenSettings || onOpenSkills) && (
         <div
           className={cn(
-            "shrink-0 border-t border-[var(--border-subtle)]",
-            "flex gap-[var(--space-2)] px-[var(--space-3)] py-[var(--space-3)]",
+            "shrink-0 border-t border-[var(--border-subtle)] py-[var(--space-3)]",
+            open
+              ? "flex gap-[var(--space-2)] px-[var(--space-3)]"
+              : "flex flex-col items-center gap-[var(--space-2)] px-0",
           )}
         >
           {onOpenSkills && (
@@ -164,14 +194,16 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
               type="button"
               onClick={onOpenSkills}
               className={cn(
-                "nodrag flex flex-1 h-[30px] items-center justify-center gap-[var(--gap-inline)]",
+                "nodrag flex items-center justify-center",
                 "rounded-[var(--radius-md)] border border-[var(--border)]",
-                "text-[12px] font-medium text-[var(--ink-secondary)]",
+                "text-[var(--text-caption)] font-medium text-[var(--ink-secondary)]",
                 "transition-colors hover:bg-[var(--border-subtle)]",
+                open ? "h-[30px] flex-1 gap-[var(--gap-inline)]" : "h-8 w-8",
               )}
+              title={open ? undefined : t.skills}
             >
-              <Icon icon="solar:widget-outline" width={14} />
-              <span>{t.skills}</span>
+              <Icon icon="solar:widget-outline" width={16} />
+              {open && <span>{t.skills}</span>}
             </button>
           )}
           {onOpenSettings && (
@@ -179,14 +211,16 @@ export function Sidebar({ open, onOpenSettings, onOpenSkills }: SidebarProps) {
               type="button"
               onClick={onOpenSettings}
               className={cn(
-                "nodrag flex flex-1 h-[30px] items-center justify-center gap-[var(--gap-inline)]",
+                "nodrag flex items-center justify-center",
                 "rounded-[var(--radius-md)] border border-[var(--border)]",
-                "text-[12px] font-medium text-[var(--ink-secondary)]",
+                "text-[var(--text-caption)] font-medium text-[var(--ink-secondary)]",
                 "transition-colors hover:bg-[var(--border-subtle)]",
+                open ? "h-[30px] flex-1 gap-[var(--gap-inline)]" : "h-8 w-8",
               )}
+              title={open ? undefined : t.settings}
             >
-              <Icon icon="solar:settings-outline" width={14} />
-              <span>{t.settings}</span>
+              <Icon icon="solar:settings-outline" width={16} />
+              {open && <span>{t.settings}</span>}
             </button>
           )}
         </div>
@@ -236,13 +270,13 @@ function SessionItem({
             : "text-[var(--ink)] hover:bg-[var(--border-subtle)]",
         )}
       >
-        {/* Status dot — idle for all sessions */}
+        {/* Status dot */}
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ink-tertiary)]" />
 
         {/* Title */}
         <span
           className={cn(
-            "flex-1 truncate text-[13px] font-medium",
+            "flex-1 truncate text-[var(--text-body-sm)] font-medium",
             isActive ? "text-[var(--accent)]" : "",
           )}
         >
@@ -253,7 +287,7 @@ function SessionItem({
         {timeLabel && (
           <span
             className={cn(
-              "shrink-0 font-[var(--font-mono)] text-[10px] text-[var(--ink-ghost)]",
+              "shrink-0 font-[var(--font-mono)] text-[var(--text-micro)] text-[var(--ink-ghost)]",
               "ml-auto",
             )}
           >
@@ -285,7 +319,7 @@ function SessionItem({
       >
         <Icon
           icon={confirming ? "solar:trash-bin-2-outline" : "solar:close-circle-outline"}
-          width={12}
+          width={14}
         />
       </button>
     </div>

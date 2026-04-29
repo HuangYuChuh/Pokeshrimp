@@ -92,7 +92,7 @@ export function ApprovalCard({ request, resolved }: ApprovalCardProps) {
         <div className="flex items-center gap-[var(--gap-inline)] px-[12px] py-[10px]">
           <Icon
             icon="solar:shield-warning-outline"
-            width={18}
+            width={20}
             className="shrink-0 text-[var(--warning)]"
           />
           <span className="text-[var(--text-body-sm)] font-semibold text-[var(--ink)]">
