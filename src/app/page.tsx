@@ -250,6 +250,7 @@ function HomeInner() {
           onModelChange={setModelId}
           modelOptions={modelOptions}
           inputRef={chatInputRef}
+          sidebarOpen={sidebarOpen}
           previewOpen={previewOpen}
           onToggleSidebar={toggleSidebar}
           onTogglePreview={togglePreview}

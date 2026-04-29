@@ -108,6 +108,7 @@ interface ChatPanelProps {
   onModelChange: (id: string) => void;
   modelOptions: { value: string; label: string }[];
   inputRef?: React.RefObject<HTMLTextAreaElement | null>;
+  sidebarOpen: boolean;
   previewOpen: boolean;
   onToggleSidebar: () => void;
   onTogglePreview: () => void;
@@ -118,6 +119,7 @@ export function ChatPanel({
   onModelChange,
   modelOptions,
   inputRef,
+  sidebarOpen,
   previewOpen,
   onToggleSidebar,
   onTogglePreview,
@@ -387,7 +389,7 @@ export function ChatPanel({
             variant="ghost"
             size="icon-sm"
             onClick={onToggleSidebar}
-            className=""
+            className={cn(sidebarOpen && "invisible")}
             aria-label={t.toggleSidebar}
           >
             <Icon icon="solar:sidebar-minimalistic-outline" width={18} />

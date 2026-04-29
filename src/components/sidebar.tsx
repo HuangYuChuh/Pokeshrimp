@@ -93,33 +93,52 @@ export function Sidebar({ open, onToggle, onOpenSettings, onOpenSkills }: Sideba
           open ? "px-[var(--space-3)]" : "items-center px-0",
         )}
       >
-        {/* Brand glyph — clickable to toggle */}
-        <button
-          type="button"
-          onClick={onToggle}
+        {/* Brand row — expanded: brand + collapse arrow; collapsed: glyph to expand */}
+        <div
           className={cn(
-            "nodrag flex items-center gap-[var(--space-2)] rounded-[var(--radius-md)] transition-colors hover:bg-[var(--border-subtle)]",
-            open ? "px-[var(--space-1)] py-[var(--space-1)]" : "justify-center p-[var(--space-1)]",
+            "nodrag flex items-center",
+            open ? "gap-[var(--space-2)] px-[var(--space-1)]" : "justify-center",
           )}
-          title={open ? undefined : "pokeshrimp"}
         >
-          <div
+          <button
+            type="button"
+            onClick={open ? undefined : onToggle}
             className={cn(
-              "flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-md)]",
-              "border border-[var(--accent)] bg-[var(--accent-subtle)]",
+              "flex items-center gap-[var(--space-2)] rounded-[var(--radius-md)]",
+              !open &&
+                "cursor-pointer p-[var(--space-1)] transition-colors hover:bg-[var(--border-subtle)]",
             )}
+            title={open ? undefined : "pokeshrimp"}
           >
-            <span className="text-[var(--text-body-sm)] font-bold leading-none text-[var(--accent)]">
-              P
-            </span>
-          </div>
+            <div
+              className={cn(
+                "flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-md)]",
+                "border border-[var(--accent)] bg-[var(--accent-subtle)]",
+              )}
+            >
+              <span className="text-[var(--text-body-sm)] font-bold leading-none text-[var(--accent)]">
+                P
+              </span>
+            </div>
+            {open && (
+              <span className="text-[var(--text-body-sm)] font-semibold text-[var(--ink)]">
+                pokeshrimp
+                <span className="text-[var(--accent)]">.</span>
+              </span>
+            )}
+          </button>
+          {/* Collapse arrow — only when expanded */}
           {open && (
-            <span className="text-[var(--text-body-sm)] font-semibold text-[var(--ink)]">
-              pokeshrimp
-              <span className="text-[var(--accent)]">.</span>
-            </span>
+            <button
+              type="button"
+              onClick={onToggle}
+              className="ml-auto flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] text-[var(--ink-tertiary)] transition-colors hover:bg-[var(--border-subtle)] hover:text-[var(--ink)]"
+              aria-label={t.toggleSidebar}
+            >
+              <Icon icon="solar:sidebar-minimalistic-outline" width={16} />
+            </button>
           )}
-        </button>
+        </div>
 
         {/* New task button */}
         <button
