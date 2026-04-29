@@ -11,6 +11,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * extracting the same algorithm the hook uses. This keeps tests fast,
  * dependency-free, and focused on the contract that matters:
  *   "given these events, is dragging true or false?"
+ *
+ * Limitation: React effect lifecycle (listener mount/cleanup, state
+ * batching) is NOT exercised here — the project does not have
+ * @testing-library/react. If RTL is added later, supplement with
+ * renderHook-based integration tests for the useEffect escape hatches.
  * ----------------------------------------------------------------------- */
 
 /* --- Minimal simulation of the counter + escape logic ------------------ */

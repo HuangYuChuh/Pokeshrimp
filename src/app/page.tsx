@@ -11,6 +11,7 @@ import { SkillDropOverlay } from "@/components/skill-drop-overlay";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useDropZone } from "@/hooks/use-drop-zone";
 import { Chip } from "@/design-system/components";
+import { useT } from "@/lib/i18n";
 import { buildModelOptions } from "@/core/ai/provider";
 import type { ProviderConfig } from "@/core/config/schema";
 
@@ -50,6 +51,7 @@ function HomeInner() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTabId>("providers");
   const chatInputRef = useRef<HTMLTextAreaElement>(null);
+  const t = useT();
   const dispatch = useAppDispatch();
   const { previewContent } = useAppState();
 
@@ -190,7 +192,7 @@ function HomeInner() {
     async (files: File[]) => {
       const skillFiles = files.filter((f) => f.name.endsWith(".skill.md"));
       if (skillFiles.length === 0) {
-        showToast("Only .skill.md files can be imported", true);
+        showToast(t.onlySkillFiles, true);
         return;
       }
       for (const file of skillFiles) {
@@ -203,16 +205,16 @@ function HomeInner() {
           });
           const data = await res.json();
           if (!res.ok) {
-            showToast(data.error || "Failed to import skill", true);
+            showToast(data.error || t.skillImportError, true);
           } else {
-            showToast(`Skill '${data.name}' installed`, false);
+            showToast(t.skillInstalled.replace("{name}", data.name), false);
           }
         } catch {
-          showToast(`Failed to import ${file.name}`, true);
+          showToast(t.skillImportError, true);
         }
       }
     },
-    [showToast],
+    [showToast, t],
   );
 
   const {

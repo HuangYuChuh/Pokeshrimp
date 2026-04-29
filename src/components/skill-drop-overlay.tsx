@@ -36,7 +36,11 @@ export function SkillDropOverlay({ visible, onDismiss }: SkillDropOverlayProps) 
       )}
       onClick={onDismiss}
     >
-      <div className="flex flex-col items-center gap-[var(--space-3)]">
+      {/* Stop propagation so clicking content doesn't dismiss via backdrop */}
+      <div
+        className="flex flex-col items-center gap-[var(--space-3)]"
+        onClick={(e) => e.stopPropagation()}
+      >
         <Icon icon="solar:file-download-outline" width={48} className="text-[var(--ink)]" />
         <p className="text-[var(--text-title)] font-semibold text-[var(--ink)]">{t.dropSkill}</p>
         <span className="text-[var(--text-caption)] text-[var(--ink-ghost)]">

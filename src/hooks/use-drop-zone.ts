@@ -78,9 +78,11 @@ export function useDropZone({ onDrop }: UseDropZoneOptions): UseDropZoneReturn {
       setDragging(false);
     };
 
-    // OS drag ended normally
+    // Defense-in-depth: multiple escape hatches ensure the overlay
+    // can never get stuck. dragend may not fire for all OS drag
+    // cancellations, but blur + ESC (in overlay) + click-to-dismiss
+    // cover the remaining scenarios.
     window.addEventListener("dragend", bail);
-    // User alt-tabbed away — no more drag events will arrive
     window.addEventListener("blur", bail);
 
     return () => {
