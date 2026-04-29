@@ -252,7 +252,6 @@ function HomeInner() {
           inputRef={chatInputRef}
           sidebarOpen={sidebarOpen}
           previewOpen={previewOpen}
-          onToggleSidebar={toggleSidebar}
           onTogglePreview={togglePreview}
         />
 
