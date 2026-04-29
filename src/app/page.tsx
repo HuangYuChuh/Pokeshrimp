@@ -233,6 +233,7 @@ function HomeInner() {
         {/* Left: Sidebar */}
         <Sidebar
           open={sidebarOpen}
+          onToggle={toggleSidebar}
           onOpenSettings={() => {
             setSettingsTab("providers");
             setSettingsOpen(true);
@@ -249,7 +250,6 @@ function HomeInner() {
           onModelChange={setModelId}
           modelOptions={modelOptions}
           inputRef={chatInputRef}
-          sidebarOpen={sidebarOpen}
           previewOpen={previewOpen}
           onToggleSidebar={toggleSidebar}
           onTogglePreview={togglePreview}

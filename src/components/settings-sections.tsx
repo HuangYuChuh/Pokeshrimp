@@ -171,7 +171,7 @@ export function McpServersSection({
       <AccordionItem value="mcp-servers">
         <AccordionTrigger>
           <span className="flex min-w-0 items-center gap-[var(--gap-inline)]">
-            <Icon icon="solar:server-outline" width={14} className="shrink-0" />
+            <Icon icon="solar:server-outline" width={16} className="shrink-0" />
             <span className="truncate">MCP Servers</span>
           </span>
         </AccordionTrigger>
@@ -223,7 +223,7 @@ export function McpServersSection({
                         className="h-[var(--space-6)] w-[var(--space-6)] min-w-0 p-0"
                         aria-label={`Remove ${name}`}
                       >
-                        <Icon icon="solar:trash-bin-2-outline" width={13} />
+                        <Icon icon="solar:trash-bin-2-outline" width={14} />
                       </Button>
                     </div>
                   </CardContent>
@@ -320,7 +320,7 @@ export function McpServersSection({
 
             {!adding ? (
               <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
-                <Icon icon="solar:add-circle-outline" width={13} />
+                <Icon icon="solar:add-circle-outline" width={14} />
                 Add Server
               </Button>
             ) : null}
@@ -402,7 +402,7 @@ export function HooksSection({
       <AccordionItem value="hooks">
         <AccordionTrigger>
           <span className="flex min-w-0 items-center gap-[var(--gap-inline)]">
-            <Icon icon="solar:link-circle-outline" width={14} className="shrink-0" />
+            <Icon icon="solar:link-circle-outline" width={16} className="shrink-0" />
             <span className="truncate">Hooks</span>
           </span>
         </AccordionTrigger>
@@ -471,7 +471,7 @@ export function HooksSection({
                       className="h-[var(--space-6)] w-[var(--space-6)] min-w-0 p-0"
                       aria-label={`Remove ${event} hook`}
                     >
-                      <Icon icon="solar:trash-bin-2-outline" width={13} />
+                      <Icon icon="solar:trash-bin-2-outline" width={14} />
                     </Button>
                   </CardContent>
                 </Card>
@@ -550,7 +550,7 @@ export function HooksSection({
 
             {!adding ? (
               <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
-                <Icon icon="solar:add-circle-outline" width={13} />
+                <Icon icon="solar:add-circle-outline" width={14} />
                 Add Hook
               </Button>
             ) : null}
@@ -624,7 +624,7 @@ function PatternList({
                 onClick={() => handleRemove(index)}
                 aria-label={`Remove ${pattern}`}
               >
-                <Icon icon="solar:close-circle-outline" width={11} />
+                <Icon icon="solar:close-circle-outline" width={12} />
               </button>
             </Chip>
           ))}
@@ -666,7 +666,7 @@ export function PermissionsSection({
       <AccordionItem value="permissions">
         <AccordionTrigger>
           <span className="flex min-w-0 items-center gap-[var(--gap-inline)]">
-            <Icon icon="solar:shield-outline" width={14} className="shrink-0" />
+            <Icon icon="solar:shield-outline" width={16} className="shrink-0" />
             <span className="truncate">Permissions</span>
           </span>
         </AccordionTrigger>

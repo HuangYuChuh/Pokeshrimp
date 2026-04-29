@@ -12,14 +12,14 @@
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", ui-monospace, monospace;
 
   /* ── Font sizes (explicit px — desktop) ── */
-  --text-hero: 32px;
-  --text-display: 24px;
-  --text-headline: 18px;
-  --text-title: 15px;
-  --text-body: 14px;
-  --text-body-sm: 13px;
-  --text-caption: 12px;
-  --text-micro: 11px;
+  --text-hero: 34px;
+  --text-display: 26px;
+  --text-headline: 20px;
+  --text-title: 16px;
+  --text-body: 15px;
+  --text-body-sm: 14px;
+  --text-caption: 13px;
+  --text-micro: 12px;
 
   /* ── Line heights ── */
   --leading-tight: 1.2;

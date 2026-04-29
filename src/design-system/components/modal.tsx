@@ -43,7 +43,7 @@ export const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
       >
         {size === "default" && (
           <Dialog.Close className="absolute right-4 top-4 rounded-[var(--radius-sm)] p-1 text-[var(--ink-secondary)] hover:text-[var(--ink)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
-            <Icon icon="solar:close-circle-outline" width={18} />
+            <Icon icon="solar:close-circle-outline" width={20} />
           </Dialog.Close>
         )}
 

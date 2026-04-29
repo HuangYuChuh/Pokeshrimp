@@ -214,16 +214,16 @@ function PreviewContent({
       <div className="flex h-full flex-col">
         <div className="flex shrink-0 items-center gap-[var(--space-1)] border-b border-[var(--border)] px-[var(--space-3)] py-[var(--space-2)]">
           <Button variant="ghost" size="icon-sm" onClick={handleZoomOut} aria-label={t.zoomOut}>
-            <Icon icon="solar:magnifer-zoom-out-outline" width={15} />
+            <Icon icon="solar:magnifer-zoom-out-outline" width={16} />
           </Button>
           <span className="min-w-[3.5rem] text-center text-[var(--text-caption)] tabular-nums text-[var(--ink-secondary)]">
             {Math.round(zoom * 100)}%
           </span>
           <Button variant="ghost" size="icon-sm" onClick={handleZoomIn} aria-label={t.zoomIn}>
-            <Icon icon="solar:magnifer-zoom-in-outline" width={15} />
+            <Icon icon="solar:magnifer-zoom-in-outline" width={16} />
           </Button>
           <Button variant="ghost" size="icon-sm" onClick={handleReset} aria-label={t.resetZoom}>
-            <Icon icon="solar:maximize-square-outline" width={15} />
+            <Icon icon="solar:maximize-square-outline" width={16} />
           </Button>
           {hasComparison && (
             <>
@@ -234,7 +234,7 @@ function PreviewContent({
                 onClick={() => setComparing((v) => !v)}
                 aria-label={t.compare}
               >
-                <Icon icon="solar:tuning-2-outline" width={15} />
+                <Icon icon="solar:tuning-2-outline" width={16} />
               </Button>
             </>
           )}
@@ -297,11 +297,11 @@ function PreviewContent({
 
         <div className="flex shrink-0 items-center justify-center gap-[var(--gap-inline)] border-t border-[var(--border)] px-[var(--space-3)] py-[var(--space-2)]">
           <Button variant="ghost" size="sm" onClick={onRerun}>
-            <Icon icon="solar:refresh-outline" width={15} className="mr-1.5" />
+            <Icon icon="solar:refresh-outline" width={16} className="mr-1.5" />
             {t.reRun}
           </Button>
           <Button variant="ghost" size="sm" onClick={onEditRerun}>
-            <Icon icon="solar:pen-outline" width={15} className="mr-1.5" />
+            <Icon icon="solar:pen-outline" width={16} className="mr-1.5" />
             {t.editAndReRun}
           </Button>
         </div>

@@ -259,7 +259,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                   onMouseEnter={() => setSlashIndex(i)}
                 >
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--border-subtle)] text-[var(--ink-tertiary)]">
-                    <Icon icon="solar:slash-circle-outline" width={11} />
+                    <Icon icon="solar:slash-circle-outline" width={12} />
                   </span>
                   <div className="min-w-0">
                     <div className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
@@ -308,7 +308,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                     <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--border-subtle)]">
                       <Icon
                         icon="solar:file-outline"
-                        width={16}
+                        width={18}
                         className="text-[var(--ink-tertiary)]"
                       />
                     </div>
@@ -326,7 +326,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                     onClick={() => removeAttachment(att.id)}
                     className="nodrag absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--canvas)] opacity-0 transition-opacity group-hover/att:opacity-100"
                   >
-                    <Icon icon="solar:close-circle-outline" width={10} />
+                    <Icon icon="solar:close-circle-outline" width={12} />
                   </button>
                 </div>
               ))}
@@ -366,7 +366,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                 className="nodrag flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] bg-transparent text-[var(--ink-secondary)] transition-colors hover:bg-[var(--border-subtle)] disabled:opacity-50 disabled:pointer-events-none"
                 aria-label={t.attachFiles}
               >
-                <Icon icon="solar:paperclip-outline" width={15} />
+                <Icon icon="solar:paperclip-outline" width={18} />
               </button>
 
               {/* Skills button */}
@@ -376,7 +376,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                 disabled={isLoading}
                 className="nodrag flex h-7 w-auto items-center gap-[var(--space-1)] rounded-[var(--radius-sm)] bg-transparent px-[var(--space-2)] text-[var(--ink-secondary)] transition-colors hover:bg-[var(--border-subtle)] disabled:opacity-50 disabled:pointer-events-none"
               >
-                <Icon icon="solar:slash-circle-outline" width={13} />
+                <Icon icon="solar:slash-circle-outline" width={14} />
                 <span className="font-[family-name:var(--font-mono)] text-[var(--text-micro)] text-[var(--ink-secondary)]">
                   {t.skills.toLowerCase()}
                 </span>
@@ -392,12 +392,12 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                   onChange={onModelChange}
                   options={modelOptions}
                   placeholder="model..."
-                  className="nodrag !h-auto !w-auto !border-none !bg-transparent !p-0 !shadow-none !ring-0 !outline-none [&>span]:font-[family-name:var(--font-mono)] [&>span]:text-[10px] [&>span]:text-[var(--ink-ghost)] [&>svg]:hidden"
+                  className="nodrag !h-auto !w-auto !border-none !bg-transparent !p-0 !shadow-none !ring-0 !outline-none [&>span]:font-[family-name:var(--font-mono)] [&>span]:text-[var(--text-micro)] [&>span]:text-[var(--ink-ghost)] [&>svg]:hidden"
                 />
               </div>
 
               {/* Shortcut hint */}
-              <span className="select-none font-[family-name:var(--font-mono)] text-[10px] text-[var(--ink-ghost)]">
+              <span className="select-none font-[family-name:var(--font-mono)] text-[var(--text-micro)] text-[var(--ink-ghost)]">
                 ·&nbsp;&#x2318;&#x21B5;
               </span>
 
@@ -408,7 +408,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, InputAreaProps>(functio
                 disabled={(!input.trim() && attachments.length === 0) || isLoading || !modelId}
                 className="nodrag !h-7 !w-7 !rounded-[var(--radius-md)] !p-0"
               >
-                <Icon icon="solar:arrow-up-outline" width={15} />
+                <Icon icon="solar:arrow-up-outline" width={18} />
               </Button>
             </div>
           </div>

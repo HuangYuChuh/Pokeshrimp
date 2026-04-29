@@ -136,7 +136,7 @@ export function SkillsTab({ active }: SkillsTabProps) {
         description="Installed .skill.md files that teach the agent CLI tools."
         action={
           <Button variant="outline" size="sm" onClick={handleImport} className="max-[520px]:w-full">
-            <Icon icon="solar:upload-outline" width={13} />
+            <Icon icon="solar:upload-outline" width={14} />
             Import
           </Button>
         }
@@ -223,12 +223,12 @@ function SkillCard({
           >
             <Icon
               icon={expanded ? "solar:alt-arrow-down-outline" : "solar:alt-arrow-right-outline"}
-              width={14}
+              width={16}
               className="mt-[var(--space-1)] shrink-0 text-[var(--ink-tertiary)]"
             />
             <Icon
               icon="solar:widget-outline"
-              width={14}
+              width={16}
               className="mt-[var(--space-1)] shrink-0 text-[var(--ink-tertiary)]"
             />
             <div className="min-w-0 flex-1">
@@ -267,7 +267,7 @@ function SkillCard({
                 className="h-[var(--space-6)] w-[var(--space-6)] min-w-0 p-0"
                 aria-label={`Delete ${skill.command}`}
               >
-                <Icon icon="solar:trash-bin-2-outline" width={13} />
+                <Icon icon="solar:trash-bin-2-outline" width={14} />
               </Button>
             ) : null}
           </div>
@@ -369,7 +369,7 @@ function ScopeBadge({ scope }: { scope: "global" | "project" }) {
       <span className="flex items-center gap-[var(--space-1)]">
         <Icon
           icon={scope === "global" ? "solar:globe-outline" : "solar:folder-open-outline"}
-          width={10}
+          width={12}
         />
         {scope}
       </span>
@@ -391,7 +391,7 @@ function DetailSection({ label, children }: { label: string; children: ReactNode
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center gap-[var(--space-2)] py-[var(--space-12)] text-center">
-      <Icon icon="solar:widget-outline" width={32} className="text-[var(--ink-ghost)]" />
+      <Icon icon="solar:widget-outline" width={36} className="text-[var(--ink-ghost)]" />
       <p className="text-[var(--text-body-sm)] font-medium text-[var(--ink-secondary)]">
         No skills installed
       </p>

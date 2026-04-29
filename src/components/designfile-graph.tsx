@@ -135,7 +135,7 @@ export function DesignfileGraph() {
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center px-4 text-center text-[13px] text-[var(--ink-secondary)]">
+      <div className="flex h-full items-center justify-center px-4 text-center text-[var(--text-body-sm)] text-[var(--ink-secondary)]">
         {error}
       </div>
     );
@@ -146,12 +146,16 @@ export function DesignfileGraph() {
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-4">
-        <h2 className="mb-1 text-[15px] font-semibold text-[var(--ink)]">{data.brand}</h2>
+        <h2 className="mb-1 text-[var(--text-title)] font-semibold text-[var(--ink)]">
+          {data.brand}
+        </h2>
         {data.description && (
-          <p className="mb-3 text-[12px] text-[var(--ink-secondary)]">{data.description}</p>
+          <p className="mb-3 text-[var(--text-caption)] text-[var(--ink-secondary)]">
+            {data.description}
+          </p>
         )}
         {data.cycle && (
-          <div className="mb-3 rounded-lg border border-[var(--error)] bg-[var(--error-subtle)] px-3 py-2 text-[12px] text-[var(--error)]">
+          <div className="mb-3 rounded-lg border border-[var(--error)] bg-[var(--error-subtle)] px-3 py-2 text-[var(--text-caption)] text-[var(--error)]">
             Cycle detected: {data.cycle}
           </div>
         )}
@@ -213,7 +217,11 @@ function GraphSVG({ assets }: { assets: AssetOverview[] }) {
   }
 
   if (assets.length === 0) {
-    return <div className="text-[13px] text-[var(--ink-secondary)]">No assets defined.</div>;
+    return (
+      <div className="text-[var(--text-body-sm)] text-[var(--ink-secondary)]">
+        No assets defined.
+      </div>
+    );
   }
 
   return (
@@ -282,7 +290,7 @@ function AssetCard({ asset, x, y }: { asset: AssetOverview; x: number; y: number
           className={cn("h-2 w-2 shrink-0 rounded-full", STATUS_COLOR[asset.status])}
           aria-hidden="true"
         />
-        <span className="truncate text-[12px] text-[var(--ink)]">{asset.name}</span>
+        <span className="truncate text-[var(--text-caption)] text-[var(--ink)]">{asset.name}</span>
       </button>
     </foreignObject>
   );

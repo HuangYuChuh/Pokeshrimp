@@ -108,7 +108,6 @@ interface ChatPanelProps {
   onModelChange: (id: string) => void;
   modelOptions: { value: string; label: string }[];
   inputRef?: React.RefObject<HTMLTextAreaElement | null>;
-  sidebarOpen: boolean;
   previewOpen: boolean;
   onToggleSidebar: () => void;
   onTogglePreview: () => void;
@@ -119,7 +118,6 @@ export function ChatPanel({
   onModelChange,
   modelOptions,
   inputRef,
-  sidebarOpen,
   previewOpen,
   onToggleSidebar,
   onTogglePreview,
@@ -372,10 +370,12 @@ export function ChatPanel({
             className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--warning)]"
             style={{ boxShadow: "0 0 3px var(--warning)" }}
           />
-          <span className="text-[13px] font-medium text-[var(--ink)]">{t.newConversation}</span>
+          <span className="text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
+            {t.newConversation}
+          </span>
           <span
             className="text-[var(--ink-tertiary)]"
-            style={{ fontFamily: "var(--font-mono)", fontSize: "11px" }}
+            style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-micro)" }}
           >
             {modelId}
           </span>
@@ -387,10 +387,10 @@ export function ChatPanel({
             variant="ghost"
             size="icon-sm"
             onClick={onToggleSidebar}
-            className={cn(sidebarOpen && "invisible")}
+            className=""
             aria-label={t.toggleSidebar}
           >
-            <Icon icon="solar:sidebar-minimalistic-outline" width={16} />
+            <Icon icon="solar:sidebar-minimalistic-outline" width={18} />
           </Button>
           <Button
             variant="ghost"
@@ -399,7 +399,7 @@ export function ChatPanel({
             className={cn(previewOpen && "invisible")}
             aria-label={t.togglePreview}
           >
-            <Icon icon="solar:sidebar-minimalistic-outline" width={16} className="scale-x-[-1]" />
+            <Icon icon="solar:sidebar-minimalistic-outline" width={18} className="scale-x-[-1]" />
           </Button>
         </div>
       </div>
@@ -440,7 +440,7 @@ export function ChatPanel({
                 <Card className="mb-[var(--gap-message)]">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div className="flex items-center gap-[var(--gap-inline)] text-[var(--text-body-sm)] font-medium text-[var(--ink)]">
-                      <Icon icon="solar:clipboard-list-outline" width={15} />
+                      <Icon icon="solar:clipboard-list-outline" width={16} />
                       {t.sessionSummary}
                     </div>
                     <Button
@@ -450,7 +450,7 @@ export function ChatPanel({
                       className="h-6 min-w-0 gap-1 px-2 text-[var(--text-caption)]"
                     >
                       {t.collapse}
-                      <Icon icon="solar:alt-arrow-up-outline" width={12} />
+                      <Icon icon="solar:alt-arrow-up-outline" width={14} />
                     </Button>
                   </CardHeader>
                   <CardContent>
@@ -476,7 +476,7 @@ export function ChatPanel({
                     className="cursor-pointer"
                     onClick={() => setSummaryCollapsed(false)}
                   >
-                    <Icon icon="solar:clipboard-list-outline" width={12} />
+                    <Icon icon="solar:clipboard-list-outline" width={14} />
                     {sessionSummary.messageCount} {t.messages}
                     {sessionSummary.lastActiveAt &&
                       ` \u00B7 ${formatRelativeTime(sessionSummary.lastActiveAt, t)}`}

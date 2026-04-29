@@ -57,7 +57,7 @@ export function ToolCard({ invocation }: ToolCardProps) {
         <div className="flex items-center gap-[var(--gap-inline)] border-b border-[var(--border-subtle)] px-[12px] py-[8px]">
           <Icon
             icon="solar:code-square-outline"
-            width={14}
+            width={16}
             className="shrink-0 text-[var(--ink-tertiary)]"
           />
           <span className="font-[var(--font-mono)] text-[var(--text-caption)] font-medium text-[var(--ink)]">
@@ -110,7 +110,7 @@ function PreBlock({ label, value }: { label: string; value: string }) {
   return (
     <div className="mb-[var(--space-3)]">
       <div className="mb-[var(--space-1)] flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-[var(--tracking-wide)] text-[var(--ink-ghost)]">
+        <span className="text-[var(--text-micro)] font-semibold uppercase tracking-[var(--tracking-wide)] text-[var(--ink-ghost)]">
           {label}
         </span>
         <Button
@@ -120,7 +120,7 @@ function PreBlock({ label, value }: { label: string; value: string }) {
           aria-label={`Copy ${label}`}
           className="h-5 w-5"
         >
-          <Icon icon={copied ? "solar:check-circle-outline" : "solar:copy-outline"} width={12} />
+          <Icon icon={copied ? "solar:check-circle-outline" : "solar:copy-outline"} width={14} />
         </Button>
       </div>
       <pre className="whitespace-pre-wrap break-all">{value}</pre>
