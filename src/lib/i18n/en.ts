@@ -169,4 +169,5 @@ export const en = {
   // ── Misc ──
   configPath: "~/.visagent/config.json",
   dropSkill: "Drop .skill.md to install",
+  pressEscToCancel: "Press ESC to cancel",
 } as const;
