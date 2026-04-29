@@ -2,6 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { useRef, useEffect, useCallback, useState, type KeyboardEvent } from "react";
+import { z } from "zod";
 import { useAppState, useAppDispatch, type OutputFile } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Icon } from "@iconify/react";
@@ -18,6 +19,18 @@ import { useT } from "@/lib/i18n";
 import { MessageBubble } from "./message-bubble";
 import { ApprovalCards } from "./approval-cards";
 import { InputArea, type SkillInfo } from "./input-area";
+
+/* --- Zod schema for session message response --- */
+
+const SessionResponseSchema = z.object({
+  messages: z.array(
+    z.object({
+      id: z.string(),
+      role: z.enum(["user", "assistant", "system", "data"]),
+      content: z.string(),
+    }),
+  ),
+});
 
 /* --- Example prompts for empty state --- */
 
@@ -146,6 +159,7 @@ export function ChatPanel({
     data,
     reload,
   } = useChat({
+    id: currentSessionId ?? "draft",
     api: "/api/chat",
     body: { modelId, sessionId: currentSessionId },
     onResponse(response) {
@@ -201,6 +215,29 @@ export function ChatPanel({
       }
     },
   });
+
+  /* --- Load messages on session switch --- */
+
+  useEffect(() => {
+    if (!currentSessionId) {
+      setMessages([]);
+      return;
+    }
+
+    const ac = new AbortController();
+    fetch(`/api/sessions/${currentSessionId}`, { signal: ac.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (ac.signal.aborted) return;
+        const parsed = SessionResponseSchema.safeParse(data);
+        setMessages(parsed.success ? parsed.data.messages : []);
+      })
+      .catch(() => {
+        if (!ac.signal.aborted) setMessages([]);
+      });
+
+    return () => ac.abort();
+  }, [currentSessionId, setMessages]);
 
   /* --- Auto-scroll --- */
 

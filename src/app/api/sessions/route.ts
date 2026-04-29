@@ -2,10 +2,12 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { listSessions, createSession } from "@/lib/db";
 
-const CreateSessionSchema = z.object({
-  title: z.string().max(200).optional(),
-  id: z.string().optional(),
-});
+const CreateSessionSchema = z
+  .object({
+    title: z.string().max(200).optional(),
+    id: z.string().uuid().optional(),
+  })
+  .strict();
 
 export async function GET() {
   const sessions = await listSessions();
@@ -18,7 +20,7 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.message }, { status: 400 });
   }
-  const { title } = parsed.data;
-  const session = await createSession(title || "New Chat");
+  const { title, id } = parsed.data;
+  const session = await createSession(title || "New Chat", id);
   return NextResponse.json(session, { status: 201 });
 }
