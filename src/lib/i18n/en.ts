@@ -166,6 +166,20 @@ export const en = {
   before: "Before",
   after: "After",
 
+  // ── Dreamina ──
+  dreamina: "Dreamina",
+  dreaminaDescription: "Connect your Dreamina account for AI image & video generation.",
+  dreaminaNotInstalled: "Not installed",
+  dreaminaInstallHint: "curl -fsSL https://jimeng.jianying.com/cli | bash",
+  dreaminaNotConnected: "Not connected",
+  dreaminaConnected: "Connected",
+  dreaminaConnect: "Connect",
+  dreaminaDisconnect: "Disconnect",
+  dreaminaCredits: "{n} credits",
+  dreaminaAuthPrompt: "Open the link and enter the code to authorize:",
+  dreaminaOpenLink: "Open",
+  dreaminaWaiting: "Waiting for authorization...",
+
   // ── Misc ──
   configPath: "~/.visagent/config.json",
   dropSkill: "Drop .skill.md to install",
