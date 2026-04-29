@@ -9,6 +9,7 @@ import { PreviewPanel } from "@/components/preview-panel";
 import { SettingsDialog, type SettingsTabId } from "@/components/settings-dialog";
 import { SkillDropOverlay } from "@/components/skill-drop-overlay";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { useDropZone } from "@/hooks/use-drop-zone";
 import { Chip } from "@/design-system/components";
 import { buildModelOptions } from "@/core/ai/provider";
 import type { ProviderConfig } from "@/core/config/schema";
@@ -175,57 +176,23 @@ function HomeInner() {
   });
 
   /* --- Drag-and-drop skill import --------------------------------------- */
-  const [dragOver, setDragOver] = useState(false);
   const [dropToast, setDropToast] = useState<{
     message: string;
     isError: boolean;
   } | null>(null);
-  const dragCounter = useRef(0);
-
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounter.current += 1;
-    if (e.dataTransfer.types.includes("Files")) {
-      setDragOver(true);
-    }
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounter.current -= 1;
-    if (dragCounter.current <= 0) {
-      dragCounter.current = 0;
-      setDragOver(false);
-    }
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
 
   const showToast = useCallback((message: string, isError: boolean) => {
     setDropToast({ message, isError });
     setTimeout(() => setDropToast(null), 3000);
   }, []);
 
-  const handleDrop = useCallback(
-    async (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dragCounter.current = 0;
-      setDragOver(false);
-
-      const files = Array.from(e.dataTransfer.files);
+  const handleSkillDrop = useCallback(
+    async (files: File[]) => {
       const skillFiles = files.filter((f) => f.name.endsWith(".skill.md"));
-
       if (skillFiles.length === 0) {
         showToast("Only .skill.md files can be imported", true);
         return;
       }
-
       for (const file of skillFiles) {
         try {
           const content = await file.text();
@@ -248,17 +215,19 @@ function HomeInner() {
     [showToast],
   );
 
+  const {
+    dragging,
+    reset: resetDrag,
+    handlers: dragHandlers,
+  } = useDropZone({
+    onDrop: handleSkillDrop,
+  });
+
   /* --- Render ----------------------------------------------------------- */
   return (
     <>
       {/* Three-panel layout: sidebar (260px) + chat (flex-1) + preview (380px) */}
-      <div
-        className="flex h-screen w-screen overflow-hidden bg-[var(--canvas)]"
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-      >
+      <div className="flex h-screen w-screen overflow-hidden bg-[var(--canvas)]" {...dragHandlers}>
         {/* Left: Sidebar */}
         <Sidebar
           open={sidebarOpen}
@@ -288,7 +257,7 @@ function HomeInner() {
         <PreviewPanel open={previewOpen} />
 
         {/* Skill drag-and-drop overlay */}
-        <SkillDropOverlay visible={dragOver} />
+        <SkillDropOverlay visible={dragging} onDismiss={resetDrag} />
 
         {/* Drop result toast */}
         {dropToast && (
