@@ -123,7 +123,6 @@ interface ChatPanelProps {
   inputRef?: React.RefObject<HTMLTextAreaElement | null>;
   sidebarOpen: boolean;
   previewOpen: boolean;
-  onToggleSidebar: () => void;
   onTogglePreview: () => void;
 }
 
@@ -134,7 +133,6 @@ export function ChatPanel({
   inputRef,
   sidebarOpen,
   previewOpen,
-  onToggleSidebar,
   onTogglePreview,
 }: ChatPanelProps) {
   const t = useT();
@@ -402,7 +400,12 @@ export function ChatPanel({
   return (
     <div className="flex min-w-0 flex-1 flex-col bg-[var(--canvas)]">
       {/* Top bar */}
-      <div className="drag flex h-[var(--height-titlebar)] shrink-0 items-center justify-between border-b border-[var(--border-subtle)] px-[var(--space-4)]">
+      <div
+        className={cn(
+          "drag flex h-[var(--height-titlebar)] shrink-0 items-center justify-between border-b border-[var(--border-subtle)] pr-[var(--space-4)]",
+          sidebarOpen ? "pl-[var(--space-4)]" : "pl-[var(--width-traffic-lights)]",
+        )}
+      >
         {/* Left: status + title + model */}
         <div className="nodrag flex items-center gap-[var(--space-3)]">
           <div
@@ -420,17 +423,8 @@ export function ChatPanel({
           </span>
         </div>
 
-        {/* Right: actions + sidebar toggles */}
+        {/* Right: actions */}
         <div className="nodrag flex items-center gap-[var(--space-1)]">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={onToggleSidebar}
-            className={cn(sidebarOpen && "invisible")}
-            aria-label={t.toggleSidebar}
-          >
-            <Icon icon="solar:sidebar-minimalistic-outline" width={18} />
-          </Button>
           <Button
             variant="ghost"
             size="icon-sm"

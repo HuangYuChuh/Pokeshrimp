@@ -8,4 +8,5 @@
   --width-chat:               680px;
   --width-preview:            380px;
   --height-titlebar:          52px;
+  --width-traffic-lights:     80px;  /* macOS window controls region */
 }
